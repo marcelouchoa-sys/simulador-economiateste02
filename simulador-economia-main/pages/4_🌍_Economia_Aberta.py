@@ -1,17 +1,13 @@
 # pages/4_🌍_Economia_Aberta.py
 """
 IS-LM-BP — Economia Aberta (Mundell-Fleming)
-Modo Simplificado (didático) + Modo Complexo (numérico)
+Modo Simplificado (didático, estilo FGV/MIT) + Modo Complexo (numérico)
 """
 
 import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
-# ══════════════════════════════════════════════════════════════
-# IMPORTAÇÕES SEGURAS (sem scipy)
-# ══════════════════════════════════════════════════════════════
 try:
     from scipy.optimize import fsolve
     SCIPY_OK = True
@@ -23,664 +19,615 @@ from core.parameters import DEFAULT_PARAMS
 # ══════════════════════════════════════════════════════════════
 # CONFIGURAÇÃO DA PÁGINA
 # ══════════════════════════════════════════════════════════════
-st.set_page_config(layout="wide", page_title="IS-LM-BP")
+st.set_page_config(layout="wide", page_title="IS-LM-BP | Simulador Macroeconômico")
 
-# --- Garantir que session_state tem os dicionários esperados ---
 if "params" not in st.session_state:
     st.session_state.params = DEFAULT_PARAMS.copy()
 
 if "settings" not in st.session_state:
     st.session_state.settings = {
-        "nivel": "Médio",               # Básico, Médio, Avançado
-        "detalhe_causal": True,
-        "show_grid": True,
-        "color_base": "#1565c0",
-        "color_shock": "#c62828",
-        "color_final": "#2e7d32",
-        "mobilidade_capital": "Média",  # default para a mobilidade didática
-        "modo_simulacao": "Modo Simplificado (didático, sem números)"
+        "nivel": "Médio",
+        "mobilidade_capital": "Alta",
     }
 
 # ══════════════════════════════════════════════════════════════
-# NÚCLEO ECONÔMICO — EQUAÇÕES
+# NÚCLEO ECONÔMICO
 # ══════════════════════════════════════════════════════════════
 
-def consumo(c0, c1, Y, T):
-    return c0 + c1 * (Y - T)
-
-def investimento(I0, b, r):
-    return I0 - b * r
-
-def exportacoes(x0, x1, Y_star, e):
-    return x0 + x1 * Y_star * e
-
-def importacoes(m0, m1, Y, e):
-    return m0 + m1 * Y / max(e, 1e-9)
-
-def NX(x0, x1, Y_star, m0, m1, Y, e):
-    return exportacoes(x0, x1, Y_star, e) - importacoes(m0, m1, Y, e)
-
-def fluxo_capital(kf, r, r_star):
-    return kf * (r - r_star)
+def consumo(c0, c1, Y, T):       return c0 + c1 * (Y - T)
+def investimento(I0, b, r):      return I0 - b * r
+def exportacoes(x0, x1, Y_s, e): return x0 + x1 * Y_s * e
+def importacoes(m0, m1, Y, e):   return m0 + m1 * Y / max(e, 1e-9)
+def NX(x0,x1,Y_s,m0,m1,Y,e):    return exportacoes(x0,x1,Y_s,e) - importacoes(m0,m1,Y,e)
+def fluxo_capital(kf, r, r_s):   return kf * (r - r_s)
 
 def eq_IS(Y, r, e, p):
     C  = consumo(p["c0"], p["c1"], Y, p["T"])
     I  = investimento(p["I0"], p["b"], r)
-    nx = NX(p["x0"], p["x1"], p["Y_star"], p["m0"], p["m1"], Y, e) if p.get("aberta") else 0.0
+    nx = NX(p["x0"],p["x1"],p["Y_star"],p["m0"],p["m1"],Y,e) if p.get("aberta") else 0.0
     return Y - C - I - p["G"] - nx
 
 def eq_LM(Y, r, M, p):
     return M / p["P"] - p["k"] * Y + p["h"] * r
 
 def eq_BP(Y, r, e, p):
-    nx = NX(p["x0"], p["x1"], p["Y_star"], p["m0"], p["m1"], Y, e)
+    nx = NX(p["x0"],p["x1"],p["Y_star"],p["m0"],p["m1"],Y,e)
     cf = fluxo_capital(p["kf"], r, p["r_star"])
     return nx + cf
 
-# ── Solver numérico (Newton-Raphson manual, sem scipy) ────────
 def newton_solve(F, x0, tol=1e-10, max_iter=500):
     x = np.array(x0, dtype=float)
     for _ in range(max_iter):
         fx = np.array(F(x), dtype=float)
         if np.max(np.abs(fx)) < tol:
             return x, True
-        # Jacobiano numérico
-        n  = len(x)
-        J  = np.zeros((n, n))
-        dx = 1e-6
+        n = len(x); J = np.zeros((n, n)); dx = 1e-6
         for j in range(n):
             xp = x.copy(); xp[j] += dx
             J[:, j] = (np.array(F(xp)) - fx) / dx
-        try:
-            delta = np.linalg.solve(J, -fx)
-        except np.linalg.LinAlgError:
-            return x, False
+        try:    delta = np.linalg.solve(J, -fx)
+        except: return x, False
         x = x + delta
     return x, False
 
-# ── Solver câmbio flexível ────────────────────────────────────
 def solve_flex(p):
     def F(v):
         Y, r, e = v
-        return [eq_IS(Y, r, e, p), eq_LM(Y, r, p["M"], p), eq_BP(Y, r, e, p)]
-    x0  = [p.get("Yn", 1200.0), p["r_star"], p.get("e", 1.0)]
-    sol, ok = newton_solve(F, x0)
-    if not ok and SCIPY_OK:
-        sol = fsolve(F, x0)
-    Y, r, e = sol
-    return _result(Y, r, e, p, "flex")
+        return [eq_IS(Y,r,e,p), eq_LM(Y,r,p["M"],p), eq_BP(Y,r,e,p)]
+    sol, ok = newton_solve(F, [p.get("Yn",1200.), p["r_star"], p.get("e",1.)])
+    if not ok and SCIPY_OK: sol = fsolve(F, sol)
+    return _result(*sol, p, "flex")
 
-# ── Solver câmbio fixo ────────────────────────────────────────
 def solve_fixo(p):
     e = p.get("e_fixed", 1.0)
     def F(v):
         Y, r, M_eq = v
-        return [eq_IS(Y, r, e, p), eq_LM(Y, r, M_eq, p), eq_BP(Y, r, e, p)]
-    x0  = [p.get("Yn", 1200.0), p["r_star"], p["M"]]
-    sol, ok = newton_solve(F, x0)
-    if not ok and SCIPY_OK:
-        sol = fsolve(F, x0)
+        return [eq_IS(Y,r,e,p), eq_LM(Y,r,M_eq,p), eq_BP(Y,r,e,p)]
+    sol, ok = newton_solve(F, [p.get("Yn",1200.), p["r_star"], p["M"]])
+    if not ok and SCIPY_OK: sol = fsolve(F, sol)
     Y, r, M_eq = sol
     return _result(Y, r, e, p, "fixo", M_eq=M_eq)
 
-# ── Solver economia fechada ───────────────────────────────────
 def solve_fechada(p):
-    # IS fechada: Y = c0 + c1(Y-T) + I0 - b*r + G
-    # LM: M/P = kY - h*r
-    # Sistema 2x2 linear
-    A = np.array([
-        [1 - p["c1"],  p["b"]],
-        [p["k"],      -p["h"]]
-    ])
-    B = np.array([
-        p["c0"] - p["c1"]*p["T"] + p["I0"] + p["G"],
-        p["M"] / p["P"]
-    ])
-    try:
-        sol = np.linalg.solve(A, B)
-        Y, r = sol
-    except np.linalg.LinAlgError:
-        Y, r = p.get("Yn", 1200.0), p["r_star"]
-    return _result(Y, r, p.get("e", 1.0), p, "fechada")
+    A = np.array([[1-p["c1"], p["b"]], [p["k"], -p["h"]]])
+    B = np.array([p["c0"]-p["c1"]*p["T"]+p["I0"]+p["G"], p["M"]/p["P"]])
+    try:    Y, r = np.linalg.solve(A, B)
+    except: Y, r = p.get("Yn",1200.), p["r_star"]
+    return _result(Y, r, p.get("e",1.), p, "fechada")
 
 def _result(Y, r, e, p, regime, M_eq=None):
-    C   = consumo(p["c0"], p["c1"], Y, p["T"])
-    I   = investimento(p["I0"], p["b"], r)
-    nx  = NX(p["x0"], p["x1"], p["Y_star"], p["m0"], p["m1"], Y, e) if p.get("aberta") else 0.0
-    cf  = fluxo_capital(p["kf"], r, p["r_star"]) if p.get("aberta") else 0.0
-    M_u = M_eq if M_eq is not None else p["M"]
-    return dict(
-        Y=Y, r=r, e=e, C=C, I=I, NX=nx, CF=cf,
-        BP=nx+cf, M_eq=M_u, regime=regime,
-        IS_res=Y - C - I - p["G"] - nx,
-        LM_res=M_u/p["P"] - p["k"]*Y + p["h"]*r,
-        BP_res=nx+cf if p.get("aberta") else 0.0,
-    )
+    C  = consumo(p["c0"],p["c1"],Y,p["T"])
+    I  = investimento(p["I0"],p["b"],r)
+    nx = NX(p["x0"],p["x1"],p["Y_star"],p["m0"],p["m1"],Y,e) if p.get("aberta") else 0.
+    cf = fluxo_capital(p["kf"],r,p["r_star"]) if p.get("aberta") else 0.
+    Mu = M_eq if M_eq is not None else p["M"]
+    return dict(Y=Y,r=r,e=e,C=C,I=I,NX=nx,CF=cf,BP=nx+cf,M_eq=Mu,regime=regime,
+                IS_res=Y-C-I-p["G"]-nx,
+                LM_res=Mu/p["P"]-p["k"]*Y+p["h"]*r,
+                BP_res=nx+cf if p.get("aberta") else 0.)
 
-# ── Curvas para plotagem ──────────────────────────────────────
 def curva_IS(Y_grid, e, p, aberta=True):
     r_vals = []
     for Y in Y_grid:
-        nx = NX(p["x0"], p["x1"], p["Y_star"], p["m0"], p["m1"], Y, e) if aberta else 0.0
-        A  = p["c0"] - p["c1"]*p["T"] + p["I0"] + p["G"] + nx
-        r  = (A - (1 - p["c1"])*Y) / max(p["b"], 1e-9)
-        r_vals.append(r)
+        nx = NX(p["x0"],p["x1"],p["Y_star"],p["m0"],p["m1"],Y,e) if aberta else 0.
+        A  = p["c0"]-p["c1"]*p["T"]+p["I0"]+p["G"]+nx
+        r_vals.append((A-(1-p["c1"])*Y)/max(p["b"],1e-9))
     return np.array(r_vals)
 
 def curva_LM(Y_grid, M, p):
-    return (p["k"]*Y_grid - M/p["P"]) / max(p["h"], 1e-9)
+    return (p["k"]*Y_grid - M/p["P"]) / max(p["h"],1e-9)
 
 def curva_BP_plot(Y_grid, e, p, Y_anchor=None, r_anchor=None):
-    """
-    BP didática para plotagem — separada da BP numérica do solver.
-    Ancorada no equilíbrio (Y_anchor, r_anchor) com slope = m1/kf.
-    - kf → ∞  : horizontal em r_star
-    - kf → 0  : vertical (retorna array constante em r_star, tratar externamente)
-    """
-    kf     = p.get("kf", 80.0)
-    r_star = p.get("r_star", 0.05)
-    m1     = p.get("m1", 0.10)
-
-    if kf >= 1e6:
-        return np.full_like(Y_grid, r_star, dtype=float)
-
-    # Âncora: se não fornecida, usa centro do grid
-    if Y_anchor is None:
-        Y_anchor = float(np.mean(Y_grid))
-    if r_anchor is None:
-        r_anchor = r_star
-
-    slope = m1 / max(kf, 1e-9)   # inclinação positiva (livro-texto)
-    return r_anchor + slope * (Y_grid - Y_anchor)
+    kf = p.get("kf",80.); r_star = p.get("r_star",0.05)
+    if kf >= 1e6: return np.full_like(Y_grid, r_star, dtype=float)
+    if Y_anchor is None: Y_anchor = float(np.mean(Y_grid))
+    if r_anchor is None: r_anchor = r_star
+    slope = 1 / (max(kf,1e-6)**0.6)
+    return r_anchor + slope*(Y_grid - Y_anchor)
 
 # ══════════════════════════════════════════════════════════════
-# GERADOR DE EXPLICAÇÃO AUTOMÁTICA (MODO SIMPLIFICADO)
+# PALETA DE CORES ACADÊMICA
 # ══════════════════════════════════════════════════════════════
-
-def gerar_explicacao(tipo_eco, regime, politica, direcao, mobilidade_label):
-    """
-    Gera explicação passo a passo como um professor de macroeconomia.
-    Retorna lista de passos com tipo: 'intro', 'curva', 'ponto', 'externo', 'conclusao'
-    """
-    exp = []
-    fiscal = politica == "Fiscal"
-    expansao = direcao == "Expansionista"
-    aberta = tipo_eco == "Aberta"
-    flex = regime == "Flexível"
-
-    # Nota sobre mobilidade (ajuda didática)
-    if aberta:
-        exp.append(("externo", f"🔎 Mobilidade de capital selecionada: **{mobilidade_label}**."))
-
-    # ── INTRODUÇÃO ────────────────────────────────────────────
-    if fiscal and expansao:
-        exp.append(("intro", "🏛️ O governo adotou uma **política fiscal expansionista**."))
-        exp.append(("intro", "Isso significa um **aumento nos gastos públicos (G↑)** ou uma **redução de impostos (T↓)**."))
-        exp.append(("intro", "O efeito direto é um aumento na **demanda agregada** da economia."))
-    elif fiscal and not expansao:
-        exp.append(("intro", "🏛️ O governo adotou uma **política fiscal contracionista**."))
-        exp.append(("intro", "Isso significa uma **redução nos gastos públicos (G↓)** ou um **aumento de impostos (T↑)**."))
-        exp.append(("intro", "O efeito direto é uma **redução na demanda agregada** da economia."))
-    elif not fiscal and expansao:
-        exp.append(("intro", "🏦 O Banco Central adotou uma **política monetária expansionista**."))
-        exp.append(("intro", "Isso significa um **aumento na oferta de moeda (M↑)**."))
-        exp.append(("intro", "Com mais moeda disponível, os juros tendem a cair."))
-    else:
-        exp.append(("intro", "🏦 O Banco Central adotou uma **política monetária contracionista**."))
-        exp.append(("intro", "Isso significa uma **redução na oferta de moeda (M↓)**."))
-        exp.append(("intro", "Com menos moeda disponível, os juros tendem a subir."))
-
-    # ── DESLOCAMENTO DA CURVA ─────────────────────────────────
-    if fiscal:
-        direcao_curva = "direita" if expansao else "esquerda"
-        exp.append(("curva", f"📈 Como consequência, a **curva IS se desloca para a {direcao_curva}**."))
-        exp.append(("curva", "A curva IS representa o equilíbrio no mercado de bens. "
-                             "Quando a demanda aumenta, para cada nível de juros, o produto de equilíbrio é maior."))
-        exp.append(("curva", "A curva **LM não se move** — a oferta de moeda não foi alterada."))
-    else:
-        direcao_curva = "direita" if expansao else "esquerda"
-        exp.append(("curva", f"📈 Como consequência, a **curva LM se desloca para a {direcao_curva}**."))
-        exp.append(("curva", "A curva LM representa o equilíbrio no mercado monetário. "
-                             "Com mais moeda, para cada nível de renda, os juros de equilíbrio são menores."))
-        exp.append(("curva", "A curva **IS não se move** — os gastos e impostos não foram alterados."))
-
-    # ── PONTO A → B ───────────────────────────────────────────
-    exp.append(("ponto", "📍 **Ponto A → Ponto B** (desequilíbrio transitório)"))
-    if fiscal and expansao:
-        exp.append(("ponto", "Com a IS deslocada para a direita, ao nível de juros do ponto A, "
-                             "a demanda por bens **supera a produção atual**."))
-        exp.append(("ponto", "Isso pressiona o produto para cima. Mas o aumento do produto "
-                             "eleva a **demanda por moeda**, pressionando os **juros para cima**."))
-        exp.append(("ponto", "O ponto B representa esse desequilíbrio: Y maior, r maior, "
-                             "mas ainda fora do equilíbrio do mercado monetário."))
-    elif fiscal and not expansao:
-        exp.append(("ponto", "Com a IS deslocada para a esquerda, a demanda cai. "
-                             "O produto começa a recuar e os juros caem."))
-        exp.append(("ponto", "O ponto B representa a queda inicial: Y menor, r menor."))
-    elif not fiscal and expansao:
-        exp.append(("ponto", "Com a LM deslocada para a direita, ao nível de renda do ponto A, "
-                             "há **excesso de oferta de moeda**."))
-        exp.append(("ponto", "Isso reduz os juros. Com juros menores, o investimento aumenta, "
-                             "elevando a demanda e o produto."))
-        exp.append(("ponto", "O ponto B representa: r menor, Y maior — mas ainda em ajuste."))
-    else:
-        exp.append(("ponto", "Com a LM deslocada para a esquerda, há **escassez de moeda**."))
-        exp.append(("ponto", "Os juros sobem. Com juros maiores, o investimento cai, "
-                             "reduzindo a demanda e o produto."))
-        exp.append(("ponto", "O ponto B representa: r maior, Y menor — em ajuste."))
-
-    # ── PONTO B → C ───────────────────────────────────────────
-    exp.append(("ponto", "📍 **Ponto B → Ponto C** (novo equilíbrio)"))
-    exp.append(("ponto", "O sistema se ajusta automaticamente até que IS e LM se intersectem novamente."))
-    if fiscal and expansao:
-        exp.append(("ponto", "No ponto C: **Y maior e r maior** do que no ponto A. "
-                             "O aumento dos juros **reduz parcialmente o investimento privado** — "
-                             "esse é o efeito chamado de **crowding-out**."))
-    elif fiscal and not expansao:
-        exp.append(("ponto", "No ponto C: **Y menor e r menor** do que no ponto A."))
-    elif not fiscal and expansao:
-        exp.append(("ponto", "No ponto C: **Y maior e r menor** do que no ponto A. "
-                             "A política monetária estimulou o investimento sem elevar os juros."))
-    else:
-        exp.append(("ponto", "No ponto C: **Y menor e r maior** do que no ponto A. "
-                             "A contração monetária desaqueceu a economia."))
-
-    # ── EFEITOS EXTERNOS (ECONOMIA ABERTA) ───────────────────
-    if aberta:
-        exp.append(("externo", "🌍 **Efeitos sobre a economia aberta:**"))
-
-        # As mensagens aqui eram originalmente escritas assumindo alta mobilidade.
-        # Mantemos as explicações centrais e o rótulo de mobilidade acima ajuda o aluno a contextualizar.
-        if fiscal and expansao and flex:
-            exp.append(("externo", "Com r maior, o país se torna mais atrativo para capital estrangeiro."))
-            exp.append(("externo", "Há **entrada de capital (CF > 0)**, o que aprecia a moeda doméstica **(e↓)**."))
-            exp.append(("externo", "Com câmbio apreciado, as exportações ficam mais caras e as importações mais baratas."))
-            exp.append(("externo", "Isso **reduz as exportações líquidas (NX↓)**, deslocando a IS de volta para a esquerda."))
-            exp.append(("externo", "⚠️ **Resultado Mundell-Fleming:** Com câmbio flexível e alta mobilidade de capital, "
-                                   "a política fiscal é **ineficaz** — o crowding-out externo cancela o estímulo."))
-        elif fiscal and expansao and not flex:
-            exp.append(("externo", "Com r maior, há entrada de capital. O BC precisa **comprar divisas** para manter o câmbio fixo."))
-            exp.append(("externo", "Isso **aumenta a oferta de moeda (M↑)**, deslocando a LM para a direita."))
-            exp.append(("externo", "✅ **Resultado Mundell-Fleming:** Com câmbio fixo e alta mobilidade, "
-                                   "a política fiscal é **muito eficaz** — o efeito é amplificado."))
-        elif not fiscal and expansao and flex:
-            exp.append(("externo", "Com r menor, o capital sai do país em busca de melhores retornos."))
-            exp.append(("externo", "Há **saída de capital (CF < 0)**, o que **deprecia a moeda (e↑)**."))
-            exp.append(("externo", "Com câmbio depreciado, as exportações ficam mais baratas e competitivas."))
-            exp.append(("externo", "Isso **aumenta as exportações líquidas (NX↑)**, deslocando a IS para a direita."))
-            exp.append(("externo", "✅ **Resultado Mundell-Fleming:** Com câmbio flexível e alta mobilidade, "
-                                   "a política monetária é **muito eficaz** — o canal cambial amplifica o estímulo."))
-        elif not fiscal and expansao and not flex:
-            exp.append(("externo", "Com r menor, há saída de capital. O BC precisa **vender divisas** para manter o câmbio fixo."))
-            exp.append(("externo", "Isso **reduz a oferta de moeda (M↓)**, revertendo o estímulo inicial."))
-            exp.append(("externo", "⚠️ **Resultado Mundell-Fleming:** Com câmbio fixo, "
-                                   "a política monetária é **ineficaz** — o BC perde o controle da moeda."))
-        elif fiscal and not expansao and flex:
-            exp.append(("externo", "Com r menor, há saída de capital e **depreciação cambial (e↑)**."))
-            exp.append(("externo", "A depreciação estimula exportações **(NX↑)**, parcialmente compensando a contração fiscal."))
-        elif not fiscal and not expansao and flex:
-            exp.append(("externo", "Com r maior, há entrada de capital e **apreciação cambial (e↓)**."))
-            exp.append(("externo", "A apreciação reduz exportações **(NX↓)**, amplificando a contração."))
-        else:
-            exp.append(("externo", "O BC ajusta a oferta de moeda para manter o câmbio fixo, "
-                                   "alterando a eficácia da política."))
-
-    # ── CONCLUSÃO ─────────────────────────────────────────────
-    exp.append(("conclusao", "✅ **Conclusão:**"))
-    if fiscal and expansao:
-        if aberta and flex:
-            exp.append(("conclusao", "A política fiscal expansionista em câmbio flexível com alta mobilidade de capital "
-                                     "**não aumenta o produto** — o crowding-out externo é completo."))
-        elif aberta and not flex:
-            exp.append(("conclusao", "A política fiscal expansionista em câmbio fixo **é muito eficaz**, "
-                                     "pois o BC valida o estímulo com expansão monetária."))
-        else:
-            exp.append(("conclusao", "A política fiscal expansionista **aumenta Y e r**. "
-                                     "O crowding-out parcial reduz o investimento privado."))
-    elif fiscal and not expansao:
-        exp.append(("conclusao", "A política fiscal contracionista **reduz Y e r**, "
-                                 "podendo ser usada para controlar inflação."))
-    elif not fiscal and expansao:
-        if aberta and flex:
-            exp.append(("conclusao", "A política monetária expansionista em câmbio flexível **é muito eficaz** — "
-                                     "atua via canal de juros E via canal cambial."))
-        elif aberta and not flex:
-            exp.append(("conclusao", "A política monetária expansionista em câmbio fixo **é ineficaz** — "
-                                     "o BC perde autonomia para defender o câmbio."))
-        else:
-            exp.append(("conclusao", "A política monetária expansionista **aumenta Y e reduz r**, "
-                                     "estimulando o investimento privado."))
-    else:
-        exp.append(("conclusao", "A política monetária contracionista **reduz Y e eleva r**, "
-                                 "sendo usada para combater inflação."))
-
-    return exp
+C = dict(
+    IS   = "#2563eb",
+    IS1  = "#60a5fa",
+    IS2  = "#7c3aed",
+    LM   = "#dc2626",
+    LM1  = "#f87171",
+    BP   = "#059669",
+    A    = "#2563eb",
+    B    = "#d97706",
+    C    = "#059669",
+    grid = "#f1f5f9",
+    axis = "#94a3b8",
+    dot  = "#94a3b8",
+)
 
 # ══════════════════════════════════════════════════════════════
-# GRÁFICO MODO SIMPLIFICADO
+# GEOMETRIA DAS CURVAS (normalizada, estilo livro-texto)
 # ══════════════════════════════════════════════════════════════
+IS_a, IS_b = 2.2, 1.6
+LM_a, LM_b = -1.2, 0.35  # LM: r = LM_a + LM_b·Y
+SHIFT       = 0.55
 
-def grafico_simplificado(politica, direcao, tipo_eco, regime, mobilidade_kappa=0.5):
-    """
-    Gráfico qualitativo IS-LM (sem números nos eixos).
-    Mostra curvas base, curvas deslocadas, pontos A, B, C e setas.
-    mobilidade_kappa: float [0..1], 1 = perfeita mobilidade (BP horizontal)
-    """
+# ── SLOPE_MAP: kappa → inclinação da BP ──────────────────────
+# Valores maiores = mais vertical (imobilidade)
+# Valores menores = mais horizontal (alta mobilidade)
+# Nula (0.0)  → muito íngreme (quase vertical)
+# Baixa (0.2) → íngreme
+# Alta (0.5)  → suave
+# Perfeita    → horizontal (tratada separadamente)
+SLOPE_MAP = {
+    0.0: 2.5,   # Nula  → quase vertical
+    0.2: 1.2,   # Baixa → íngreme
+    0.5: 0.15,  # Alta  → quase horizontal
+}
+
+def _equilibrio(IS_a_, LM_a_):
+    YE = (IS_a_ - LM_a_) / (IS_b + LM_b)
+    rE = IS_a_ - IS_b * YE
+    return YE, rE
+
+def _geometria(politica, direcao, aberta, flex):
     fiscal   = politica == "Fiscal"
-    expansao = direcao == "Expansionista"
-    aberta   = tipo_eco == "Aberta"
-    flex     = regime == "Flexível"
+    expansao = direcao  == "Expansionista"
 
-    # Curvas base (normalizadas, sem unidade)
-    Y = np.linspace(0.2, 1.8, 300)
+    YA, rA = _equilibrio(IS_a, LM_a)
 
-    # IS base: r = 1.2 - 0.8*Y
-    r_IS0 = 1.2 - 0.8 * Y
-    # LM base: r = -0.4 + 0.6*Y
-    r_LM0 = -0.4 + 0.6 * Y
-
-    # Equilíbrio A: IS0 = LM0 → 1.2 - 0.8Y = -0.4 + 0.6Y → Y=1.143, r=0.286
-    YA = (1.2 + 0.4) / (0.8 + 0.6)
-    rA = 1.2 - 0.8 * YA
-
-    # Deslocamento
-    shift = 0.35
-
-    if fiscal and expansao:
-        r_IS1 = r_IS0 + shift   # IS desloca direita (↑)
-        r_LM1 = r_LM0           # LM fica
-        # Equilíbrio C: IS1 = LM0
-        YC = (1.2 + shift + 0.4) / (0.8 + 0.6)
-        rC = 1.2 + shift - 0.8 * YC
-        # Ponto B: Y aumenta ao nível de juros de A
-        YB = YC
-        rB = rA
-        curva_move = "IS"
-    elif fiscal and not expansao:
-        r_IS1 = r_IS0 - shift
-        r_LM1 = r_LM0
-        YC = (1.2 - shift + 0.4) / (0.8 + 0.6)
-        rC = 1.2 - shift - 0.8 * YC
-        YB = YC; rB = rA
-        curva_move = "IS"
-    elif not fiscal and expansao:
-        r_IS1 = r_IS0
-        r_LM1 = r_LM0 - shift   # LM desloca direita (↓ em r)
-        YC = (1.2 + 0.4 - shift) / (0.8 + 0.6)
-        rC = -0.4 - shift + 0.6 * YC
-        YB = YA; rB = rA - shift
-        curva_move = "LM"
+    if fiscal:
+        IS_a1 = IS_a + (SHIFT if expansao else -SHIFT)
+        LM_a1 = LM_a
     else:
-        r_IS1 = r_IS0
-        r_LM1 = r_LM0 + shift
-        YC = (1.2 + 0.4 + shift) / (0.8 + 0.6)
-        rC = -0.4 + shift + 0.6 * YC
-        YB = YA; rB = rA + shift
-        curva_move = "LM"
+        IS_a1 = IS_a
+        LM_a1 = LM_a + (-SHIFT if expansao else SHIFT)
 
-    # Efeito externo (câmbio flexível): IS retorna parcialmente
-    r_IS2 = None
-    YC_final = YC
-    rC_final = rC
+    YC, rC = _equilibrio(IS_a1, LM_a1)
+
+    if fiscal:
+        YB, rB = YC, rA
+    else:
+        YB, rB = YA, rC
+
+    IS_a2   = None
+    YC_fin  = YC
+    rC_fin  = rC
 
     if aberta and flex:
         if fiscal and expansao:
-            # IS retorna para esquerda (crowding-out externo)
-            r_IS2 = r_IS0 + shift * 0.15  # quase volta ao original
-            YC_final = (1.2 + shift*0.15 + 0.4) / (0.8 + 0.6)
-            rC_final = 1.2 + shift*0.15 - 0.8 * YC_final
+            IS_a2  = IS_a + SHIFT * 0.12
+            YC_fin, rC_fin = _equilibrio(IS_a2, LM_a1)
         elif not fiscal and expansao:
-            # IS desloca direita (canal cambial)
-            r_IS2 = r_IS0 + shift * 0.7
-            YC_final = (1.2 + shift*0.7 + 0.4 - shift) / (0.8 + 0.6)
-            rC_final = -0.4 - shift + 0.6 * YC_final
+            IS_a2  = IS_a + SHIFT * 0.75
+            YC_fin, rC_fin = _equilibrio(IS_a2, LM_a1)
 
-    # ── Figura ────────────────────────────────────────────────
+    return dict(
+        YA=YA, rA=rA,
+        YB=YB, rB=rB,
+        YC=YC, rC=rC,
+        YC_fin=YC_fin, rC_fin=rC_fin,
+        IS_a0=IS_a,  IS_a1=IS_a1, IS_a2=IS_a2,
+        LM_a0=LM_a,  LM_a1=LM_a1,
+        fiscal=fiscal, expansao=expansao,
+    )
+
+# ══════════════════════════════════════════════════════════════
+# CONSTRUTOR DO GRÁFICO POR ETAPA
+# ══════════════════════════════════════════════════════════════
+
+def _base_fig(titulo):
     fig = go.Figure()
-
-    # Curvas base
-    fig.add_trace(go.Scatter(
-        x=Y, y=r_IS0, name="IS₀",
-        line=dict(color="#1565c0", width=3)
-    ))
-    fig.add_trace(go.Scatter(
-        x=Y, y=r_LM0, name="LM₀",
-        line=dict(color="#c62828", width=3)
-    ))
-
-    # BP (economia aberta) — representação didática ancorada no equilíbrio A
-    if aberta:
-        r_star_did = rA   # BP passa pelo equilíbrio A (correto didaticamente)
-        if mobilidade_kappa >= 0.98:
-            # Perfeita mobilidade → BP horizontal
-            r_BP0 = np.full_like(Y, r_star_did)
-            bp_label = "BP (mobilidade perfeita)"
-        elif mobilidade_kappa <= 0.02:
-            # Mobilidade nula → BP vertical (desenhamos como linha vertical)
-            fig.add_shape(
-                type="line",
-                x0=YA, y0=float(r_IS0.min()), x1=YA, y1=float(r_IS0.max()),
-                line=dict(color="#2e7d32", width=2.5, dash="dash")
-            )
-            fig.add_trace(go.Scatter(
-                x=[YA], y=[rA + 0.25],
-                mode="text", text=["BP (imobilidade)"],
-                textfont=dict(color="#2e7d32", size=11),
-                showlegend=False
-            ))
-            r_BP0 = None
-            bp_label = None
-        else:
-            # Inclinação positiva: slope = (1 - kappa) * fator_visual
-            # Quanto menor kappa, mais íngreme (mais vertical)
-            slope = (1.0 - mobilidade_kappa) * 0.6
-            r_BP0 = r_star_did + slope * (Y - YA)
-            mob_txt = {0.2: "baixa", 0.5: "média", 0.8: "alta"}.get(
-                round(mobilidade_kappa, 1), f"κ={mobilidade_kappa:.1f}"
-            )
-            bp_label = f"BP (mobilidade {mob_txt})"
-
-        if r_BP0 is not None:
-            fig.add_trace(go.Scatter(
-                x=Y, y=r_BP0, name=bp_label,
-                line=dict(color="#2e7d32", width=2.5, dash="dash")
-            ))
-
-    # Curvas deslocadas
-    if curva_move == "IS":
-        fig.add_trace(go.Scatter(
-            x=Y, y=r_IS1, name="IS₁ (após choque)",
-            line=dict(color="#1565c0", width=2.5, dash="dot")
-        ))
-    else:
-        fig.add_trace(go.Scatter(
-            x=Y, y=r_LM1, name="LM₁ (após choque)",
-            line=dict(color="#c62828", width=2.5, dash="dot")
-        ))
-
-    # IS final (efeito câmbio)
-    if r_IS2 is not None:
-        fig.add_trace(go.Scatter(
-            x=Y, y=r_IS2, name="IS₂ (ajuste cambial)",
-            line=dict(color="#6a1b9a", width=2.5, dash="longdash")
-        ))
-
-    # Pontos A, B, C
-    fig.add_trace(go.Scatter(
-        x=[YA, YB, YC_final],
-        y=[rA, rB, rC_final],
-        mode="markers+text",
-        marker=dict(size=14, color=["#1565c0", "#f57f17", "#2e7d32"],
-                    symbol="circle", line=dict(width=2, color="white")),
-        text=["A", "B", "C"],
-        textposition=["top left", "top right", "bottom right"],
-        textfont=dict(size=16, color=["#1565c0", "#f57f17", "#2e7d32"]),
-        name="Equilíbrios",
-        showlegend=True
-    ))
-
-    # Seta A → B
-    fig.add_annotation(
-        ax=YA, ay=rA, x=YB, y=rB,
-        xref="x", yref="y", axref="x", ayref="y",
-        showarrow=True, arrowhead=3, arrowwidth=2.5,
-        arrowcolor="#f57f17"
-    )
-    # Seta B → C
-    fig.add_annotation(
-        ax=YB, ay=rB, x=YC_final, y=rC_final,
-        xref="x", yref="y", axref="x", ayref="y",
-        showarrow=True, arrowhead=3, arrowwidth=2.5,
-        arrowcolor="#2e7d32"
-    )
-
-    # ── Linhas de projeção tracejadas nos eixos (A e C) ───────
-    # Ponto A → projeção vertical (Yₐ) e horizontal (iₐ)
-    fig.add_shape(type="line", x0=YA, y0=float(r_LM0.min()-0.1),
-                  x1=YA, y1=rA,
-                  line=dict(color="#1565c0", width=1.2, dash="dot"))
-    fig.add_shape(type="line", x0=float(Y.min()), y0=rA,
-                  x1=YA, y1=rA,
-                  line=dict(color="#1565c0", width=1.2, dash="dot"))
-
-    # Ponto C → projeção vertical (Y꜀) e horizontal (i꜀)
-    fig.add_shape(type="line", x0=YC_final, y0=float(r_LM0.min()-0.1),
-                  x1=YC_final, y1=rC_final,
-                  line=dict(color="#2e7d32", width=1.2, dash="dot"))
-    fig.add_shape(type="line", x0=float(Y.min()), y0=rC_final,
-                  x1=YC_final, y1=rC_final,
-                  line=dict(color="#2e7d32", width=1.2, dash="dot"))
-
-    # ── Rótulos teóricos nos eixos via tickvals + ticktext ─────
-    # Eixo X: Yₐ e Y꜀  |  Eixo Y: iₐ e i꜀
-    # Se YA ≈ YC_final (sem deslocamento de Y), mostramos só um rótulo
-    x_ticks_vals = [YA, YC_final]
-    x_ticks_text = ["Yₐ", "Y꜀"]
-    y_ticks_vals = [rA, rC_final]
-    y_ticks_text = ["iₐ", "i꜀"]
-
-    # Remover duplicatas se os valores forem muito próximos
-    if abs(YA - YC_final) < 0.02:
-        x_ticks_vals = [YA]
-        x_ticks_text = ["Yₐ = Y꜀"]
-    if abs(rA - rC_final) < 0.02:
-        y_ticks_vals = [rA]
-        y_ticks_text = ["iₐ = i꜀"]
-
-    # Layout com rótulos teóricos nos eixos + travas de zoom/pan
     fig.update_layout(
-        title=f"IS-LM {'+ BP' if aberta else ''} — {politica} {direcao}",
+        title=dict(text=titulo, font=dict(size=15, color=None, family="'Poppins', sans-serif"),
+                   x=0.5, xanchor="center", y=0.97),
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+        height=600,
+        margin=dict(l=70, r=100, t=65, b=65),
+        hovermode="closest",
+        dragmode=False,
+        legend=dict(x=0.01, y=0.99, bgcolor="rgba(128,128,128,0.12)",
+                    bordercolor="rgba(128,128,128,0.3)", borderwidth=1,
+                    font=dict(size=11, family="'EB Garamond', Georgia, serif")),
         xaxis=dict(
-            title="Produto (Y) →",
-            tickvals=x_ticks_vals,
-            ticktext=x_ticks_text,
-            tickfont=dict(size=13, color="#333"),
-            showgrid=False,
-            zeroline=True, zerolinecolor="#aaa",
-            fixedrange=True   # 🔒 trava zoom/pan horizontal
+            title=dict(text="Produto  Y", font=dict(size=13)),
+            showgrid=True, gridcolor="rgba(128,128,128,0.2)", gridwidth=1,
+            zeroline=False, showline=True, linecolor="rgba(128,128,128,0.5)", linewidth=1.5,
+            tickfont=dict(size=12), fixedrange=True,
         ),
         yaxis=dict(
-            title="Taxa de Juros (i) →",
-            tickvals=y_ticks_vals,
-            ticktext=y_ticks_text,
-            tickfont=dict(size=13, color="#333"),
-            showgrid=False,
-            zeroline=True, zerolinecolor="#aaa",
-            fixedrange=True   # 🔒 trava zoom/pan vertical
+            title=dict(text="Taxa de Juros  i", font=dict(size=13)),
+            showgrid=True, gridcolor="rgba(128,128,128,0.2)", gridwidth=1,
+            zeroline=False, showline=True, linecolor="rgba(128,128,128,0.5)", linewidth=1.5,
+            tickfont=dict(size=12), fixedrange=True,
         ),
-        template="plotly_white",
-        height=520,
-        legend=dict(x=0.01, y=0.99),
-        plot_bgcolor="#fafafa",
-        dragmode=False   # 🔒 desativa arraste
     )
-
     return fig
 
-# ══════════════════════════════════════════════════════════════
-# GRÁFICO MODO COMPLEXO (sem mudanças funcionais além das opções de kf)
-# ══════════════════════════════════════════════════════════════
-
-def grafico_complexo(p_base, p_shock, eq_b, eq_c, aberta):
-    Y_grid = np.linspace(200, 2500, 500)
-    r_min, r_max = -0.3, 0.8
-
-    r_IS_b = curva_IS(Y_grid, eq_b["e"], p_base, aberta)
-    r_IS_c = curva_IS(Y_grid, eq_c["e"], p_shock, aberta)
-    r_LM_b = curva_LM(Y_grid, p_base["M"], p_base)
-    r_LM_c = curva_LM(Y_grid, p_shock["M"], p_shock)
-
-    fig = go.Figure()
-
-    for r_curve, name, color, dash in [
-        (r_IS_b, "IS base",   "#1565c0", "solid"),
-        (r_IS_c, "IS choque", "#1565c0", "dash"),
-        (r_LM_b, "LM base",   "#c62828", "solid"),
-        (r_LM_c, "LM choque", "#c62828", "dash"),
-    ]:
-        mask = (r_curve > r_min) & (r_curve < r_max)
-        fig.add_trace(go.Scatter(
-            x=Y_grid[mask], y=r_curve[mask],
-            name=name, line=dict(color=color, width=2.5, dash=dash)
-        ))
-
-    if aberta:
-        r_BP_b = curva_BP_plot(Y_grid, eq_b["e"], p_base)
-        r_BP_c = curva_BP_plot(Y_grid, eq_c["e"], p_shock)
-        for r_curve, name, dash in [
-            (r_BP_b, "BP base",   "solid"),
-            (r_BP_c, "BP choque", "dash"),
-        ]:
-            mask = (r_curve > r_min) & (r_curve < r_max)
-            fig.add_trace(go.Scatter(
-                x=Y_grid[mask], y=r_curve[mask],
-                name=name, line=dict(color="#2e7d32", width=2.5, dash=dash)
-            ))
-
-    # Equilíbrios
+def _add_curve(fig, Y, r, name, color, width=3.2, dash="solid", label=None, label_side="right"):
     fig.add_trace(go.Scatter(
-        x=[eq_b["Y"], eq_c["Y"]],
-        y=[eq_b["r"], eq_c["r"]],
-        mode="markers+text",
-        marker=dict(size=14, color=["#1565c0", "#c62828"],
-                    symbol="star", line=dict(width=1, color="white")),
-        text=["E₀", "E₁"], textposition="top right",
-        textfont=dict(size=14),
-        name="Equilíbrios"
+        x=Y, y=r, mode="lines", name=name,
+        line=dict(color=color, width=width, dash=dash),
+        showlegend=True,
+        hovertemplate=f"<b>{name}</b><br>Y=%{{x:.3f}}<br>i=%{{y:.3f}}<extra></extra>"
+    ))
+    if label:
+        if label_side == "right":
+            lx, ly = float(Y[-1]), float(r[-1])
+            xanchor = "left"; xshift = 8
+        else:
+            lx, ly = float(Y[0]), float(r[0])
+            xanchor = "right"; xshift = -8
+        fig.add_annotation(x=lx, y=ly, text=f"<b>{label}</b>",
+                           showarrow=False, xanchor=xanchor, yanchor="middle",
+                           font=dict(color=color, size=13, family="Georgia, serif"),
+                           xshift=xshift)
+
+def _add_point(fig, x, y, label, color, tpos="top left"):
+    fig.add_trace(go.Scatter(
+        x=[x], y=[y], mode="markers+text",
+        marker=dict(size=14, color=color, symbol="circle",
+                    line=dict(width=2.5, color="white")),
+        text=[f"<b>{label}</b>"],
+        textposition=tpos,
+        textfont=dict(size=14, color=color, family="Georgia, serif"),
+        showlegend=False,
+        hovertemplate=f"<b>Ponto {label}</b><br>Y={x:.3f}<br>i={y:.3f}<extra></extra>"
     ))
 
-    # Seta
+def _add_projections(fig, x, y, x_left, y_floor, color):
+    fig.add_shape(type="line", x0=x, y0=y_floor, x1=x, y1=y,
+                  line=dict(color=color, width=1.1, dash="dot"))
+    fig.add_shape(type="line", x0=x_left, y0=y, x1=x, y1=y,
+                  line=dict(color=color, width=1.1, dash="dot"))
+
+def _add_trajectory_arrow(fig, x0, y0, x1, y1, color):
     fig.add_annotation(
-        ax=eq_b["Y"], ay=eq_b["r"],
-        x=eq_c["Y"],  y=eq_c["r"],
+        ax=x0, ay=y0, x=x1, y=y1,
         xref="x", yref="y", axref="x", ayref="y",
-        showarrow=True, arrowhead=3, arrowwidth=2.5,
-        arrowcolor="black"
+        showarrow=True, arrowhead=4, arrowwidth=2.5,
+        arrowcolor=color, arrowsize=1.0
     )
 
+def _set_axes(fig, Y, geo, etapa, aberta):
+    YA, rA = geo["YA"], geo["rA"]
+    YC_fin, rC_fin = geo["YC_fin"], geo["rC_fin"]
+
+    x_left = float(Y.min())
+    y_floor = LM_a + LM_b * float(Y.min()) - 0.25
+
+    if etapa == 0:
+        xv = [YA]; xt = ["Y<sub>A</sub>"]
+        yv = [rA]; yt = ["i<sub>A</sub>"]
+    elif etapa == 1:
+        xv = [YA, geo["YB"]]; xt = ["Y<sub>A</sub>", "Y<sub>B</sub>"]
+        yv = [rA, geo["rB"]]; yt = ["i<sub>A</sub>", "i<sub>B</sub>"]
+    else:
+        xv = [YA, YC_fin]; xt = ["Y<sub>A</sub>", "Y<sub>C</sub>"]
+        yv = [rA, rC_fin]; yt = ["i<sub>A</sub>", "i<sub>C</sub>"]
+        if abs(YA - YC_fin) < 0.02:
+            xv = [YA]; xt = ["Y<sub>A</sub>=Y<sub>C</sub>"]
+        if abs(rA - rC_fin) < 0.02:
+            yv = [rA]; yt = ["i<sub>A</sub>=i<sub>C</sub>"]
+
+    IS_a_max = max(geo["IS_a0"], geo["IS_a1"])
+    if geo["IS_a2"] is not None:
+        IS_a_max = max(IS_a_max, geo["IS_a2"])
+    r_top = IS_a_max - IS_b * float(Y.min()) + 0.3
+
     fig.update_layout(
-        title="IS-LM-BP: Base vs. Choque",
-        xaxis_title="Produto (Y)",
-        yaxis_title="Taxa de Juros (r)",
-        template="plotly_white",
-        height=520,
-        legend=dict(x=0.01, y=0.99)
+        xaxis=dict(
+            tickvals=xv, ticktext=xt,
+            range=[x_left - 0.05, float(Y.max()) + 0.22],
+        ),
+        yaxis=dict(
+            tickvals=yv, ticktext=yt,
+            range=[y_floor - 0.05, r_top],
+        ),
     )
+    return x_left, y_floor
+
+# ══════════════════════════════════════════════════════════════
+# GRÁFICO POR ETAPA
+# ══════════════════════════════════════════════════════════════
+
+def grafico_etapa(politica, direcao, tipo_eco, regime, mobilidade_kappa, etapa):
+    """
+    etapa: 0 = Estado A, 1 = Estado B, 2 = Estado C
+    """
+    fiscal   = politica == "Fiscal"
+    expansao = direcao  == "Expansionista"
+    aberta   = tipo_eco == "Aberta"
+    flex     = regime   == "Flexível"
+
+    geo = _geometria(politica, direcao, aberta, flex)
+    Y   = np.linspace(0.1, 2.4, 400)
+
+    # Curvas IS e LM
+    r_IS0 = geo["IS_a0"] - IS_b * Y
+    r_IS1 = geo["IS_a1"] - IS_b * Y
+    r_LM0 = geo["LM_a0"] + LM_b * Y
+    r_LM1 = geo["LM_a1"] + LM_b * Y
+    r_IS2 = (geo["IS_a2"] - IS_b * Y) if geo["IS_a2"] is not None else None
+
+    # ── BP: lógica corrigida ──────────────────────────────────
+    # Perfeita (kappa ≥ 0.98) → horizontal no nível rA
+    # Nula (kappa ≤ 0.02)     → vertical em YA (shape separado)
+    # Baixa (0.2) / Alta (0.5) → slope do SLOPE_MAP
+    if aberta:
+        kappa_key = round(mobilidade_kappa, 1)
+        if mobilidade_kappa >= 0.98:
+            # Perfeita: linha horizontal
+            r_BP   = np.full_like(Y, geo["rA"])
+            bp_tipo = "perfeita"
+        elif mobilidade_kappa <= 0.02:
+            # Nula: linha vertical (plotada como shape, não como trace)
+            r_BP   = None
+            bp_tipo = "nula"
+        else:
+            # Baixa ou Alta: usa SLOPE_MAP
+            slope  = SLOPE_MAP.get(kappa_key, 0.3)
+            r_BP   = geo["rA"] + slope * (Y - geo["YA"])
+            bp_tipo = {0.2: "baixa", 0.5: "alta"}.get(kappa_key, f"κ={mobilidade_kappa:.1f}")
+    else:
+        r_BP   = None
+        bp_tipo = None
+
+    etapa_labels = ["A — Equilíbrio Inicial", "B — Choque de Curto Prazo", "C — Novo Equilíbrio"]
+    titulo = f"IS-LM{'+ BP ' if aberta else ' '}— {politica} {direcao}  │  Etapa {etapa_labels[etapa]}"
+    fig = _base_fig(titulo)
+
+    # ── ETAPA 0: IS₀, LM₀, BP, ponto A ──────────────────────
+    if etapa >= 0:
+        _add_curve(fig, Y, r_IS0, "IS₀", C["IS"], label="IS₀")
+        _add_curve(fig, Y, r_LM0, "LM₀", C["LM"], label="LM₀")
+
+        if aberta:
+            if bp_tipo == "nula":
+                # Linha vertical em YA
+                y_min_bp = float(r_IS0.min()) - 0.1
+                y_max_bp = float(r_IS0.max()) + 0.1
+                fig.add_shape(type="line",
+                    x0=geo["YA"], y0=y_min_bp, x1=geo["YA"], y1=y_max_bp,
+                    line=dict(color=C["BP"], width=2.8, dash="dash"))
+                fig.add_annotation(x=geo["YA"], y=y_max_bp + 0.05,
+                    text="<b>BP</b><br><span style='font-size:10px'>(imobilidade)</span>",
+                    showarrow=False, xanchor="center",
+                    font=dict(color=C["BP"], size=12, family="Georgia, serif"))
+            elif r_BP is not None:
+                bp_lbl = f"BP ({bp_tipo})"
+                _add_curve(fig, Y, r_BP, bp_lbl, C["BP"], width=2.8, dash="dash",
+                           label=f"BP<br><span style='font-size:10px'>({bp_tipo})</span>")
+
+    # ── ETAPA 1: curva deslocada + seta + ponto B ─────────────
+    if etapa >= 1:
+        if fiscal:
+            _add_curve(fig, Y, r_IS1, "IS₁ (após choque)", C["IS1"], dash="dash", label="IS₁")
+            idx = len(Y) // 2
+            dx = SHIFT * 0.45 if expansao else -SHIFT * 0.45
+            fig.add_annotation(
+                ax=Y[idx], ay=r_IS0[idx],
+                x=Y[idx] + dx, y=r_IS0[idx],
+                xref="x", yref="y", axref="x", ayref="y",
+                showarrow=True, arrowhead=2, arrowwidth=2.2,
+                arrowcolor=C["IS1"], arrowsize=1.1
+            )
+        else:
+            _add_curve(fig, Y, r_LM1, "LM₁ (após choque)", C["LM1"], dash="dash", label="LM₁")
+            idx = len(Y) // 2
+            dy = -SHIFT * 0.45 if expansao else SHIFT * 0.45
+            fig.add_annotation(
+                ax=Y[idx], ay=r_LM0[idx],
+                x=Y[idx], y=r_LM0[idx] + dy,
+                xref="x", yref="y", axref="x", ayref="y",
+                showarrow=True, arrowhead=2, arrowwidth=2.2,
+                arrowcolor=C["LM1"], arrowsize=1.1
+            )
+        _add_point(fig, geo["YA"], geo["rA"], "A", C["A"], "top left")
+        _add_point(fig, geo["YB"], geo["rB"], "B", C["B"], "top right")
+        _add_trajectory_arrow(fig, geo["YA"], geo["rA"], geo["YB"], geo["rB"], C["B"])
+
+    # ── ETAPA 2: IS₂ (se houver) + ponto C ───────────────────
+    if etapa >= 2:
+        if r_IS2 is not None:
+            _add_curve(fig, Y, r_IS2, "IS₂ (ajuste cambial)", C["IS2"],
+                       width=2.5, dash="longdash", label="IS₂")
+        _add_point(fig, geo["YA"],     geo["rA"],     "A", C["A"], "top left")
+        _add_point(fig, geo["YB"],     geo["rB"],     "B", C["B"], "top right")
+        _add_point(fig, geo["YC_fin"], geo["rC_fin"], "C", C["C"], "bottom right")
+        _add_trajectory_arrow(fig, geo["YA"],  geo["rA"],    geo["YB"],     geo["rB"],     C["B"])
+        _add_trajectory_arrow(fig, geo["YB"],  geo["rB"],    geo["YC_fin"], geo["rC_fin"], C["C"])
+
+    # ── Projeções nos eixos ───────────────────────────────────
+    x_left, y_floor = _set_axes(fig, Y, geo, etapa, aberta)
+
+    if etapa == 0:
+        _add_projections(fig, geo["YA"], geo["rA"], x_left, y_floor, C["A"])
+    elif etapa == 1:
+        _add_projections(fig, geo["YA"], geo["rA"], x_left, y_floor, C["A"])
+        _add_projections(fig, geo["YB"], geo["rB"], x_left, y_floor, C["B"])
+    else:
+        _add_projections(fig, geo["YA"],     geo["rA"],     x_left, y_floor, C["A"])
+        _add_projections(fig, geo["YC_fin"], geo["rC_fin"], x_left, y_floor, C["C"])
+
+    # Ponto A sempre visível na etapa 0
+    if etapa == 0:
+        _add_point(fig, geo["YA"], geo["rA"], "A", C["A"], "top left")
+
     return fig
+
+# ══════════════════════════════════════════════════════════════
+# CAMADA DIDÁTICA — TEXTOS POR ETAPA
+# ══════════════════════════════════════════════════════════════
+
+def _texto_etapa(politica, direcao, tipo_eco, regime, mobilidade_label, etapa):
+    fiscal   = politica == "Fiscal"
+    expansao = direcao  == "Expansionista"
+    aberta   = tipo_eco == "Aberta"
+    flex     = regime   == "Flexível"
+
+    if etapa == 0:
+        return dict(
+            titulo="📍 Estado A — Equilíbrio Inicial",
+            cor="blue",
+            blocos=[
+                ("O que representa?",
+                 "A economia encontra-se em equilíbrio simultâneo nos mercados de **bens (IS)** "
+                 "e **moeda (LM)**" + (", e no balanço de pagamentos **(BP)**" if aberta else "") + ". "
+                 "O produto Y₀ e a taxa de juros i₀ são determinados pela interseção IS-LM."),
+                ("Condições de equilíbrio",
+                 "- **Mercado de bens (IS):** Demanda agregada = Produto  \n"
+                 "- **Mercado monetário (LM):** Oferta de moeda = Demanda por moeda  \n"
+                 + ("- **Balanço de pagamentos (BP):** NX + FC = 0" if aberta else "")),
+                ("Próximo passo",
+                 f"Será aplicada uma **política {politica.lower()} {direcao.lower()}**. "
+                 "Avance para a Etapa B para ver o efeito imediato."),
+            ]
+        )
+
+    elif etapa == 1:
+        if fiscal and expansao:
+            causa = "O aumento dos gastos públicos (G↑) ou redução de impostos (T↓) eleva a demanda agregada."
+            efeito_curva = "A **curva IS desloca-se para a direita** (IS₀ → IS₁)."
+            efeito_Y = "O produto tende a aumentar (Y↑)."
+            efeito_r = "A maior demanda por moeda pressiona os juros para cima (i↑)."
+        elif fiscal and not expansao:
+            causa = "A redução dos gastos públicos (G↓) ou aumento de impostos (T↑) contrai a demanda."
+            efeito_curva = "A **curva IS desloca-se para a esquerda** (IS₀ → IS₁)."
+            efeito_Y = "O produto tende a cair (Y↓)."
+            efeito_r = "A menor demanda por moeda reduz os juros (i↓)."
+        elif not fiscal and expansao:
+            causa = "O aumento da oferta de moeda (M↑) pelo Banco Central reduz o custo do crédito."
+            efeito_curva = "A **curva LM desloca-se para a direita** (LM₀ → LM₁)."
+            efeito_Y = "Com juros menores, o investimento aumenta e o produto cresce (Y↑)."
+            efeito_r = "Os juros caem imediatamente (i↓)."
+        else:
+            causa = "A redução da oferta de moeda (M↓) eleva o custo do crédito."
+            efeito_curva = "A **curva LM desloca-se para a esquerda** (LM₀ → LM₁)."
+            efeito_Y = "Com juros maiores, o investimento cai e o produto recua (Y↓)."
+            efeito_r = "Os juros sobem imediatamente (i↑)."
+
+        return dict(
+            titulo="⚡ Estado B — Choque de Curto Prazo",
+            cor="orange",
+            blocos=[
+                ("O que aconteceu?", causa),
+                ("Deslocamento da curva", efeito_curva + "  \n" + efeito_Y + "  \n" + efeito_r),
+                ("Interpretação do Ponto B",
+                 "O ponto B representa o **desequilíbrio transitório**: a economia saiu do ponto A "
+                 "mas ainda não atingiu o novo equilíbrio. O mercado de " +
+                 ("moeda" if fiscal else "bens") + " ainda está se ajustando."),
+                ("Próximo passo",
+                 "Os mercados se ajustam automaticamente. Avance para a Etapa C para ver o novo equilíbrio."),
+            ]
+        )
+
+    else:  # etapa == 2
+        if fiscal and expansao and aberta and flex:
+            resultado = ("Com câmbio flexível e alta mobilidade de capital, a entrada de capital aprecia "
+                         "a moeda (e↓), reduzindo as exportações líquidas (NX↓). A IS recua quase à posição "
+                         "original. **Resultado Mundell-Fleming: política fiscal é ineficaz** — o crowding-out "
+                         "externo cancela o estímulo fiscal.")
+            delta_Y = "≈ 0 (crowding-out externo completo)"
+            delta_r = "≈ 0 (retorna ao nível internacional)"
+        elif fiscal and expansao and aberta and not flex:
+            resultado = ("Com câmbio fixo, a entrada de capital força o BC a comprar divisas, expandindo "
+                         "a oferta de moeda (M↑). A LM desloca-se para a direita, amplificando o estímulo. "
+                         "**Resultado Mundell-Fleming: política fiscal é muito eficaz.**")
+            delta_Y = "↑↑ (amplificado pelo ajuste monetário)"
+            delta_r = "≈ 0 (mantido pelo câmbio fixo)"
+        elif not fiscal and expansao and aberta and flex:
+            resultado = ("Com câmbio flexível, a queda dos juros provoca saída de capital e depreciação "
+                         "cambial (e↑). As exportações aumentam (NX↑), deslocando a IS para a direita. "
+                         "**Resultado Mundell-Fleming: política monetária é muito eficaz.**")
+            delta_Y = "↑↑ (amplificado pelo canal cambial)"
+            delta_r = "↓ (retorna ao nível internacional)"
+        elif not fiscal and expansao and aberta and not flex:
+            resultado = ("Com câmbio fixo, a queda dos juros provoca saída de capital. O BC vende divisas "
+                         "para defender o câmbio, contraindo a oferta de moeda. A LM retorna à posição original. "
+                         "**Resultado Mundell-Fleming: política monetária é ineficaz.**")
+            delta_Y = "≈ 0 (revertido pelo ajuste do BC)"
+            delta_r = "≈ 0 (retorna ao nível inicial)"
+        elif fiscal and expansao:
+            resultado = ("O novo equilíbrio apresenta **Y maior e i maior**. O aumento dos juros reduz "
+                         "parcialmente o investimento privado — efeito **crowding-out** parcial.")
+            delta_Y = "↑ (menor que o multiplicador simples)"
+            delta_r = "↑ (crowding-out parcial)"
+        elif fiscal and not expansao:
+            resultado = "O novo equilíbrio apresenta **Y menor e i menor**."
+            delta_Y = "↓"; delta_r = "↓"
+        elif not fiscal and expansao:
+            resultado = ("O novo equilíbrio apresenta **Y maior e i menor**. "
+                         "A política monetária estimulou o investimento sem pressionar os juros.")
+            delta_Y = "↑"; delta_r = "↓"
+        else:
+            resultado = "O novo equilíbrio apresenta **Y menor e i maior**."
+            delta_Y = "↓"; delta_r = "↑"
+
+        return dict(
+            titulo="✅ Estado C — Novo Equilíbrio",
+            cor="green",
+            blocos=[
+                ("Ajuste e novo equilíbrio", resultado),
+                ("Variações em relação ao Estado A",
+                 f"- **ΔY:** {delta_Y}  \n- **Δi:** {delta_r}"),
+                ("Síntese teórica",
+                 "O modelo IS-LM-BP de Mundell-Fleming demonstra que a **eficácia das políticas econômicas "
+                 "depende criticamente do regime cambial e do grau de mobilidade de capital**. "
+                 "Em economias abertas, os canais externos modificam substancialmente os multiplicadores fiscais e monetários."),
+            ]
+        )
 
 # ══════════════════════════════════════════════════════════════
 # INTERFACE PRINCIPAL
 # ══════════════════════════════════════════════════════════════
 
-st.title("🌍 IS-LM-BP — Simulador Macroeconômico")
-st.caption("Mundell-Fleming | Economia Aberta | Rigor Teórico")
+st.markdown("""
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+    .main-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.85rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 55%, #10b981 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 2px;
+    }
+    .sub-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 300;
+        letter-spacing: 0.03em;
+        margin-top: -4px;
+    }
+    .etapa-card {
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin-bottom: 10px;
+        border-left: 4px solid;
+        font-family: 'Poppins', sans-serif;
+    }
+    .etapa-blue   {border-color: #1a3a6b; background: #eef2ff; color: #1e3a5f;}
+    .etapa-orange {border-color: #b45309; background: #fef9ee; color: #7c3a00;}
+    .etapa-green  {border-color: #065f46; background: #f0fdf4; color: #064e3b;}
+    .sub-title { color: #64748b; }
+    @media (prefers-color-scheme: dark) {
+        .sub-title { color: #94a3b8; }
+        .etapa-blue   {border-color: #4a7fc1; background: rgba(74,127,193,0.13); color: #93c5fd;}
+        .etapa-orange {border-color: #d97706; background: rgba(217,119,6,0.13);  color: #fcd34d;}
+        .etapa-green  {border-color: #10b981; background: rgba(16,185,129,0.13); color: #6ee7b7;}
+    }
+</style>
+""", unsafe_allow_html=True)
 
-# ── ESCOLHA DO MODO ───────────────────────────────────────────
+st.markdown('<div class="main-title">🌍 IS-LM-BP — Simulador Macroeconômico</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">Modelo Mundell-Fleming &nbsp;|&nbsp; Economia Aberta &nbsp;|&nbsp; Nível Universitário</div>', unsafe_allow_html=True)
 st.divider()
+
 modo = st.radio(
-    "### Escolha o modo de simulação:",
-    ["🎓 Modo Simplificado (didático, sem números)",
-     "🔢 Modo Complexo (numérico, com equações)"],
+    "Modo de simulação:",
+    ["🎓 Modo Simplificado (didático)", "🔢 Modo Complexo (numérico)"],
     horizontal=True
 )
 st.divider()
@@ -690,108 +637,120 @@ st.divider()
 # ══════════════════════════════════════════════════════════════
 if "Simplificado" in modo:
 
-    col1, col2 = st.columns([1, 2])
-
-    with col1:
-        st.markdown("### ⚙️ Configuração")
-
-        tipo_eco = st.radio("Tipo de economia:", ["Fechada", "Aberta"])
+    with st.sidebar:
+        st.markdown("### ⚙️ Configurações")
+        tipo_eco = st.radio("Economia:", ["Fechada", "Aberta"])
         aberta   = tipo_eco == "Aberta"
-
-        regime = "Flexível"
+        regime   = "Flexível"
         if aberta:
             regime = st.radio("Regime cambial:", ["Flexível", "Fixo"])
-
         st.divider()
-
-        politica = st.radio("Tipo de política:", ["Fiscal", "Monetária"])
+        politica = st.radio("Política:", ["Fiscal", "Monetária"])
         direcao  = st.radio("Direção:", ["Expansionista", "Contracionista"])
-
-        # --- NOVO: Mobilidade de capital (modo didático) ---
         if aberta:
-            mob_options = ["Nula", "Baixa", "Média", "Alta", "Perfeita"]
-            # garantir que existe st.session_state.params para armazenar kappa
-            if "params" not in st.session_state:
-                st.session_state.params = DEFAULT_PARAMS.copy()
-            default_mob = st.session_state.get("settings", {}).get("mobilidade_capital", "Média")
-            sel_mob = st.selectbox(
-                "Mobilidade de capital (modo didático):",
-                mob_options,
-                index=mob_options.index(default_mob),
-                help="Nula: capital praticamente imóvel. Perfeita: fluxo livre, paridade imediata."
-            )
+            mob_opts = ["Nula", "Baixa", "Alta", "Perfeita"]
+            default_mob = st.session_state.settings.get("mobilidade_capital", "Alta")
+            if default_mob not in mob_opts:
+                default_mob = "Alta"
+            sel_mob = st.selectbox("Mobilidade de capital:", mob_opts,
+                                   index=mob_opts.index(default_mob))
             st.session_state.settings["mobilidade_capital"] = sel_mob
-            MOB_MAP = {"Nula": 0.0, "Baixa": 0.2, "Média": 0.5, "Alta": 0.8, "Perfeita": 1.0}
-            kappa = MOB_MAP.get(sel_mob, 0.5)
-            # armazenar o kappa em params para uso pelas funções (se necessário)
-            st.session_state.params["kappa"] = kappa
-            st.caption(f"Mobilidade selecionada: **{sel_mob}**  •  (kappa = {kappa})")
+            MOB_MAP = {"Nula": 0.0, "Baixa": 0.2, "Alta": 0.5, "Perfeita": 1.0}
+            kappa = MOB_MAP[sel_mob]
+            st.caption(f"κ = {kappa}")
+        else:
+            kappa = 0.5; sel_mob = "Alta"
+        st.divider()
+        executar = st.button("Simular economia", type="primary", use_container_width=True)
+
+    if executar:
+        st.session_state["simp_ok"]  = True
+        st.session_state["simp_cfg"] = (tipo_eco, regime, politica, direcao, kappa, sel_mob)
+        st.session_state["etapa"]    = 0
+
+    if st.session_state.get("simp_ok"):
+        tipo_eco_s, regime_s, politica_s, direcao_s, kappa_s, mob_s = st.session_state["simp_cfg"]
+
+        col_nav1, col_nav2, col_nav3, col_nav4 = st.columns([1, 1, 1, 3])
+        with col_nav1:
+            if st.button("◀ Anterior", use_container_width=True):
+                st.session_state["etapa"] = max(0, st.session_state.get("etapa", 0) - 1)
+        with col_nav2:
+            if st.button("Próximo ▶", use_container_width=True):
+                st.session_state["etapa"] = min(2, st.session_state.get("etapa", 0) + 1)
+        with col_nav3:
+            etapa_sel = st.selectbox("Etapa:", [0, 1, 2],
+                                     index=st.session_state.get("etapa", 0),
+                                     format_func=lambda x: ["A — Inicial", "B — Choque", "C — Equilíbrio"][x],
+                                     label_visibility="collapsed")
+            st.session_state["etapa"] = etapa_sel
+
+        etapa = st.session_state.get("etapa", 0)
+
+        prog_cols = st.columns(3)
+        for i, (lbl, cor_cls) in enumerate([
+            ("A — Equilíbrio Inicial",    "etapa-blue"),
+            ("B — Choque de Curto Prazo", "etapa-orange"),
+            ("C — Novo Equilíbrio",       "etapa-green"),
+        ]):
+            with prog_cols[i]:
+                ativo = "**" if i == etapa else ""
+                st.markdown(
+                    f'<div class="etapa-card {cor_cls if i == etapa else ""}" '
+                    f'style="opacity:{"1" if i <= etapa else "0.35"}; padding:8px 12px;">'
+                    f'{ativo}{"●" if i == etapa else "○"} {lbl}{ativo}</div>',
+                    unsafe_allow_html=True
+                )
 
         st.divider()
-        executar = st.button("▶️ Simular", type="primary", use_container_width=True)
 
-    with col2:
-        if executar or st.session_state.get("simp_executado"):
-            st.session_state["simp_executado"] = True
-            st.session_state["simp_config"] = (tipo_eco, regime, politica, direcao)
+        col_graf, col_exp = st.columns([3, 2])
 
-        if st.session_state.get("simp_executado"):
-            tipo_eco_s, regime_s, politica_s, direcao_s = st.session_state["simp_config"]
-            # obter kappa (default 0.5 caso não definido)
-            kappa = st.session_state.get("params", {}).get("kappa", 0.5)
-
-            # Gráfico — agora passa mobilidade_kappa
-            fig = grafico_simplificado(politica_s, direcao_s, tipo_eco_s, regime_s, mobilidade_kappa=kappa)
+        with col_graf:
+            fig = grafico_etapa(politica_s, direcao_s, tipo_eco_s, regime_s, kappa_s, etapa)
             st.plotly_chart(fig, use_container_width=True)
 
-            # Legenda dos pontos
-            col_a, col_b, col_c = st.columns(3)
-            col_a.info("🔵 **Ponto A**\nEquilíbrio inicial")
-            col_b.warning("🟡 **Ponto B**\nDesequilíbrio transitório")
-            col_c.success("🟢 **Ponto C**\nNovo equilíbrio")
+            if etapa >= 1:
+                lc1, lc2, lc3 = st.columns(3)
+                lc1.info("🔵 **A** — Equilíbrio inicial")
+                if etapa >= 1: lc2.warning("🟡 **B** — Desequilíbrio transitório")
+                if etapa >= 2: lc3.success("🟢 **C** — Novo equilíbrio")
 
-        else:
-            st.info("Configure os parâmetros ao lado e clique em **▶️ Simular**.")
+        with col_exp:
+            txt = _texto_etapa(politica_s, direcao_s, tipo_eco_s, regime_s, mob_s, etapa)
+            cor_border   = {"blue": "#2563eb", "orange": "#d97706", "green": "#059669"}[txt["cor"]]
+            cor_txt_light= {"blue": "#1e3a5f", "orange": "#7c3a00", "green": "#064e3b"}[txt["cor"]]
+            cor_txt_dark = {"blue": "#93c5fd", "orange": "#fcd34d", "green": "#6ee7b7"}[txt["cor"]]
+            bg_light     = {"blue": "#eef2ff", "orange": "#fef9ee", "green": "#f0fdf4"}[txt["cor"]]
+            bg_dark      = {"blue": "rgba(37,99,235,0.12)", "orange": "rgba(217,119,6,0.12)", "green": "rgba(5,150,105,0.12)"}[txt["cor"]]
+            card_id      = f"exp-card-{txt['cor']}"
 
-    # ── EXPLICAÇÃO AUTOMÁTICA ─────────────────────────────────
-    if st.session_state.get("simp_executado"):
-        tipo_eco_s, regime_s, politica_s, direcao_s = st.session_state["simp_config"]
-        mobilidade_label = st.session_state.get("settings", {}).get("mobilidade_capital", "Média")
-        st.divider()
-        st.markdown("### 📖 Explicação Econômica Passo a Passo")
+            st.markdown(
+                f'<style>'
+                f'#{card_id} {{ background:{bg_light}; border-left:4px solid {cor_border}; '
+                f'border-radius:8px; padding:16px 18px; font-family:"EB Garamond",Georgia,serif; }}'
+                f'#{card_id} .card-title {{ color:{cor_txt_light}; font-size:1.1rem; font-weight:700; }}'
+                f'@media (prefers-color-scheme: dark) {{'
+                f'  #{card_id} {{ background:{bg_dark}; }}'
+                f'  #{card_id} .card-title {{ color:{cor_txt_dark}; }}'
+                f'}}'
+                f'</style>'
+                f'<div id="{card_id}"><span class="card-title">{txt["titulo"]}</span></div>',
+                unsafe_allow_html=True
+            )
+            st.markdown("")
 
-        explicacao = gerar_explicacao(tipo_eco_s, regime_s, politica_s, direcao_s, mobilidade_label)
+            for subtitulo, conteudo in txt["blocos"]:
+                with st.expander(f"📖 {subtitulo}", expanded=True):
+                    st.markdown(conteudo)
 
-        tipo_anterior = None
-        for tipo, texto in explicacao:
-            if tipo != tipo_anterior:
-                if tipo == "intro":
-                    st.markdown("#### 1️⃣ O que aconteceu?")
-                elif tipo == "curva":
-                    st.markdown("#### 2️⃣ Qual curva se move?")
-                elif tipo == "ponto":
-                    st.markdown("#### 3️⃣ Trajetória do equilíbrio")
-                elif tipo == "externo":
-                    st.markdown("#### 4️⃣ Efeitos sobre o setor externo")
-                elif tipo == "conclusao":
-                    st.markdown("#### 5️⃣ Conclusão")
-                tipo_anterior = tipo
-
-            if tipo == "conclusao":
-                st.success(texto)
-            elif tipo == "externo" and ("⚠️" in texto or "✅" in texto):
-                if "⚠️" in texto:
-                    st.warning(texto)
-                else:
-                    st.success(texto)
-            else:
-                st.markdown(f"→ {texto}")
+    else:
+        st.info("Configure os parâmetros na barra lateral e clique em **▶ Simular**.")
 
 # ══════════════════════════════════════════════════════════════
 # MODO COMPLEXO
 # ══════════════════════════════════════════════════════════════
 else:
-    # ── Parâmetros ────────────────────────────────────────────
     p = DEFAULT_PARAMS.copy()
     p["aberta"] = False
 
@@ -799,92 +758,71 @@ else:
 
     with col1:
         st.markdown("#### 🏛️ Política Econômica")
-        p["G"] = st.number_input("G — Gasto do Governo", value=float(p["G"]), step=10.0)
-        p["T"] = st.number_input("T — Impostos",         value=float(p["T"]), step=10.0)
-        p["M"] = st.number_input("M — Oferta Monetária", value=float(p["M"]), step=50.0)
+        p["G"] = st.number_input("G — Gasto do Governo", value=float(p["G"]), step=10.)
+        p["T"] = st.number_input("T — Impostos",         value=float(p["T"]), step=10.)
+        p["M"] = st.number_input("M — Oferta Monetária", value=float(p["M"]), step=50.)
         p["P"] = st.number_input("P — Nível de Preços",  value=float(p["P"]), step=0.1)
-
         st.markdown("#### 📐 Parâmetros Estruturais")
-        p["c0"] = st.number_input("c0 — Consumo Autônomo",     value=float(p["c0"]), step=10.0)
+        p["c0"] = st.number_input("c0 — Consumo Autônomo",     value=float(p["c0"]), step=10.)
         p["c1"] = st.number_input("c1 — Propensão a Consumir", value=float(p["c1"]), step=0.01, format="%.2f")
-        p["I0"] = st.number_input("I0 — Investimento Autônomo",value=float(p["I0"]), step=10.0)
-        p["b"]  = st.number_input("b — Sensibilidade I a r",   value=float(p["b"]),  step=5.0)
+        p["I0"] = st.number_input("I0 — Investimento Autônomo",value=float(p["I0"]), step=10.)
+        p["b"]  = st.number_input("b — Sensibilidade I a r",   value=float(p["b"]),  step=5.)
         p["k"]  = st.number_input("k — Sensibilidade L a Y",   value=float(p["k"]),  step=0.05, format="%.2f")
-        p["h"]  = st.number_input("h — Sensibilidade L a r",   value=float(p["h"]),  step=10.0)
+        p["h"]  = st.number_input("h — Sensibilidade L a r",   value=float(p["h"]),  step=10.)
 
     with col2:
         st.markdown("#### 🌐 Economia Aberta")
         aberta_cx = st.checkbox("Ativar economia aberta (IS-LM-BP)", value=False)
         p["aberta"] = aberta_cx
-
         if aberta_cx:
             regime_cx = st.radio("Regime cambial:", ["flex", "fixo"],
                                   format_func=lambda x: "Câmbio Flexível" if x == "flex" else "Câmbio Fixo")
-            p["regime"] = regime_cx
-
-            p["Y_star"]  = st.number_input("Y* — Renda Externa",        value=float(p["Y_star"]), step=50.0)
+            p["regime"]  = regime_cx
+            p["Y_star"]  = st.number_input("Y* — Renda Externa",        value=float(p["Y_star"]), step=50.)
             p["r_star"]  = st.number_input("r* — Juros Internacionais",  value=float(p["r_star"]), step=0.005, format="%.4f")
             p["e"]       = st.number_input("e — Câmbio Inicial",         value=float(p["e"]),      step=0.05)
-            p["x0"]      = st.number_input("x0 — Exportações Autônomas", value=float(p["x0"]),     step=10.0)
+            p["x0"]      = st.number_input("x0 — Exportações Autônomas", value=float(p["x0"]),     step=10.)
             p["x1"]      = st.number_input("x1 — Sensib. X a Y*",        value=float(p["x1"]),     step=0.01, format="%.3f")
-            p["m0"]      = st.number_input("m0 — Importações Autônomas", value=float(p["m0"]),     step=10.0)
+            p["m0"]      = st.number_input("m0 — Importações Autônomas", value=float(p["m0"]),     step=10.)
             p["m1"]      = st.number_input("m1 — Propensão a Importar",  value=float(p["m1"]),     step=0.01, format="%.3f")
-
-            # Ajustei as opções para incluir "Nula" e "Média" (consistência com modo didático)
-            kf_preset = st.select_slider("Mobilidade de Capital:",
-                                          options=["Nula","Baixa","Média","Alta","Perfeita"],
-                                          value="Alta")
-            p["kf"] = {"Nula":0.0,"Baixa":50.0,"Média":200.0,"Alta":800.0,"Perfeita":1e7}[kf_preset]
-
+            kf_preset    = st.select_slider("Mobilidade de Capital:",
+                                             options=["Nula", "Baixa", "Alta", "Perfeita"], value="Alta")
+            p["kf"] = {"Nula": 0., "Baixa": 10., "Alta": 700., "Perfeita": 1e7}[kf_preset]
             if regime_cx == "fixo":
-                p["e_fixed"] = st.number_input("e fixo (meta BC)", value=float(p.get("e_fixed",1.0)), step=0.05)
+                p["e_fixed"] = st.number_input("e fixo (meta BC)", value=float(p.get("e_fixed", 1.)), step=0.05)
 
     with col3:
         st.markdown("#### 🔀 Choque (Cenário 2)")
-        dG = st.number_input("ΔG", value=0.0, step=10.0)
-        dT = st.number_input("ΔT", value=0.0, step=10.0)
-        dM = st.number_input("ΔM", value=0.0, step=50.0)
+        dG = st.number_input("ΔG", value=0., step=10.)
+        dT = st.number_input("ΔT", value=0., step=10.)
+        dM = st.number_input("ΔM", value=0., step=50.)
         if aberta_cx:
-            dr_star = st.number_input("Δr*", value=0.0, step=0.005, format="%.4f")
-            dY_star = st.number_input("ΔY*", value=0.0, step=50.0)
+            dr_star = st.number_input("Δr*", value=0., step=0.005, format="%.4f")
+            dY_star = st.number_input("ΔY*", value=0., step=50.)
         else:
-            dr_star = dY_star = 0.0
-
+            dr_star = dY_star = 0.
         executar_cx = st.button("🚀 Calcular Equilíbrio", type="primary", use_container_width=True)
 
-    # ── Cálculo ───────────────────────────────────────────────
     if executar_cx:
         p_shock = p.copy()
-        p_shock["G"]      += dG
-        p_shock["T"]      += dT
-        p_shock["M"]      += dM
-        p_shock["r_star"] += dr_star
-        p_shock["Y_star"] += dY_star
-
+        p_shock["G"] += dG; p_shock["T"] += dT; p_shock["M"] += dM
+        p_shock["r_star"] += dr_star; p_shock["Y_star"] += dY_star
         try:
             if not aberta_cx:
-                eq_b = solve_fechada(p)
-                eq_c = solve_fechada(p_shock)
+                eq_b = solve_fechada(p); eq_c = solve_fechada(p_shock)
             elif p["regime"] == "flex":
-                eq_b = solve_flex(p)
-                eq_c = solve_flex(p_shock)
+                eq_b = solve_flex(p);    eq_c = solve_flex(p_shock)
             else:
-                eq_b = solve_fixo(p)
-                eq_c = solve_fixo(p_shock)
+                eq_b = solve_fixo(p);    eq_c = solve_fixo(p_shock)
 
             st.divider()
             st.markdown("### 📊 Resultados")
-
-            # Métricas base
-            st.markdown("**Cenário Base:**")
             c1, c2, c3, c4 = st.columns(4)
-            c1.metric("Y*",  f"{eq_b['Y']:.2f}")
-            c2.metric("r*",  f"{eq_b['r']*100:.3f}%")
-            c3.metric("e*",  f"{eq_b['e']:.4f}")
-            c4.metric("NX",  f"{eq_b['NX']:.2f}")
+            c1.metric("Y*", f"{eq_b['Y']:.2f}", f"{eq_c['Y']-eq_b['Y']:+.2f}")
+            c2.metric("r*", f"{eq_b['r']*100:.3f}%", f"{(eq_c['r']-eq_b['r'])*100:+.3f}pp")
+            c3.metric("e*", f"{eq_b['e']:.4f}", f"{eq_c['e']-eq_b['e']:+.4f}")
+            c4.metric("NX", f"{eq_b['NX']:.2f}", f"{eq_c['NX']-eq_b['NX']:+.2f}")
 
-            # Tabela comparativa
-            st.markdown("**Comparação Base vs. Choque:**")
             st.markdown(f"""
 | Variável | Base | Choque | Δ |
 |---|---|---|---|
@@ -896,34 +834,48 @@ else:
 | **C** | {eq_b['C']:.2f} | {eq_c['C']:.2f} | **{eq_c['C']-eq_b['C']:+.2f}** |
 | **I** | {eq_b['I']:.2f} | {eq_c['I']:.2f} | **{eq_c['I']-eq_b['I']:+.2f}** |
 """)
-
-            # Consistência
             with st.expander("🔬 Verificação de Consistência"):
-                for label, res in [("IS", eq_c["IS_res"]), ("LM", eq_c["LM_res"]), ("BP", eq_c["BP_res"])]:
+                for lbl, res in [("IS", eq_c["IS_res"]), ("LM", eq_c["LM_res"]), ("BP", eq_c["BP_res"])]:
                     ok = abs(res) < 0.01
-                    st.markdown(f"{'✅' if ok else '⚠️'} **{label}** resíduo = `{res:.6f}`")
+                    st.markdown(f"{'✅' if ok else '⚠️'} **{lbl}** resíduo = `{res:.6f}`")
 
-            # Gráfico
-            fig = grafico_complexo(p, p_shock, eq_b, eq_c, aberta_cx)
-            st.plotly_chart(fig, use_container_width=True)
-
-            # Equações (modo avançado)
-            with st.expander("📐 Equações do Sistema"):
-                st.markdown(f"""
-**IS (aberta):**
-$$Y = c_0 + c_1(Y-T) + I_0 - br + G + NX(e,Y,Y^*)$$
-
-**LM:**
-$$\\frac{{M}}{{P}} = kY - hr$$
-
-**BP:**
-$$NX(e,Y,Y^*) + k_f(r - r^*) = 0$$
-
-**Equilíbrio resolvido numericamente (Newton-Raphson):**
-- $Y^* = {eq_c['Y']:.4f}$
-- $r^* = {eq_c['r']:.6f}$
-- $e^* = {eq_c['e']:.6f}$
-""")
+            # Gráfico complexo
+            Y_grid = np.linspace(200, 2500, 500)
+            r_min, r_max = -0.3, 0.8
+            fig2 = go.Figure()
+            for r_c, nm, col, dsh in [
+                (curva_IS(Y_grid, eq_b["e"], p, aberta_cx),       "IS base",   C["IS"],  "solid"),
+                (curva_IS(Y_grid, eq_c["e"], p_shock, aberta_cx), "IS choque", C["IS1"], "dash"),
+                (curva_LM(Y_grid, p["M"], p),                     "LM base",   C["LM"],  "solid"),
+                (curva_LM(Y_grid, p_shock["M"], p_shock),         "LM choque", C["LM1"], "dash"),
+            ]:
+                mask = (r_c > r_min) & (r_c < r_max)
+                fig2.add_trace(go.Scatter(x=Y_grid[mask], y=r_c[mask], name=nm,
+                                          line=dict(color=col, width=2.5, dash=dsh)))
+            if aberta_cx:
+                for r_c, nm, dsh in [
+                    (curva_BP_plot(Y_grid, eq_b["e"], p),       "BP base",   "solid"),
+                    (curva_BP_plot(Y_grid, eq_c["e"], p_shock), "BP choque", "dash"),
+                ]:
+                    mask = (r_c > r_min) & (r_c < r_max)
+                    fig2.add_trace(go.Scatter(x=Y_grid[mask], y=r_c[mask], name=nm,
+                                              line=dict(color=C["BP"], width=2.5, dash=dsh)))
+            fig2.add_trace(go.Scatter(
+                x=[eq_b["Y"], eq_c["Y"]], y=[eq_b["r"], eq_c["r"]],
+                mode="markers+text",
+                marker=dict(size=14, color=[C["IS"], C["LM"]], symbol="star",
+                            line=dict(width=1, color="white")),
+                text=["E₀", "E₁"], textposition="top right",
+                textfont=dict(size=14), name="Equilíbrios"
+            ))
+            fig2.add_annotation(ax=eq_b["Y"], ay=eq_b["r"], x=eq_c["Y"], y=eq_c["r"],
+                                 xref="x", yref="y", axref="x", ayref="y",
+                                 showarrow=True, arrowhead=3, arrowwidth=2.5, arrowcolor="#0f172a")
+            fig2.update_layout(title="IS-LM-BP: Base vs. Choque",
+                                xaxis_title="Produto (Y)", yaxis_title="Taxa de Juros (r)",
+                                template="plotly_white", height=520,
+                                legend=dict(x=0.01, y=0.99))
+            st.plotly_chart(fig2, use_container_width=True)
 
         except Exception as ex:
             st.error(f"Erro no solver: {ex}")
