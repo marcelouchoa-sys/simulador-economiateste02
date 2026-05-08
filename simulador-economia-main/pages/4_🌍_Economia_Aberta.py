@@ -464,117 +464,890 @@ def _texto_etapa(politica, direcao, tipo_eco, regime, mobilidade_label, etapa):
     aberta   = tipo_eco == "Aberta"
     flex     = regime   == "Flexível"
 
-    if etapa == 0:
-        return dict(
-            titulo="📍 Estado A — Equilíbrio Inicial",
-            cor="blue",
-            blocos=[
-                ("O que representa?",
-                 "A economia encontra-se em equilíbrio simultâneo nos mercados de **bens (IS)** "
-                 "e **moeda (LM)**" + (", e no balanço de pagamentos **(BP)**" if aberta else "") + ". "
-                 "O produto Y₀ e a taxa de juros i₀ são determinados pela interseção IS-LM."),
-                ("Condições de equilíbrio",
-                 "- **Mercado de bens (IS):** Demanda agregada = Produto  \n"
-                 "- **Mercado monetário (LM):** Oferta de moeda = Demanda por moeda  \n"
-                 + ("- **Balanço de pagamentos (BP):** NX + FC = 0" if aberta else "")),
-                ("Próximo passo",
-                 f"Será aplicada uma **política {politica.lower()} {direcao.lower()}**. "
-                 "Avance para a Etapa B para ver o efeito imediato."),
-            ]
-        )
+    # ══════════════════════════════════════════════════════════
+    # DICIONÁRIO DE CARACTERÍSTICAS DA BP POR MOBILIDADE
+    # Cada entrada descreve: inclinação geométrica, interpretação
+    # econômica, condição acima/abaixo da curva, e mecanismo de
+    # ajuste diferenciado por regime cambial.
+    # ══════════════════════════════════════════════════════════
+    BP_INFO = {
+        "Nula": dict(
+            inclinacao="vertical (↕)",
+            geometria=(
+                "No gráfico, observe que a curva **BP é vertical** — ela não depende da taxa de juros. "
+                "Isso significa que nenhum fluxo de capital cruza as fronteiras, independentemente do diferencial de juros. "
+                "O equilíbrio externo é determinado **exclusivamente pela balança comercial**: NX = 0."
+            ),
+            descricao=(
+                "Com **mobilidade nula**, o país está completamente isolado dos mercados financeiros internacionais. "
+                "Não há entrada nem saída de capital estrangeiro. "
+                "O único canal de ajuste externo é o **comércio de bens**: exportações e importações. "
+                "A posição da BP no eixo Y indica o nível de renda compatível com NX = 0."
+            ),
+            acima_bp=(
+                "**Superávit no Balanço de Pagamentos (NX > 0)**  \n"
+                "O ponto está à **esquerda** da BP vertical: a renda interna (Y) está baixa demais, "
+                "gerando poucas importações. As exportações superam as importações → entrada líquida de divisas."
+            ),
+            abaixo_bp=(
+                "**Déficit no Balanço de Pagamentos (NX < 0)**  \n"
+                "O ponto está à **direita** da BP vertical: a renda interna (Y) está alta demais, "
+                "gerando excesso de importações. As importações superam as exportações → saída líquida de divisas."
+            ),
+            ajuste_flex=(
+                "**Câmbio Flexível + Mobilidade Nula:**  \n"
+                "O déficit comercial pressiona a moeda para baixo (depreciação: e↑).  \n"
+                "Com a moeda mais barata: exportações ficam mais competitivas (X↑) e importações encarecem (M↓).  \n"
+                "A IS se desloca para a direita via NX↑, até que NX = 0 novamente.  \n"
+                "⚠️ Os juros **não têm papel** neste ajuste — apenas o câmbio real importa."
+            ),
+            ajuste_fixo=(
+                "**Câmbio Fixo + Mobilidade Nula:**  \n"
+                "O BC defende o câmbio vendendo reservas internacionais (para cobrir o déficit).  \n"
+                "Isso retira moeda local de circulação → M↓ → LM desloca para a esquerda.  \n"
+                "Y cai até o nível compatível com NX = 0.  \n"
+                "⚠️ A política monetária perde **autonomia total** — é endógena ao BP."
+            ),
+        ),
+        "Baixa": dict(
+            inclinacao="íngreme (positiva, mais vertical que a LM)",
+            geometria=(
+                "No gráfico, observe que a curva **BP tem inclinação positiva e íngreme** — "
+                "mais vertical do que a curva LM. "
+                "Isso significa que para sustentar um Y maior (que gera mais importações), "
+                "é necessário um aumento **grande** de juros para atrair capital suficiente."
+            ),
+            descricao=(
+                "Com **mobilidade baixa**, o capital responde pouco às variações de juros. "
+                "Os fluxos financeiros internacionais são restritos (controles de capital, custos de transação elevados). "
+                "O canal comercial (NX) ainda domina o ajuste externo. "
+                "A BP é **mais inclinada que a LM**: para cada unidade de Y adicional, "
+                "é preciso um aumento de juros maior do que o que a LM exigiria."
+            ),
+            acima_bp=(
+                "**Superávit no BP** (NX + FC > 0)  \n"
+                "Os juros internos estão **acima** do necessário para o equilíbrio externo naquele nível de Y. "
+                "Há entrada excessiva de capital estrangeiro (FC > 0) que supera o déficit comercial. "
+                "→ Pressão de apreciação cambial."
+            ),
+            abaixo_bp=(
+                "**Déficit no BP** (NX + FC < 0)  \n"
+                "Os juros internos estão **abaixo** do necessário. "
+                "A saída de capital (FC < 0) supera o superávit comercial. "
+                "→ Pressão de depreciação cambial."
+            ),
+            ajuste_flex=(
+                "**Câmbio Flexível + Mobilidade Baixa:**  \n"
+                "A saída de capital deprecia a moeda (e↑), mas o efeito é moderado.  \n"
+                "NX melhora gradualmente → IS desloca levemente para a direita.  \n"
+                "O ajuste é **lento**: o canal comercial domina, mas responde com defasagem.  \n"
+                "Resultado: Y aumenta menos do que com alta mobilidade."
+            ),
+            ajuste_fixo=(
+                "**Câmbio Fixo + Mobilidade Baixa:**  \n"
+                "O BC precisa de intervenções **volumosas** para defender o câmbio.  \n"
+                "Cada unidade de déficit exige grande venda de reservas → M↓ significativo → LM recua.  \n"
+                "A política fiscal tem eficácia **moderada**: o crowding-out externo é parcial.  \n"
+                "Quanto menor a mobilidade, maior a eficácia fiscal relativa."
+            ),
+        ),
+        "Alta": dict(
+            inclinacao="suave (positiva, menos inclinada que a LM)",
+            geometria=(
+                "No gráfico, observe que a curva **BP tem inclinação suave** — "
+                "quase horizontal, menos inclinada que a LM. "
+                "Isso significa que pequenas variações de juros geram grandes fluxos de capital, "
+                "dominando o ajuste externo sobre o canal comercial."
+            ),
+            descricao=(
+                "Com **mobilidade alta**, o capital é muito sensível ao diferencial de juros (r − r*). "
+                "Este é o caso mais comum em economias emergentes integradas aos mercados globais. "
+                "A BP é **menos inclinada que a LM**: o canal financeiro domina o ajuste. "
+                "Pequenas diferenças entre r interno e r* internacional geram fluxos intensos."
+            ),
+            acima_bp=(
+                "**Superávit no BP** (FC >> |NX|)  \n"
+                "Os juros internos estão **acima de r***: grande entrada de capital estrangeiro. "
+                "O fluxo financeiro supera amplamente qualquer déficit comercial. "
+                "→ Forte pressão de apreciação cambial."
+            ),
+            abaixo_bp=(
+                "**Déficit no BP** (|FC| >> NX)  \n"
+                "Os juros internos estão **abaixo de r***: fuga de capital para o exterior. "
+                "O fluxo financeiro supera qualquer superávit comercial. "
+                "→ Forte pressão de depreciação cambial."
+            ),
+            ajuste_flex=(
+                "**Câmbio Flexível + Mobilidade Alta:**  \n"
+                "Qualquer diferencial r ≠ r* gera fluxos de capital intensos e rápidos.  \n"
+                "Se r < r*: saída de capital → depreciação (e↑) → NX↑ → IS desloca para direita.  \n"
+                "Se r > r*: entrada de capital → apreciação (e↓) → NX↓ → IS recua.  \n"
+                "O ajuste é **rápido e poderoso** via canal cambial-comercial."
+            ),
+            ajuste_fixo=(
+                "**Câmbio Fixo + Mobilidade Alta:**  \n"
+                "O BC perde quase toda autonomia monetária.  \n"
+                "Qualquer tentativa de alterar M é revertida pela intervenção cambial.  \n"
+                "A política fiscal é **amplificada**: G↑ → i↑ → entrada de capital → BC compra divisas → M↑ → LM desloca direita.  \n"
+                "O multiplicador fiscal é maior do que em economia fechada."
+            ),
+        ),
+        "Perfeita": dict(
+            inclinacao="horizontal (r = r* em todos os pontos)",
+            geometria=(
+                "No gráfico, observe que a curva **BP é perfeitamente horizontal** no nível r = r*. "
+                "Isso representa o caso-limite: qualquer desvio de r em relação a r* "
+                "gera fluxos de capital **infinitos** que instantaneamente restauram r = r*."
+            ),
+            descricao=(
+                "Com **mobilidade perfeita**, os mercados financeiros são completamente integrados. "
+                "A taxa de juros interna é **fixada exogenamente** em r = r* (paridade de juros). "
+                "Este é o caso-limite do modelo Mundell-Fleming, que produz os resultados mais extremos "
+                "e é o ponto de partida teórico para economias muito abertas (ex: países da zona do euro)."
+            ),
+            acima_bp=(
+                "**Impossível em equilíbrio com mobilidade perfeita**  \n"
+                "Se r > r*, a entrada de capital é instantânea e infinita → apreciação imediata → "
+                "o sistema retorna a r = r* antes de qualquer ajuste real."
+            ),
+            abaixo_bp=(
+                "**Impossível em equilíbrio com mobilidade perfeita**  \n"
+                "Se r < r*, a saída de capital é instantânea e infinita → depreciação imediata → "
+                "o sistema retorna a r = r* antes de qualquer ajuste real."
+            ),
+            ajuste_flex=(
+                "**Câmbio Flexível + Mobilidade Perfeita (Mundell-Fleming clássico):**  \n\n"
+                "🔴 **Política Fiscal COMPLETAMENTE INEFICAZ:**  \n"
+                "G↑ → IS desloca direita → r tende a subir acima de r* → entrada de capital → "
+                "apreciação (e↓) → NX↓ → IS recua exatamente à posição original.  \n"
+                "**ΔY = 0, Δr = 0** — apenas o câmbio se apreciou.  \n\n"
+                "🟢 **Política Monetária MUITO EFICAZ:**  \n"
+                "M↑ → LM desloca direita → r tende a cair abaixo de r* → saída de capital → "
+                "depreciação (e↑) → NX↑ → IS desloca direita → Y↑↑.  \n"
+                "**ΔY máximo**, r retorna a r*."
+            ),
+            ajuste_fixo=(
+                "**Câmbio Fixo + Mobilidade Perfeita (Mundell-Fleming clássico):**  \n\n"
+                "🟢 **Política Fiscal MUITO EFICAZ:**  \n"
+                "G↑ → IS desloca direita → r tende a subir → entrada de capital → "
+                "BC compra divisas para manter câmbio → M↑ → LM desloca direita → Y↑↑.  \n"
+                "**ΔY máximo**, multiplicador fiscal amplificado.  \n\n"
+                "🔴 **Política Monetária COMPLETAMENTE INEFICAZ:**  \n"
+                "M↑ → LM desloca direita → r tende a cair → saída de capital → "
+                "BC vende divisas para manter câmbio → M↓ → LM retorna à posição original.  \n"
+                "**ΔY = 0** — o BC reverte 100% do estímulo monetário."
+            ),
+        ),
+    }
 
+    bp = BP_INFO.get(mobilidade_label, BP_INFO["Alta"])
+
+    # ══════════════════════════════════════════════════════════
+    # ETAPA 0 — EQUILÍBRIO INICIAL (PONTO A)
+    # ══════════════════════════════════════════════════════════
+    if etapa == 0:
+        blocos = [
+            ("O que representa o Ponto A?",
+             "A economia encontra-se em **equilíbrio simultâneo** nos mercados de "
+             "**bens (IS)** e **moeda (LM)**" +
+             (", e no **balanço de pagamentos (BP)**" if aberta else "") +
+             ". O produto Y₀ e a taxa de juros i₀ são determinados pela interseção IS ∩ LM" +
+             (" = BP" if aberta else "") + "."),
+
+            ("Condições de equilíbrio nos 3 mercados",
+             "**① Mercado de Bens — Curva IS:**  \n"
+             "Demanda Agregada = Produto  \n"
+             "→ C + I + G" + (" + NX" if aberta else "") + " = Y  \n"
+             "→ A IS tem **inclinação negativa**: juros altos reduzem I, reduzindo Y.  \n\n"
+             "**② Mercado Monetário — Curva LM:**  \n"
+             "Oferta de Moeda Real = Demanda por Moeda  \n"
+             "→ M/P = kY − hi  \n"
+             "→ A LM tem **inclinação positiva**: Y maior exige mais moeda, elevando i.  \n" +
+             ("\n**③ Balanço de Pagamentos — Curva BP:**  \n"
+              "NX + FC = 0  \n"
+              "→ Exportações Líquidas + Fluxo de Capital = 0  \n"
+              "→ A inclinação da BP depende da **mobilidade de capital**." if aberta else "")),
+        ]
+
+        if aberta:
+            blocos.append((
+                f"📐 A Curva BP com Mobilidade {mobilidade_label}",
+                bp["geometria"] + "  \n\n"
+                "**Características desta configuração:**  \n"
+                f"- Inclinação: **{bp['inclinacao']}**  \n"
+                "- Pontos **acima** da BP → " + bp["acima_bp"].split("\\n")[0] + "  \n"
+                "- Pontos **abaixo** da BP → " + bp["abaixo_bp"].split("\\n")[0] + "  \n\n"
+                + bp["descricao"]
+            ))
+
+        blocos.append((
+            "Próximo passo",
+            f"Será aplicada uma **política {politica.lower()} {direcao.lower()}**. "
+            "Avance para a **Etapa B** para ver o efeito imediato sobre os mercados."
+        ))
+
+        return dict(titulo="📍 Estado A — Equilíbrio Inicial", cor="blue", blocos=blocos)
+
+    # ══════════════════════════════════════════════════════════
+    # ETAPA 1 — CHOQUE DE CURTO PRAZO (PONTO B)
+    # ══════════════════════════════════════════════════════════
     elif etapa == 1:
         if fiscal and expansao:
-            causa = "O aumento dos gastos públicos (G↑) ou redução de impostos (T↓) eleva a demanda agregada."
-            efeito_curva = "A **curva IS desloca-se para a direita** (IS₀ → IS₁)."
-            efeito_Y = "O produto tende a aumentar (Y↑)."
-            efeito_r = "A maior demanda por moeda pressiona os juros para cima (i↑)."
+            mercado_afetado = "**Mercado de Bens (IS)**"
+            instrumento = "aumento dos gastos públicos **(G↑)** ou redução de impostos **(T↓)**"
+            causa = "A demanda agregada aumenta diretamente: C + I + **G↑** + NX = Y."
+            curva_move = "A **IS desloca-se para a direita** (IS₀ → IS₁): para cada nível de juros, o produto de equilíbrio é maior."
+            efeito_Y = "O produto tende a aumentar **(Y↑)** — efeito multiplicador keynesiano."
+            efeito_r = "A maior renda eleva a demanda por moeda → juros sobem **(i↑)** ao longo da LM."
+            mercado_estavel = "O mercado monetário (LM) **ainda não se ajustou** — a LM permanece fixa."
+            ponto_B_desc = (
+                "No Ponto B, a IS₁ intersecta a LM₀ original. "
+                "O produto aumentou, mas os juros também subiram. "
+                "O mercado de bens está em equilíbrio com a nova IS, mas o setor externo ainda não reagiu."
+            )
         elif fiscal and not expansao:
-            causa = "A redução dos gastos públicos (G↓) ou aumento de impostos (T↑) contrai a demanda."
-            efeito_curva = "A **curva IS desloca-se para a esquerda** (IS₀ → IS₁)."
-            efeito_Y = "O produto tende a cair (Y↓)."
-            efeito_r = "A menor demanda por moeda reduz os juros (i↓)."
+            mercado_afetado = "**Mercado de Bens (IS)**"
+            instrumento = "redução dos gastos públicos **(G↓)** ou aumento de impostos **(T↑)**"
+            causa = "A demanda agregada cai diretamente: C + I + **G↓** + NX = Y."
+            curva_move = "A **IS desloca-se para a esquerda** (IS₀ → IS₁): para cada nível de juros, o produto de equilíbrio é menor."
+            efeito_Y = "O produto tende a cair **(Y↓)** — efeito multiplicador reverso."
+            efeito_r = "A menor renda reduz a demanda por moeda → juros caem **(i↓)** ao longo da LM."
+            mercado_estavel = "O mercado monetário (LM) **ainda não se ajustou** — a LM permanece fixa."
+            ponto_B_desc = (
+                "No Ponto B, a IS₁ intersecta a LM₀. "
+                "O produto caiu e os juros também recuaram. "
+                "O setor externo ainda não reagiu à nova configuração."
+            )
         elif not fiscal and expansao:
-            causa = "O aumento da oferta de moeda (M↑) pelo Banco Central reduz o custo do crédito."
-            efeito_curva = "A **curva LM desloca-se para a direita** (LM₀ → LM₁)."
-            efeito_Y = "Com juros menores, o investimento aumenta e o produto cresce (Y↑)."
-            efeito_r = "Os juros caem imediatamente (i↓)."
+            mercado_afetado = "**Mercado Monetário (LM)**"
+            instrumento = "aumento da oferta de moeda **(M↑)** pelo Banco Central"
+            causa = "A oferta de moeda real (M/P) aumenta, reduzindo o custo do crédito."
+            curva_move = "A **LM desloca-se para a direita/baixo** (LM₀ → LM₁): para cada nível de Y, os juros de equilíbrio são menores."
+            efeito_Y = "Com juros menores, o investimento privado aumenta **(I↑)** → produto cresce **(Y↑)**."
+            efeito_r = "Os juros caem imediatamente **(i↓)** — efeito liquidez direto."
+            mercado_estavel = "O mercado de bens (IS) **ainda não se ajustou** — a IS permanece fixa."
+            ponto_B_desc = (
+                "No Ponto B, a LM₁ intersecta a IS₀ original. "
+                "Os juros caíram e o produto aumentou. "
+                "Mas agora r < r*: o setor externo está em desequilíbrio."
+            )
         else:
-            causa = "A redução da oferta de moeda (M↓) eleva o custo do crédito."
-            efeito_curva = "A **curva LM desloca-se para a esquerda** (LM₀ → LM₁)."
-            efeito_Y = "Com juros maiores, o investimento cai e o produto recua (Y↓)."
-            efeito_r = "Os juros sobem imediatamente (i↑)."
+            mercado_afetado = "**Mercado Monetário (LM)**"
+            instrumento = "redução da oferta de moeda **(M↓)** pelo Banco Central"
+            causa = "A oferta de moeda real (M/P) cai, elevando o custo do crédito."
+            curva_move = "A **LM desloca-se para a esquerda/cima** (LM₀ → LM₁): para cada nível de Y, os juros de equilíbrio são maiores."
+            efeito_Y = "Com juros maiores, o investimento privado cai **(I↓)** → produto recua **(Y↓)**."
+            efeito_r = "Os juros sobem imediatamente **(i↑)** — efeito contração monetária."
+            mercado_estavel = "O mercado de bens (IS) **ainda não se ajustou** — a IS permanece fixa."
+            ponto_B_desc = (
+                "No Ponto B, a LM₁ intersecta a IS₀. "
+                "Os juros subiram e o produto caiu. "
+                "Agora r > r*: o setor externo está em desequilíbrio."
+            )
 
-        return dict(
-            titulo="⚡ Estado B — Choque de Curto Prazo",
-            cor="orange",
-            blocos=[
-                ("O que aconteceu?", causa),
-                ("Deslocamento da curva", efeito_curva + "  \n" + efeito_Y + "  \n" + efeito_r),
-                ("Interpretação do Ponto B",
-                 "O ponto B representa o **desequilíbrio transitório**: a economia saiu do ponto A "
-                 "mas ainda não atingiu o novo equilíbrio. O mercado de " +
-                 ("moeda" if fiscal else "bens") + " ainda está se ajustando."),
-                ("Próximo passo",
-                 "Os mercados se ajustam automaticamente. Avance para a Etapa C para ver o novo equilíbrio."),
-            ]
-        )
+        blocos = [
+            ("1. O Choque — Qual mercado foi afetado?",
+             f"O instrumento utilizado foi o {instrumento}, afetando o {mercado_afetado}.  \n\n"
+             f"**Causa:** {causa}  \n\n"
+             f"**Deslocamento:** {curva_move}  \n\n"
+             f"**Efeito sobre Y:** {efeito_Y}  \n"
+             f"**Efeito sobre i:** {efeito_r}  \n\n"
+             f"⚠️ {mercado_estavel}"),
 
-    else:  # etapa == 2
-        if fiscal and expansao and aberta and flex:
-            resultado = ("Com câmbio flexível e alta mobilidade de capital, a entrada de capital aprecia "
-                         "a moeda (e↓), reduzindo as exportações líquidas (NX↓). A IS recua quase à posição "
-                         "original. **Resultado Mundell-Fleming: política fiscal é ineficaz** — o crowding-out "
-                         "externo cancela o estímulo fiscal.")
-            delta_Y = "≈ 0 (crowding-out externo completo)"
-            delta_r = "≈ 0 (retorna ao nível internacional)"
-        elif fiscal and expansao and aberta and not flex:
-            resultado = ("Com câmbio fixo, a entrada de capital força o BC a comprar divisas, expandindo "
-                         "a oferta de moeda (M↑). A LM desloca-se para a direita, amplificando o estímulo. "
-                         "**Resultado Mundell-Fleming: política fiscal é muito eficaz.**")
-            delta_Y = "↑↑ (amplificado pelo ajuste monetário)"
-            delta_r = "≈ 0 (mantido pelo câmbio fixo)"
-        elif not fiscal and expansao and aberta and flex:
-            resultado = ("Com câmbio flexível, a queda dos juros provoca saída de capital e depreciação "
-                         "cambial (e↑). As exportações aumentam (NX↑), deslocando a IS para a direita. "
-                         "**Resultado Mundell-Fleming: política monetária é muito eficaz.**")
-            delta_Y = "↑↑ (amplificado pelo canal cambial)"
-            delta_r = "↓ (retorna ao nível internacional)"
-        elif not fiscal and expansao and aberta and not flex:
-            resultado = ("Com câmbio fixo, a queda dos juros provoca saída de capital. O BC vende divisas "
-                         "para defender o câmbio, contraindo a oferta de moeda. A LM retorna à posição original. "
-                         "**Resultado Mundell-Fleming: política monetária é ineficaz.**")
-            delta_Y = "≈ 0 (revertido pelo ajuste do BC)"
-            delta_r = "≈ 0 (retorna ao nível inicial)"
+            ("2. Interpretação do Ponto B",
+             ponto_B_desc + "  \n\n"
+             "O **Ponto B** representa o **desequilíbrio transitório de curto prazo**:  \n"
+             "- A economia saiu do Ponto A, mas **ainda não atingiu o novo equilíbrio**  \n"
+             "- Existe excesso de demanda ou oferta em pelo menos um mercado  \n"
+             "- As forças de ajuste já estão em ação, mas levam tempo para se completar"),
+        ]
+
+        if aberta:
+            # Determinar posição do ponto B em relação à BP
+            if not fiscal and expansao:
+                pos_bp = "abaixo"
+                cond_bp = bp["abaixo_bp"]
+                pressao = (
+                    "A queda dos juros internos cria um **diferencial negativo** em relação a r*: r < r*.  \n"
+                    "Investidores preferem aplicar no exterior → **saída de capital (FC < 0)**.  \n"
+                    "O BP entra em déficit: NX + FC < 0."
+                )
+            elif not fiscal and not expansao:
+                pos_bp = "acima"
+                cond_bp = bp["acima_bp"]
+                pressao = (
+                    "A alta dos juros internos cria um **diferencial positivo** em relação a r*: r > r*.  \n"
+                    "Capital estrangeiro é atraído → **entrada de capital (FC > 0)**.  \n"
+                    "O BP entra em superávit: NX + FC > 0."
+                )
+            elif fiscal and expansao:
+                pos_bp = "acima"
+                cond_bp = bp["acima_bp"]
+                pressao = (
+                    "O aumento do produto eleva as importações (NX↓), mas a alta dos juros atrai capital (FC↑).  \n"
+                    f"Com mobilidade **{mobilidade_label.lower()}**, o efeito financeiro {'domina' if mobilidade_label in ['Alta','Perfeita'] else 'é moderado'}: "
+                    f"{'o BP tende a superávit (FC > |NX|).' if mobilidade_label in ['Alta','Perfeita'] else 'o resultado depende da magnitude relativa dos fluxos.'}"
+                )
+            else:
+                pos_bp = "abaixo"
+                cond_bp = bp["abaixo_bp"]
+                pressao = (
+                    "A queda do produto reduz importações (NX↑), mas a queda dos juros afasta capital (FC↓).  \n"
+                    f"Com mobilidade **{mobilidade_label.lower()}**, o efeito financeiro {'domina' if mobilidade_label in ['Alta','Perfeita'] else 'é moderado'}: "
+                    f"{'o BP tende a déficit (|FC| > NX).' if mobilidade_label in ['Alta','Perfeita'] else 'o resultado depende da magnitude relativa dos fluxos.'}"
+                )
+
+            blocos.append((
+                f"3. Posição do Ponto B em relação à BP (Mobilidade {mobilidade_label})",
+                f"O Ponto B encontra-se **{pos_bp} da curva BP**.  \n\n"
+                f"{cond_bp}  \n\n"
+                f"**Pressão gerada no setor externo:**  \n{pressao}  \n\n"
+                f"**Por que a BP tem inclinação {bp['inclinacao']}?**  \n"
+                + bp["descricao"]
+            ))
+
+            blocos.append((
+                f"4. O que o câmbio {regime} vai fazer agora?",
+                (bp["ajuste_flex"] if flex else bp["ajuste_fixo"]) +
+                "  \n\n→ Avance para a **Etapa C** para ver o resultado final."
+            ))
+        else:
+            blocos.append((
+                "3. Próximo passo (Economia Fechada)",
+                "Sem setor externo, o ajuste ocorre apenas via variações em Y e i.  \n"
+                "Os mercados de bens e moeda convergem para o novo equilíbrio IS-LM.  \n"
+                "Avance para a **Etapa C** para ver o novo equilíbrio."
+            ))
+
+        return dict(titulo="⚡ Estado B — Choque de Curto Prazo", cor="orange", blocos=blocos)
+
+    # ══════════════════════════════════════════════════════════
+    # ETAPA 2 — NOVO EQUILÍBRIO (PONTO C)
+    # ══════════════════════════════════════════════════════════
+    else:
+        # ── Resultado Mundell-Fleming por combinação ──────────
+        if aberta and flex and fiscal and expansao:
+            if mobilidade_label == "Perfeita":
+                resultado = (
+                    "**Transmissão completa A → B → C:**  \n"
+                    "1. G↑ → IS desloca para direita → Y↑ e i↑ (Ponto B)  \n"
+                    "2. i > r* → entrada massiva de capital → **apreciação cambial (e↓)**  \n"
+                    "3. e↓ → exportações encarecem, importações barateiam → **NX↓**  \n"
+                    "4. NX↓ → IS recua exatamente à posição original (IS₂ ≈ IS₀)  \n\n"
+                    "🔴 **Resultado: Política COMPLETAMENTE INEFICAZ**  \n"
+                    "O crowding-out externo é **100%**: a IS retorna à posição original.  \n"
+                    "**ΔY ≈ 0** — o câmbio absorveu todo o estímulo fiscal."
+                )
+                delta_Y = "≈ 0 (crowding-out externo 100%)"; delta_r = "≈ 0 (= r*)"; delta_e = "↓↓ (apreciação forte)"
+            elif mobilidade_label == "Alta":
+                resultado = (
+                    "**Transmissão A → B → C:**  \n"
+                    "1. G↑ → IS desloca para direita → Y↑ e i↑ (Ponto B)  \n"
+                    "2. i > r* → entrada de capital → **apreciação cambial (e↓)**  \n"
+                    "3. e↓ → NX↓ → IS recua parcialmente  \n\n"
+                    "🟡 **Resultado: Política PARCIALMENTE INEFICAZ**  \n"
+                    "O crowding-out externo é forte mas não total.  \n"
+                    "Y aumenta levemente, muito menos que o multiplicador keynesiano simples sugeriria."
+                )
+                delta_Y = "↑ (pequeno)"; delta_r = "≈ r*"; delta_e = "↓ (apreciação moderada)"
+            elif mobilidade_label == "Baixa":
+                resultado = (
+                    "**Transmissão A → B → C:**  \n"
+                    "1. G↑ → IS desloca para direita → Y↑ e i↑ (Ponto B)  \n"
+                    "2. i > r* → entrada moderada de capital → apreciação leve (e↓)  \n"
+                    "3. NX↓ moderado → IS recua levemente  \n\n"
+                    "🟢 **Resultado: Política PARCIALMENTE EFICAZ**  \n"
+                    "Com baixa mobilidade, o canal cambial é fraco.  \n"
+                    "Y aumenta de forma mais próxima ao multiplicador keynesiano."
+                )
+                delta_Y = "↑↑"; delta_r = "↑"; delta_e = "↓ (leve)"
+            else:  # Nula
+                resultado = (
+                    "**Transmissão A → B → C:**  \n"
+                    "1. G↑ → IS desloca para direita → Y↑ e i↑ (Ponto B)  \n"
+                    "2. Sem fluxo de capital: o ajuste externo é via NX apenas  \n"
+                    "3. Y↑ → importações↑ → NX↓ → IS recua levemente  \n\n"
+                    "🟢 **Resultado: Política EFICAZ** (mobilidade nula)  \n"
+                    "Sem crowding-out financeiro, o estímulo fiscal é mais efetivo.  \n"
+                    "O câmbio flexível deprecia para restaurar NX = 0."
+                )
+                delta_Y = "↑↑"; delta_r = "↑"; delta_e = "↑ (depreciação para equilibrar NX)"
+
+        elif aberta and not flex and fiscal and expansao:
+            if mobilidade_label == "Perfeita":
+                resultado = (
+                    "**Transmissão A → B → C:**  \n"
+                    "1. G↑ → IS desloca para direita → Y↑ e i↑ (Ponto B)  \n"
+                    "2. i > r* → entrada massiva de capital → pressão de apreciação  \n"
+                    "3. BC intervém: **compra divisas** para manter câmbio fixo → M↑  \n"
+                    "4. M↑ → LM desloca para direita → i↓, Y↑↑  \n\n"
+                    "🟢 **Resultado: Política MUITO EFICAZ**  \n"
+                    "O multiplicador fiscal é **máximo**: a expansão monetária endógena amplifica o estímulo.  \n"
+                    "**ΔY >> ΔG**, com i mantido em r*."
+                )
+                delta_Y = "↑↑↑ (máximo)"; delta_r = "≈ 0 (= r*)"; delta_e = "fixo"
+            else:
+                resultado = (
+                    "**Transmissão A → B → C:**  \n"
+                    "1. G↑ → IS desloca para direita → Y↑ e i↑ (Ponto B)  \n"
+                    f"2. i > r* → entrada de capital ({'intensa' if mobilidade_label == 'Alta' else 'moderada'}) → pressão de apreciação  \n"
+                    "3. BC compra divisas → M↑ → LM desloca para direita  \n\n"
+                    "🟢 **Resultado: Política EFICAZ**  \n"
+                    "A intervenção do BC amplifica o efeito fiscal.  \n"
+                    f"Quanto maior a mobilidade, maior a amplificação. Com mobilidade {mobilidade_label.lower()}, o efeito é {'forte' if mobilidade_label == 'Alta' else 'moderado'}."
+                )
+                delta_Y = "↑↑"; delta_r = "↑ (leve)"; delta_e = "fixo"
+
+        elif aberta and flex and not fiscal and expansao:
+            if mobilidade_label == "Perfeita":
+                resultado = (
+                    "**Transmissão A → B → C:**  \n"
+                    "1. M↑ → LM desloca para direita → Y↑ e i↓ (Ponto B)  \n"
+                    "2. i < r* → saída massiva de capital → **depreciação cambial (e↑)**  \n"
+                    "3. e↑ → exportações barateiam, importações encarecem → **NX↑**  \n"
+                    "4. NX↑ → IS desloca para direita → Y↑↑  \n\n"
+                    "🟢 **Resultado: Política MUITO EFICAZ**  \n"
+                    "O canal cambial amplifica completamente o estímulo monetário.  \n"
+                    "**ΔY máximo**, i retorna a r*."
+                )
+                delta_Y = "↑↑↑ (máximo)"; delta_r = "↓ → r*"; delta_e = "↑↑ (depreciação forte)"
+            else:
+                resultado = (
+                    "**Transmissão A → B → C:**  \n"
+                    "1. M↑ → LM desloca para direita → Y↑ e i↓ (Ponto B)  \n"
+                    f"2. i < r* → saída de capital ({'intensa' if mobilidade_label == 'Alta' else 'moderada'}) → depreciação (e↑)  \n"
+                    "3. e↑ → NX↑ → IS desloca para direita  \n\n"
+                    "🟢 **Resultado: Política EFICAZ**  \n"
+                    "O canal cambial amplifica o efeito monetário.  \n"
+                    f"Com mobilidade {mobilidade_label.lower()}, a amplificação é {'forte' if mobilidade_label == 'Alta' else 'moderada'}."
+                )
+                delta_Y = "↑↑"; delta_r = "↓"; delta_e = "↑ (depreciação)"
+
+        elif aberta and not flex and not fiscal and expansao:
+            if mobilidade_label == "Perfeita":
+                resultado = (
+                    "**Transmissão A → B → C:**  \n"
+                    "1. M↑ → LM desloca para direita → i↓ (Ponto B)  \n"
+                    "2. i < r* → saída massiva de capital → pressão de depreciação  \n"
+                    "3. BC intervém: **vende divisas** para manter câmbio fixo → M↓  \n"
+                    "4. M↓ → LM retorna exatamente à posição original  \n\n"
+                    "🔴 **Resultado: Política COMPLETAMENTE INEFICAZ**  \n"
+                    "A intervenção do BC reverte 100% do estímulo monetário.  \n"
+                    "**ΔY = 0** — a LM retorna ao ponto de partida."
+                )
+                delta_Y = "≈ 0 (revertido pelo BC)"; delta_r = "≈ 0 (= r*)"; delta_e = "fixo"
+            else:
+                resultado = (
+                    "**Transmissão A → B → C:**  \n"
+                    "1. M↑ → LM desloca para direita → i↓ (Ponto B)  \n"
+                    f"2. i < r* → saída de capital ({'intensa' if mobilidade_label == 'Alta' else 'moderada'}) → pressão de depreciação  \n"
+                    "3. BC vende divisas → M↓ → LM recua  \n\n"
+                    "🔴 **Resultado: Política INEFICAZ**  \n"
+                    "A intervenção cambial neutraliza o estímulo monetário.  \n"
+                    f"Com mobilidade {mobilidade_label.lower()}, a neutralização é {'quase total' if mobilidade_label == 'Alta' else 'parcial'}."
+                )
+                delta_Y = "≈ 0"; delta_r = "≈ 0"; delta_e = "fixo"
+
+        elif aberta and flex and fiscal and not expansao:
+            resultado = (
+                "**Transmissão A → B → C (Contração Fiscal + Câmbio Flexível):**  \n"
+                "1. G↓ → IS desloca para esquerda → Y↓ e i↓ (Ponto B)  \n"
+                "2. i < r* → saída de capital → **depreciação cambial (e↑)**  \n"
+                "3. e↑ → NX↑ → IS desloca para direita (parcialmente)  \n\n"
+                f"🟡 **Resultado: Política PARCIALMENTE EFICAZ** (mobilidade {mobilidade_label})  \n"
+                "A depreciação cambial atenua o efeito contracionista."
+            )
+            delta_Y = "↓ (atenuado pelo câmbio)"; delta_r = "↓"; delta_e = "↑ (depreciação)"
+
+        elif aberta and not flex and fiscal and not expansao:
+            resultado = (
+                "**Transmissão A → B → C (Contração Fiscal + Câmbio Fixo):**  \n"
+                "1. G↓ → IS desloca para esquerda → Y↓ e i↓ (Ponto B)  \n"
+                "2. i < r* → saída de capital → pressão de depreciação  \n"
+                "3. BC vende divisas → M↓ → LM desloca para esquerda → Y↓↓  \n\n"
+                "🔴 **Resultado: Política MUITO EFICAZ** (no sentido contracionista)  \n"
+                "O ajuste monetário endógeno amplifica a contração fiscal."
+            )
+            delta_Y = "↓↓ (amplificado)"; delta_r = "≈ 0 (= r*)"; delta_e = "fixo"
+
+        elif aberta and flex and not fiscal and not expansao:
+            resultado = (
+                "**Transmissão A → B → C (Contração Monetária + Câmbio Flexível):**  \n"
+                "1. M↓ → LM desloca para esquerda → i↑ (Ponto B)  \n"
+                "2. i > r* → entrada de capital → **apreciação cambial (e↓)**  \n"
+                "3. e↓ → NX↓ → IS desloca para esquerda → Y↓↓  \n\n"
+                "🔴 **Resultado: Política MUITO EFICAZ** (no sentido contracionista)  \n"
+                "O canal cambial amplifica a contração monetária."
+            )
+            delta_Y = "↓↓ (amplificado)"; delta_r = "↑ → r*"; delta_e = "↓ (apreciação)"
+
+        elif aberta and not flex and not fiscal and not expansao:
+            resultado = (
+                "**Transmissão A → B → C (Contração Monetária + Câmbio Fixo):**  \n"
+                "1. M↓ → LM desloca para esquerda → i↑ (Ponto B)  \n"
+                "2. i > r* → entrada de capital → pressão de apreciação  \n"
+                "3. BC compra divisas → M↑ → LM retorna à posição original  \n\n"
+                "🔴 **Resultado: Política COMPLETAMENTE INEFICAZ**  \n"
+                "O BC reverte 100% da contração monetária."
+            )
+            delta_Y = "≈ 0"; delta_r = "≈ 0 (= r*)"; delta_e = "fixo"
+
         elif fiscal and expansao:
-            resultado = ("O novo equilíbrio apresenta **Y maior e i maior**. O aumento dos juros reduz "
-                         "parcialmente o investimento privado — efeito **crowding-out** parcial.")
-            delta_Y = "↑ (menor que o multiplicador simples)"
-            delta_r = "↑ (crowding-out parcial)"
-        elif fiscal and not expansao:
-            resultado = "O novo equilíbrio apresenta **Y menor e i menor**."
-            delta_Y = "↓"; delta_r = "↓"
-        elif not fiscal and expansao:
-            resultado = ("O novo equilíbrio apresenta **Y maior e i menor**. "
-                         "A política monetária estimulou o investimento sem pressionar os juros.")
-            delta_Y = "↑"; delta_r = "↓"
-        else:
-            resultado = "O novo equilíbrio apresenta **Y menor e i maior**."
-            delta_Y = "↓"; delta_r = "↑"
+            resultado = (
+                "**Transmissão A → B → C (Economia Fechada):**  \n"
+                "1. G↑ → IS desloca para direita → Y↑ (Ponto B)  \n"
+                "2. Y↑ → demanda por moeda aumenta → i↑ ao longo da LM  \n"
+                "3. i↑ → investimento privado cai **(crowding-out)**: I↓  \n\n"
+                "🟡 **Resultado: Política PARCIALMENTE EFICAZ**  \n"
+                "O aumento de Y é menor que o multiplicador keynesiano simples 1/(1−c₁)  \n"
+                "porque o crowding-out reduz o investimento privado."
+            )
+            delta_Y = "↑ (< multiplicador simples)"; delta_r = "↑ (crowding-out)"; delta_e = "N/A"
 
-        return dict(
-            titulo="✅ Estado C — Novo Equilíbrio",
-            cor="green",
-            blocos=[
-                ("Ajuste e novo equilíbrio", resultado),
-                ("Variações em relação ao Estado A",
-                 f"- **ΔY:** {delta_Y}  \n- **Δi:** {delta_r}"),
-                ("Síntese teórica",
-                 "O modelo IS-LM-BP de Mundell-Fleming demonstra que a **eficácia das políticas econômicas "
-                 "depende criticamente do regime cambial e do grau de mobilidade de capital**. "
-                 "Em economias abertas, os canais externos modificam substancialmente os multiplicadores fiscais e monetários."),
-            ]
+        elif fiscal and not expansao:
+            resultado = (
+                "**Transmissão A → B → C (Economia Fechada):**  \n"
+                "1. G↓ → IS desloca para esquerda → Y↓  \n"
+                "2. Y↓ → demanda por moeda cai → i↓  \n"
+                "3. i↓ → investimento privado aumenta (crowding-in parcial)  \n\n"
+                "🟡 **Resultado: Política PARCIALMENTE EFICAZ** (contracionista)  \n"
+                "O crowding-in atenua a queda do produto."
+            )
+            delta_Y = "↓ (atenuado pelo crowding-in)"; delta_r = "↓"; delta_e = "N/A"
+
+        elif not fiscal and expansao:
+            resultado = (
+                "**Transmissão A → B → C (Economia Fechada):**  \n"
+                "1. M↑ → LM desloca para direita → i↓  \n"
+                "2. i↓ → investimento privado aumenta **(I↑)**  \n"
+                "3. I↑ → demanda agregada sobe → Y↑  \n\n"
+                "🟢 **Resultado: Política EFICAZ** (sem crowding-out)  \n"
+                "A política monetária estimula o investimento sem pressionar os juros para cima."
+            )
+            delta_Y = "↑"; delta_r = "↓"; delta_e = "N/A"
+
+        else:
+            resultado = (
+                "**Transmissão A → B → C (Economia Fechada):**  \n"
+                "1. M↓ → LM desloca para esquerda → i↑  \n"
+                "2. i↑ → investimento privado cai **(I↓)**  \n"
+                "3. I↓ → demanda agregada cai → Y↓  \n\n"
+                "🔴 **Resultado: Política EFICAZ** (no sentido contracionista)"
+            )
+            delta_Y = "↓"; delta_r = "↑"; delta_e = "N/A"
+
+        blocos = [
+            ("1. Mecanismo de Ajuste Completo (A → B → C)", resultado),
+
+            ("2. Variações em relação ao Estado A",
+             f"| Variável | Direção | Interpretação |\n"
+             f"|---|---|---|\n"
+             f"| **ΔY** | {delta_Y} | Variação no produto/renda |\n"
+             f"| **Δi** | {delta_r} | Variação na taxa de juros |\n"
+             + (f"| **Δe** | {delta_e} | Variação na taxa de câmbio |\n" if aberta else "")),
+
+            ("3. Síntese Mundell-Fleming",
+             "O modelo IS-LM-BP demonstra que a **eficácia das políticas econômicas depende criticamente de:**  \n\n"
+             "| Fator | Impacto |\n"
+             "|---|---|\n"
+             "| Regime cambial (fixo vs. flexível) | Determina o canal de ajuste (LM ou IS) |\n"
+             "| Grau de mobilidade de capital | Determina a velocidade e magnitude do ajuste |\n"
+             "| Tipo de política (fiscal vs. monetária) | Interage com o regime cambial |\n\n"
+             "**Regra geral de Mundell-Fleming:**  \n"
+             "- Câmbio **Flexível** → Política **Monetária** eficaz, Fiscal ineficaz  \n"
+             "- Câmbio **Fixo** → Política **Fiscal** eficaz, Monetária ineficaz"),
+        ]
+
+        if aberta:
+            blocos.append((
+                f"4. O papel da BP com mobilidade {mobilidade_label}",
+                f"**Inclinação da BP:** {bp['inclinacao']}  \n\n"
+                + bp["descricao"] + "  \n\n"
+                f"**Mecanismo de ajuste com câmbio {regime.lower()}:**  \n\n"
+                + (bp["ajuste_flex"] if flex else bp["ajuste_fixo"])
+            ))
+
+        return dict(titulo="✅ Estado C — Novo Equilíbrio", cor="green", blocos=blocos)
+
+# ══════════════════════════════════════════════════════════════
+# CAMADA DIDÁTICA — CONCLUSÃO (só aparece na Etapa C)
+# ══════════════════════════════════════════════════════════════
+
+def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
+    """
+    Retorna um dict com:
+      - veredicto : "eficaz" | "parcial" | "ineficaz"
+      - emoji     : ícone do veredicto
+      - titulo    : título do card
+      - razao     : parágrafo principal (por quê)
+      - canal     : canal econômico dominante
+      - contrafactual : o que teria acontecido em outra configuração
+      - licao     : lição teórica de 1 linha
+    """
+    fiscal   = politica == "Fiscal"
+    expansao = direcao  == "Expansionista"
+    aberta   = tipo_eco == "Aberta"
+    flex     = regime   == "Flexível"
+
+    # ── Mapa de veredictos ────────────────────────────────────
+    # (fiscal, expansao, aberta, flex, mobilidade) → veredicto
+    # Simplificado: usamos as combinações canônicas de Mundell-Fleming
+
+    if not aberta:
+        # Economia fechada
+        if fiscal:
+            veredicto = "parcial"
+            emoji = "🟡"
+            titulo = "Política Fiscal — Parcialmente Eficaz (Economia Fechada)"
+            razao = (
+                "A política fiscal **aumentou o produto (Y↑)**, mas o efeito foi **atenuado pelo crowding-out**: "
+                "o aumento dos gastos públicos elevou a demanda por moeda, pressionando os juros para cima (i↑), "
+                "o que reduziu o investimento privado (I↓). "
+                "O resultado líquido é um ΔY **menor** do que o multiplicador keynesiano simples 1/(1−c₁) preveria."
+            )
+            canal = "Canal dominante: **Demanda Agregada → Mercado Monetário → Crowding-Out de Investimento**"
+            contrafactual = (
+                "Se a economia fosse **aberta com câmbio fixo e alta mobilidade**, "
+                "a política fiscal seria ainda mais eficaz — a LM se expandiria endogenamente via entrada de capital.  \n"
+                "Se fosse **aberta com câmbio flexível e mobilidade perfeita**, "
+                "seria completamente ineficaz — o crowding-out externo cancelaria todo o estímulo."
+            )
+            licao = "📌 Em economia fechada, a política fiscal sempre enfrenta crowding-out parcial via mercado monetário."
+        else:
+            veredicto = "eficaz"
+            emoji = "🟢"
+            titulo = "Política Monetária — Eficaz (Economia Fechada)"
+            razao = (
+                "A política monetária **aumentou o produto (Y↑) e reduziu os juros (i↓)** sem crowding-out. "
+                "A expansão da oferta de moeda reduziu o custo do crédito, estimulando o investimento privado (I↑), "
+                "que elevou a demanda agregada e o produto. "
+                "Não há conflito com o mercado de bens — IS e LM se movem na mesma direção."
+            )
+            canal = "Canal dominante: **Oferta de Moeda → Taxa de Juros → Investimento → Produto**"
+            contrafactual = (
+                "Se a economia fosse **aberta com câmbio fixo**, "
+                "a política monetária seria completamente ineficaz — o BC seria forçado a reverter a expansão para defender o câmbio.  \n"
+                "Se fosse **aberta com câmbio flexível**, "
+                "seria ainda mais eficaz — a depreciação cambial amplificaria o estímulo via NX↑."
+            )
+            licao = "📌 Em economia fechada, a política monetária é o instrumento mais eficiente — sem crowding-out."
+
+    elif flex and fiscal and expansao:
+        if mobilidade_label == "Perfeita":
+            veredicto = "ineficaz"
+            emoji = "🔴"
+            titulo = "Política Fiscal Expansionista — INEFICAZ (Câmbio Flexível + Mobilidade Perfeita)"
+            razao = (
+                "A política fiscal foi **completamente neutralizada pelo crowding-out externo**. "
+                "O aumento de G elevou os juros acima de r*, atraindo capital estrangeiro e apreciando a moeda (e↓). "
+                "A apreciação reduziu as exportações líquidas (NX↓) na **exata mesma magnitude** do estímulo fiscal, "
+                "fazendo a IS retornar à posição original. **ΔY ≈ 0.**"
+            )
+            canal = "Canal dominante: **Juros → Entrada de Capital → Apreciação Cambial → NX↓ → IS recua**"
+            contrafactual = (
+                "Se o regime fosse **câmbio fixo**, a mesma política seria muito eficaz: "
+                "a entrada de capital forçaria o BC a expandir M, amplificando o estímulo fiscal.  \n"
+                "Se a mobilidade fosse **baixa ou nula**, o crowding-out externo seria parcial "
+                "e Y aumentaria significativamente."
+            )
+            licao = "📌 Mundell-Fleming: câmbio flexível + mobilidade perfeita → política fiscal completamente ineficaz."
+        elif mobilidade_label == "Alta":
+            veredicto = "parcial"
+            emoji = "🟡"
+            titulo = "Política Fiscal Expansionista — Parcialmente Ineficaz (Câmbio Flexível + Alta Mobilidade)"
+            razao = (
+                "A política fiscal teve **efeito muito limitado** sobre o produto. "
+                "O crowding-out externo foi intenso: a entrada de capital apreciou a moeda (e↓), "
+                "reduzindo NX e fazendo a IS recuar parcialmente. "
+                "Y aumentou levemente, mas muito abaixo do multiplicador keynesiano simples."
+            )
+            canal = "Canal dominante: **Juros → Entrada de Capital → Apreciação → NX↓ → IS recua (parcialmente)**"
+            contrafactual = (
+                "Com **mobilidade perfeita**, o efeito seria zero (crowding-out 100%).  \n"
+                "Com **mobilidade baixa ou nula**, o canal cambial seria fraco e Y aumentaria mais."
+            )
+            licao = "📌 Quanto maior a mobilidade de capital com câmbio flexível, menor a eficácia da política fiscal."
+        else:  # Baixa ou Nula
+            veredicto = "eficaz"
+            emoji = "🟢"
+            titulo = "Política Fiscal Expansionista — Eficaz (Câmbio Flexível + Baixa/Nula Mobilidade)"
+            razao = (
+                "Com baixa mobilidade de capital, o canal financeiro externo é fraco. "
+                "O crowding-out externo é **mínimo**: a apreciação cambial é pequena e NX cai pouco. "
+                "O estímulo fiscal se transmite quase integralmente ao produto (Y↑↑), "
+                "próximo ao multiplicador keynesiano."
+            )
+            canal = "Canal dominante: **Demanda Agregada → Produto** (canal cambial fraco)"
+            contrafactual = (
+                "Com **alta mobilidade**, o crowding-out externo seria intenso e Y aumentaria pouco.  \n"
+                "Com **câmbio fixo**, a política seria ainda mais eficaz — a LM se expandiria endogenamente."
+            )
+            licao = "📌 Com baixa mobilidade de capital, a política fiscal recupera sua eficácia mesmo com câmbio flexível."
+
+    elif not flex and fiscal and expansao:
+        veredicto = "eficaz"
+        emoji = "🟢"
+        titulo = "Política Fiscal Expansionista — Muito Eficaz (Câmbio Fixo)"
+        razao = (
+            "A política fiscal foi **amplificada pelo ajuste monetário endógeno**. "
+            "O aumento de G elevou os juros, atraindo capital estrangeiro. "
+            "Para defender o câmbio fixo, o BC comprou divisas, expandindo a oferta de moeda (M↑). "
+            "A LM deslocou-se para a direita, reduzindo os juros e amplificando o estímulo fiscal. "
+            f"Com mobilidade **{mobilidade_label.lower()}**, a amplificação foi "
+            f"{'máxima' if mobilidade_label == 'Perfeita' else 'significativa'}."
         )
+        canal = "Canal dominante: **G↑ → i↑ → Entrada de Capital → BC compra divisas → M↑ → LM↓ → Y↑↑**"
+        contrafactual = (
+            "Se o regime fosse **câmbio flexível**, a política seria ineficaz (com alta mobilidade) "
+            "ou apenas parcialmente eficaz (com baixa mobilidade) — "
+            "pois a apreciação cambial reduziria NX e faria a IS recuar."
+        )
+        licao = "📌 Mundell-Fleming: câmbio fixo → política fiscal eficaz, independentemente da mobilidade de capital."
+
+    elif flex and not fiscal and expansao:
+        if mobilidade_label == "Perfeita":
+            veredicto = "eficaz"
+            emoji = "🟢"
+            titulo = "Política Monetária Expansionista — MUITO Eficaz (Câmbio Flexível + Mobilidade Perfeita)"
+            razao = (
+                "A política monetária foi **amplificada ao máximo pelo canal cambial**. "
+                "A expansão de M reduziu os juros abaixo de r*, provocando saída massiva de capital "
+                "e forte depreciação cambial (e↑). "
+                "A depreciação elevou as exportações líquidas (NX↑), deslocando a IS para a direita. "
+                "O produto aumentou muito além do efeito direto da expansão monetária. **ΔY máximo.**"
+            )
+            canal = "Canal dominante: **M↑ → i↓ → Saída de Capital → Depreciação (e↑) → NX↑ → IS↑ → Y↑↑**"
+            contrafactual = (
+                "Se o regime fosse **câmbio fixo**, a política seria completamente ineficaz: "
+                "o BC reverteria toda a expansão monetária para defender o câmbio."
+            )
+            licao = "📌 Mundell-Fleming: câmbio flexível + mobilidade perfeita → política monetária maximamente eficaz."
+        else:
+            veredicto = "eficaz"
+            emoji = "🟢"
+            titulo = f"Política Monetária Expansionista — Eficaz (Câmbio Flexível + Mobilidade {mobilidade_label})"
+            razao = (
+                "A política monetária foi **eficaz e amplificada pelo canal cambial**. "
+                "A queda dos juros gerou saída de capital e depreciação (e↑), "
+                "elevando NX e deslocando a IS para a direita. "
+                f"Com mobilidade **{mobilidade_label.lower()}**, a amplificação cambial foi "
+                f"{'forte' if mobilidade_label == 'Alta' else 'moderada'}."
+            )
+            canal = "Canal dominante: **M↑ → i↓ → Depreciação → NX↑ → IS↑ → Y↑**"
+            contrafactual = (
+                "Com **mobilidade perfeita**, o efeito seria ainda maior.  \n"
+                "Com **câmbio fixo**, a política seria completamente neutralizada pelo BC."
+            )
+            licao = "📌 Com câmbio flexível, a política monetária é sempre eficaz — e mais eficaz quanto maior a mobilidade."
+
+    elif not flex and not fiscal and expansao:
+        veredicto = "ineficaz"
+        emoji = "🔴"
+        titulo = "Política Monetária Expansionista — INEFICAZ (Câmbio Fixo)"
+        razao = (
+            "A política monetária foi **completamente neutralizada pela defesa do câmbio fixo**. "
+            "A expansão de M reduziu os juros abaixo de r*, provocando saída de capital "
+            "e pressão de depreciação cambial. "
+            "Para defender o câmbio, o BC vendeu reservas, contraindo a oferta de moeda (M↓). "
+            "A LM retornou à posição original. **ΔY ≈ 0.**"
+        )
+        canal = "Canal dominante: **M↑ → i↓ → Saída de Capital → BC vende divisas → M↓ → LM retorna**"
+        contrafactual = (
+            "Se o regime fosse **câmbio flexível**, a política seria muito eficaz: "
+            "a depreciação cambial amplificaria o estímulo via NX↑.  \n"
+            "Com câmbio fixo, **apenas a política fiscal** tem poder de alterar o produto."
+        )
+        licao = "📌 Mundell-Fleming: câmbio fixo → política monetária completamente ineficaz."
+
+    elif flex and fiscal and not expansao:
+        veredicto = "parcial"
+        emoji = "🟡"
+        titulo = "Política Fiscal Contracionista — Parcialmente Eficaz (Câmbio Flexível)"
+        razao = (
+            "A contração fiscal reduziu o produto (Y↓), mas o efeito foi **atenuado pela depreciação cambial**. "
+            "A queda dos juros gerou saída de capital e depreciação (e↑), "
+            "elevando NX e fazendo a IS recuar menos do que o esperado. "
+            "O resultado líquido é uma queda de Y menor do que o multiplicador simples preveria."
+        )
+        canal = "Canal dominante: **G↓ → i↓ → Depreciação → NX↑ → IS recua menos**"
+        contrafactual = (
+            "Com **câmbio fixo**, a contração seria amplificada: "
+            "a saída de capital forçaria o BC a contrair M, reduzindo Y ainda mais."
+        )
+        licao = "📌 Com câmbio flexível, o câmbio atua como amortecedor automático de choques fiscais."
+
+    elif not flex and fiscal and not expansao:
+        veredicto = "ineficaz"
+        emoji = "🔴"
+        titulo = "Política Fiscal Contracionista — Amplificada (Câmbio Fixo)"
+        razao = (
+            "A contração fiscal foi **amplificada pelo ajuste monetário endógeno**. "
+            "A queda dos juros gerou saída de capital e pressão de depreciação. "
+            "O BC vendeu reservas para defender o câmbio, contraindo M (M↓). "
+            "A LM deslocou-se para a esquerda, amplificando a queda do produto. **ΔY↓↓.**"
+        )
+        canal = "Canal dominante: **G↓ → i↓ → Saída de Capital → BC vende divisas → M↓ → LM↑ → Y↓↓**"
+        contrafactual = (
+            "Com **câmbio flexível**, a depreciação cambial atenuaria a contração — "
+            "NX↑ compensaria parcialmente a queda da demanda interna."
+        )
+        licao = "📌 Com câmbio fixo, a política fiscal contracionista é amplificada — o BC retira moeda para defender o câmbio."
+
+    elif flex and not fiscal and not expansao:
+        veredicto = "ineficaz"
+        emoji = "🔴"
+        titulo = "Política Monetária Contracionista — Amplificada (Câmbio Flexível)"
+        razao = (
+            "A contração monetária foi **amplificada pelo canal cambial**. "
+            "A alta dos juros atraiu capital estrangeiro e apreciou a moeda (e↓). "
+            "A apreciação reduziu NX, deslocando a IS para a esquerda. "
+            "O produto caiu mais do que o efeito direto da contração monetária. **ΔY↓↓.**"
+        )
+        canal = "Canal dominante: **M↓ → i↑ → Entrada de Capital → Apreciação → NX↓ → IS↓ → Y↓↓**"
+        contrafactual = (
+            "Com **câmbio fixo**, a contração seria completamente revertida pelo BC — "
+            "a entrada de capital forçaria expansão de M para defender o câmbio."
+        )
+        licao = "📌 Com câmbio flexível, a política monetária contracionista é amplificada pelo canal cambial."
+
+    else:  # not flex and not fiscal and not expansao
+        veredicto = "eficaz"
+        emoji = "🟢"
+        titulo = "Política Monetária Contracionista — Revertida (Câmbio Fixo)"
+        razao = (
+            "A contração monetária foi **completamente revertida pela defesa do câmbio fixo**. "
+            "A alta dos juros atraiu capital estrangeiro e pressionou o câmbio para apreciar. "
+            "O BC comprou divisas para manter o câmbio fixo, expandindo M (M↑). "
+            "A LM retornou à posição original. **ΔY ≈ 0.**"
+        )
+        canal = "Canal dominante: **M↓ → i↑ → Entrada de Capital → BC compra divisas → M↑ → LM retorna**"
+        contrafactual = (
+            "Com **câmbio flexível**, a contração seria amplificada: "
+            "a apreciação cambial reduziria NX e faria Y cair ainda mais."
+        )
+        licao = "📌 Com câmbio fixo, a política monetária contracionista também é ineficaz — o BC reverte o movimento."
+
+    # ── Mapa de cores por veredicto ───────────────────────────
+    COR_MAP = {
+        "eficaz":   {"bg_light": "#f0fdf4", "bg_dark": "rgba(16,185,129,0.13)",
+                     "border": "#059669",    "txt_light": "#064e3b", "txt_dark": "#6ee7b7"},
+        "parcial":  {"bg_light": "#fefce8", "bg_dark": "rgba(234,179,8,0.13)",
+                     "border": "#ca8a04",    "txt_light": "#713f12", "txt_dark": "#fde68a"},
+        "ineficaz": {"bg_light": "#fef2f2", "bg_dark": "rgba(220,38,38,0.13)",
+                     "border": "#dc2626",    "txt_light": "#7f1d1d", "txt_dark": "#fca5a5"},
+    }
+    cores = COR_MAP[veredicto]
+
+    return dict(
+        veredicto=veredicto,
+        emoji=emoji,
+        titulo=titulo,
+        razao=razao,
+        canal=canal,
+        contrafactual=contrafactual,
+        licao=licao,
+        cores=cores,
+    )
 
 # ══════════════════════════════════════════════════════════════
 # INTERFACE PRINCIPAL
@@ -743,6 +1516,42 @@ if "Simplificado" in modo:
             for subtitulo, conteudo in txt["blocos"]:
                 with st.expander(f"📖 {subtitulo}", expanded=True):
                     st.markdown(conteudo)
+
+            # ── CONCLUSÃO — só aparece na Etapa C ────────────
+            if etapa == 2:
+                conc = _conclusao_etapa(politica_s, direcao_s, tipo_eco_s, regime_s, mob_s)
+                c = conc["cores"]
+                st.markdown("---")
+                st.markdown(
+                    f'<style>'
+                    f'#conc-card {{ background:{c["bg_light"]}; border-left:5px solid {c["border"]}; '
+                    f'border-radius:10px; padding:18px 20px; font-family:"EB Garamond",Georgia,serif; margin-top:8px; }}'
+                    f'#conc-card .conc-title {{ color:{c["txt_light"]}; font-size:1.15rem; font-weight:700; }}'
+                    f'@media (prefers-color-scheme: dark) {{'
+                    f'  #conc-card {{ background:{c["bg_dark"]}; }}'
+                    f'  #conc-card .conc-title {{ color:{c["txt_dark"]}; }}'
+                    f'}}'
+                    f'</style>'
+                    f'<div id="conc-card">'
+                    f'<span class="conc-title">{conc["emoji"]} Conclusão — {conc["titulo"]}</span>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
+                st.markdown("")
+                with st.expander("📝 Por que a política foi (in)eficaz?", expanded=True):
+                    st.markdown(conc["razao"])
+                with st.expander("🔗 Canal econômico dominante", expanded=True):
+                    st.markdown(conc["canal"])
+                with st.expander("🔄 E se fosse diferente? (Contrafactual)", expanded=False):
+                    st.markdown(conc["contrafactual"])
+                st.markdown(
+                    f'<div style="margin-top:10px; padding:10px 14px; border-radius:6px; '
+                    f'background:{c["bg_light"]}; border:1px solid {c["border"]}; '
+                    f'font-family:\'Poppins\',sans-serif; font-size:0.9rem; color:{c["txt_light"]};">'
+                    f'{conc["licao"]}'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
 
     else:
         st.info("Configure os parâmetros na barra lateral e clique em **▶ Simular**.")
