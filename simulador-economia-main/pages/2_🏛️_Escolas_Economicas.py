@@ -305,31 +305,34 @@ if escola == "Clássica":
     )
 
     # Exibição em cards
+    CARD_STYLE = "background:#1e1e2e;color:#e0e0e0;border-radius:8px;padding:18px;margin-bottom:14px;border-left:5px solid {color};"
+    TITLE_STYLE = "color:{color};font-weight:700;font-size:1.05em;margin-bottom:8px;"
+
     with st.container():
         st.markdown(f"""
-        <div style="background:#f8f9fa;border-left:4px solid #F44336;padding:16px;border-radius:6px;margin-bottom:12px">
-        <b>🏭 1. Produto Potencial e Função de Produção</b><br><br>
+        <div style="{CARD_STYLE.format(color='#F44336')}">
+        <div style="{TITLE_STYLE.format(color='#F44336')}">🏭 1. Produto Potencial e Função de Produção</div>
         {narrativa_producao}
         </div>
         """, unsafe_allow_html=True)
 
         st.markdown(f"""
-        <div style="background:#f8f9fa;border-left:4px solid #2196F3;padding:16px;border-radius:6px;margin-bottom:12px">
-        <b>💰 2. Nível de Preços e Neutralidade da Moeda</b><br><br>
+        <div style="{CARD_STYLE.format(color='#2196F3')}">
+        <div style="{TITLE_STYLE.format(color='#64B5F6')}">💰 2. Nível de Preços e Neutralidade da Moeda</div>
         {narrativa_monetaria}
         </div>
         """, unsafe_allow_html=True)
 
         st.markdown(f"""
-        <div style="background:#f8f9fa;border-left:4px solid #4CAF50;padding:16px;border-radius:6px;margin-bottom:12px">
-        <b>{cor_trabalho} 3. Mercado de Trabalho e Ajuste Automático</b><br><br>
+        <div style="{CARD_STYLE.format(color='#4CAF50')}">
+        <div style="{TITLE_STYLE.format(color='#81C784')}">{ cor_trabalho} 3. Mercado de Trabalho e Ajuste Automático</div>
         {narrativa_trabalho}
         </div>
         """, unsafe_allow_html=True)
 
         st.markdown(f"""
-        <div style="background:#fff8e1;border-left:4px solid #FF9800;padding:16px;border-radius:6px;margin-bottom:12px">
-        <b>🔑 4. Conclusão — Dicotomia Clássica</b><br><br>
+        <div style="background:#2a2200;color:#e0e0e0;border-radius:8px;padding:18px;margin-bottom:14px;border-left:5px solid #FF9800;">
+        <div style="color:#FFB74D;font-weight:700;font-size:1.05em;margin-bottom:8px;">🔑 4. Conclusão — Dicotomia Clássica</div>
         Na visão clássica, a economia opera em dois planos independentes:
         o <b>setor real</b> (Y* = {Y_potencial:.1f}, w* = {salario_real_eq:.3f}) é determinado por
         produtividade, tecnologia, capital e trabalho — e o <b>setor nominal</b>
@@ -658,32 +661,35 @@ else:
         )
 
     # Exibição em cards
+    hiato_color = '#F44336' if hiato < -5 else '#FF9800' if hiato > 5 else '#4CAF50'
+    hiato_title_color = '#EF9A9A' if hiato < -5 else '#FFB74D' if hiato > 5 else '#81C784'
+
     st.markdown(f"""
-    <div style="background:#f8f9fa;border-left:4px solid #2196F3;padding:16px;border-radius:6px;margin-bottom:12px">
-    <b>📦 1. Composição da Demanda Agregada</b><br><br>
+    <div style="background:#1e1e2e;color:#e0e0e0;border-radius:8px;padding:18px;margin-bottom:14px;border-left:5px solid #2196F3;">
+    <div style="color:#64B5F6;font-weight:700;font-size:1.05em;margin-bottom:8px;">📦 1. Composição da Demanda Agregada</div>
     {narrativa_demanda}
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown(f"""
-    <div style="background:#f8f9fa;border-left:4px solid #9C27B0;padding:16px;border-radius:6px;margin-bottom:12px">
-    <b>⚙️ 2. Multiplicador Keynesiano e Equilíbrio</b><br><br>
+    <div style="background:#1e1e2e;color:#e0e0e0;border-radius:8px;padding:18px;margin-bottom:14px;border-left:5px solid #9C27B0;">
+    <div style="color:#CE93D8;font-weight:700;font-size:1.05em;margin-bottom:8px;">⚙️ 2. Multiplicador Keynesiano e Equilíbrio</div>
     {narrativa_multiplicador}
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown(f"""
-    <div style="background:#f8f9fa;border-left:4px solid {'#F44336' if hiato < -5 else '#FF9800' if hiato > 5 else '#4CAF50'};padding:16px;border-radius:6px;margin-bottom:12px">
-    <b>{cor_hiato} 3. Hiato do Produto e Desemprego</b><br><br>
+    <div style="background:#1e1e2e;color:#e0e0e0;border-radius:8px;padding:18px;margin-bottom:14px;border-left:5px solid {hiato_color};">
+    <div style="color:{hiato_title_color};font-weight:700;font-size:1.05em;margin-bottom:8px;">{cor_hiato} 3. Hiato do Produto e Desemprego</div>
     {narrativa_hiato}
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown(f"""
-    <div style="background:#fff8e1;border-left:4px solid #FF9800;padding:16px;border-radius:6px;margin-bottom:12px">
-    <b>🏛️ 4. Recomendação de Política Econômica</b><br><br>
+    <div style="background:#2a2200;color:#e0e0e0;border-radius:8px;padding:18px;margin-bottom:14px;border-left:5px solid #FF9800;">
+    <div style="color:#FFB74D;font-weight:700;font-size:1.05em;margin-bottom:8px;">🏛️ 4. Recomendação de Política Econômica</div>
     {politica_rec}<br><br>
-    <b>Multiplicadores disponíveis:</b>
+    <span style="color:#FFB74D;font-weight:600;">Multiplicadores disponíveis:</span>
     ΔG → k<sub>G</sub> = <b>{mult_G:.2f}x</b> &nbsp;|&nbsp;
     ΔT → k<sub>T</sub> = <b>{mult_T:.2f}x</b> &nbsp;|&nbsp;
     ΔTR → k<sub>TR</sub> = <b>{mult_TR:.2f}x</b>
