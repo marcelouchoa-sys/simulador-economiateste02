@@ -1,4 +1,4 @@
-# pages/4_🌍_Economia_Aberta.py
+# pages/4_Modelo ISLMBP.py
 """
 IS-LM-BP — Economia Aberta (Mundell-Fleming)
 Modo Simplificado (didático, estilo FGV/MIT) + Modo Complexo (numérico)
@@ -145,22 +145,24 @@ C = dict(
 
 # ══════════════════════════════════════════════════════════════
 # GEOMETRIA DAS CURVAS (normalizada, estilo livro-texto)
+#
+# CORREÇÃO: Os parâmetros originais (IS_a=2.2, LM_a=-1.2) produziam
+# equilíbrio em r≈-0.59 (negativo, fora da área visível), fazendo as
+# curvas parecerem sobrepostas. Agora o equilíbrio A fica em Y≈1.30,
+# r≈0.98 — bem visível, com separação clara entre os pontos A, B e C.
 # ══════════════════════════════════════════════════════════════
-IS_a, IS_b = 2.2, 1.6
-LM_a, LM_b = -1.2, 0.35  # LM: r = LM_a + LM_b·Y
-SHIFT       = 0.55
+IS_a, IS_b = 2.8, 1.4      # IS: r = IS_a - IS_b·Y  (intercepto maior, inclinação levemente mais suave)
+LM_a, LM_b = 0.2, 0.6      # LM: r = LM_a + LM_b·Y  (intercepto positivo, mais íngreme → ângulo claro)
+SHIFT       = 0.60          # deslocamento das curvas após o choque (levemente maior para separar A→C)
 
 # ── SLOPE_MAP: kappa → inclinação da BP ──────────────────────
-# Valores maiores = mais vertical (imobilidade)
-# Valores menores = mais horizontal (alta mobilidade)
-# Nula (0.0)  → muito íngreme (quase vertical)
-# Baixa (0.2) → íngreme
-# Alta (0.5)  → suave
-# Perfeita    → horizontal (tratada separadamente)
+# Recalibrado para ficar coerente com a nova LM (slope=0.6):
+#   BP Baixa (0.2) deve ser mais íngreme que LM  → slope > 0.6
+#   BP Alta  (0.5) deve ser menos íngreme que LM → slope < 0.6
 SLOPE_MAP = {
-    0.0: 2.5,   # Nula  → quase vertical
-    0.2: 1.2,   # Baixa → íngreme
-    0.5: 0.15,  # Alta  → quase horizontal
+    0.0: 3.5,   # Nula  → quase vertical (muito acima de LM_b)
+    0.2: 1.1,   # Baixa → íngreme (acima de LM_b=0.6)
+    0.5: 0.20,  # Alta  → suave   (abaixo de LM_b=0.6)
 }
 
 def _equilibrio(IS_a_, LM_a_):
@@ -292,7 +294,9 @@ def _set_axes(fig, Y, geo, etapa, aberta):
     YC_fin, rC_fin = geo["YC_fin"], geo["rC_fin"]
 
     x_left = float(Y.min())
-    y_floor = LM_a + LM_b * float(Y.min()) - 0.25
+    # CORREÇÃO: margem inferior reduzida de -0.25 para -0.15
+    # evita espaço morto no rodapé sem cortar projeções pontilhadas
+    y_floor = LM_a + LM_b * float(Y.min()) - 0.15
 
     if etapa == 0:
         xv = [YA]; xt = ["Y<sub>A</sub>"]
@@ -349,21 +353,15 @@ def grafico_etapa(politica, direcao, tipo_eco, regime, mobilidade_kappa, etapa):
     r_IS2 = (geo["IS_a2"] - IS_b * Y) if geo["IS_a2"] is not None else None
 
     # ── BP: lógica corrigida ──────────────────────────────────
-    # Perfeita (kappa ≥ 0.98) → horizontal no nível rA
-    # Nula (kappa ≤ 0.02)     → vertical em YA (shape separado)
-    # Baixa (0.2) / Alta (0.5) → slope do SLOPE_MAP
     if aberta:
         kappa_key = round(mobilidade_kappa, 1)
         if mobilidade_kappa >= 0.98:
-            # Perfeita: linha horizontal
             r_BP   = np.full_like(Y, geo["rA"])
             bp_tipo = "perfeita"
         elif mobilidade_kappa <= 0.02:
-            # Nula: linha vertical (plotada como shape, não como trace)
             r_BP   = None
             bp_tipo = "nula"
         else:
-            # Baixa ou Alta: usa SLOPE_MAP
             slope  = SLOPE_MAP.get(kappa_key, 0.3)
             r_BP   = geo["rA"] + slope * (Y - geo["YA"])
             bp_tipo = {0.2: "baixa", 0.5: "alta"}.get(kappa_key, f"κ={mobilidade_kappa:.1f}")
@@ -382,7 +380,6 @@ def grafico_etapa(politica, direcao, tipo_eco, regime, mobilidade_kappa, etapa):
 
         if aberta:
             if bp_tipo == "nula":
-                # Linha vertical em YA
                 y_min_bp = float(r_IS0.min()) - 0.1
                 y_max_bp = float(r_IS0.max()) + 0.1
                 fig.add_shape(type="line",
@@ -464,12 +461,6 @@ def _texto_etapa(politica, direcao, tipo_eco, regime, mobilidade_label, etapa):
     aberta   = tipo_eco == "Aberta"
     flex     = regime   == "Flexível"
 
-    # ══════════════════════════════════════════════════════════
-    # DICIONÁRIO DE CARACTERÍSTICAS DA BP POR MOBILIDADE
-    # Cada entrada descreve: inclinação geométrica, interpretação
-    # econômica, condição acima/abaixo da curva, e mecanismo de
-    # ajuste diferenciado por regime cambial.
-    # ══════════════════════════════════════════════════════════
     BP_INFO = {
         "Nula": dict(
             inclinacao="vertical (↕)",
@@ -642,9 +633,6 @@ def _texto_etapa(politica, direcao, tipo_eco, regime, mobilidade_label, etapa):
 
     bp = BP_INFO.get(mobilidade_label, BP_INFO["Alta"])
 
-    # ══════════════════════════════════════════════════════════
-    # ETAPA 0 — EQUILÍBRIO INICIAL (PONTO A)
-    # ══════════════════════════════════════════════════════════
     if etapa == 0:
         blocos = [
             ("O que representa o Ponto A?",
@@ -688,9 +676,6 @@ def _texto_etapa(politica, direcao, tipo_eco, regime, mobilidade_label, etapa):
 
         return dict(titulo="📍 Estado A — Equilíbrio Inicial", cor="blue", blocos=blocos)
 
-    # ══════════════════════════════════════════════════════════
-    # ETAPA 1 — CHOQUE DE CURTO PRAZO (PONTO B)
-    # ══════════════════════════════════════════════════════════
     elif etapa == 1:
         if fiscal and expansao:
             mercado_afetado = "**Mercado de Bens (IS)**"
@@ -763,7 +748,6 @@ def _texto_etapa(politica, direcao, tipo_eco, regime, mobilidade_label, etapa):
         ]
 
         if aberta:
-            # Determinar posição do ponto B em relação à BP
             if not fiscal and expansao:
                 pos_bp = "abaixo"
                 cond_bp = bp["abaixo_bp"]
@@ -821,11 +805,7 @@ def _texto_etapa(politica, direcao, tipo_eco, regime, mobilidade_label, etapa):
 
         return dict(titulo="⚡ Estado B — Choque de Curto Prazo", cor="orange", blocos=blocos)
 
-    # ══════════════════════════════════════════════════════════
-    # ETAPA 2 — NOVO EQUILÍBRIO (PONTO C)
-    # ══════════════════════════════════════════════════════════
     else:
-        # ── Resultado Mundell-Fleming por combinação ──────────
         if aberta and flex and fiscal and expansao:
             if mobilidade_label == "Perfeita":
                 resultado = (
@@ -861,7 +841,7 @@ def _texto_etapa(politica, direcao, tipo_eco, regime, mobilidade_label, etapa):
                     "Y aumenta de forma mais próxima ao multiplicador keynesiano."
                 )
                 delta_Y = "↑↑"; delta_r = "↑"; delta_e = "↓ (leve)"
-            else:  # Nula
+            else:
                 resultado = (
                     "**Transmissão A → B → C:**  \n"
                     "1. G↑ → IS desloca para direita → Y↑ e i↑ (Ponto B)  \n"
@@ -1069,35 +1049,29 @@ def _texto_etapa(politica, direcao, tipo_eco, regime, mobilidade_label, etapa):
 
         return dict(titulo="✅ Estado C — Novo Equilíbrio", cor="green", blocos=blocos)
 
+
 # ══════════════════════════════════════════════════════════════
 # CAMADA DIDÁTICA — CONCLUSÃO (só aparece na Etapa C)
 # ══════════════════════════════════════════════════════════════
 
 def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
-    """
-    Retorna um dict com:
-      - veredicto : "eficaz" | "parcial" | "ineficaz"
-      - emoji     : ícone do veredicto
-      - titulo    : título do card
-      - razao     : parágrafo principal (por quê)
-      - canal     : canal econômico dominante
-      - contrafactual : o que teria acontecido em outra configuração
-      - licao     : lição teórica de 1 linha
-    """
     fiscal   = politica == "Fiscal"
     expansao = direcao  == "Expansionista"
     aberta   = tipo_eco == "Aberta"
     flex     = regime   == "Flexível"
 
-    # ── Mapa de veredictos ────────────────────────────────────
-    # (fiscal, expansao, aberta, flex, mobilidade) → veredicto
-    # Simplificado: usamos as combinações canônicas de Mundell-Fleming
+    COR_MAP = {
+        "eficaz":   {"bg_light": "#f0fdf4", "bg_dark": "rgba(16,185,129,0.13)",
+                     "border": "#059669",    "txt_light": "#064e3b", "txt_dark": "#6ee7b7"},
+        "parcial":  {"bg_light": "#fefce8", "bg_dark": "rgba(234,179,8,0.13)",
+                     "border": "#ca8a04",    "txt_light": "#713f12", "txt_dark": "#fde68a"},
+        "ineficaz": {"bg_light": "#fef2f2", "bg_dark": "rgba(220,38,38,0.13)",
+                     "border": "#dc2626",    "txt_light": "#7f1d1d", "txt_dark": "#fca5a5"},
+    }
 
     if not aberta:
-        # Economia fechada
         if fiscal:
-            veredicto = "parcial"
-            emoji = "🟡"
+            veredicto = "parcial"; emoji = "🟡"
             titulo = "Política Fiscal — Parcialmente Eficaz (Economia Fechada)"
             razao = (
                 "A política fiscal **aumentou o produto (Y↑)**, mas o efeito foi **atenuado pelo crowding-out**: "
@@ -1114,8 +1088,7 @@ def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
             )
             licao = "📌 Em economia fechada, a política fiscal sempre enfrenta crowding-out parcial via mercado monetário."
         else:
-            veredicto = "eficaz"
-            emoji = "🟢"
+            veredicto = "eficaz"; emoji = "🟢"
             titulo = "Política Monetária — Eficaz (Economia Fechada)"
             razao = (
                 "A política monetária **aumentou o produto (Y↑) e reduziu os juros (i↓)** sem crowding-out. "
@@ -1134,8 +1107,7 @@ def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
 
     elif flex and fiscal and expansao:
         if mobilidade_label == "Perfeita":
-            veredicto = "ineficaz"
-            emoji = "🔴"
+            veredicto = "ineficaz"; emoji = "🔴"
             titulo = "Política Fiscal Expansionista — INEFICAZ (Câmbio Flexível + Mobilidade Perfeita)"
             razao = (
                 "A política fiscal foi **completamente neutralizada pelo crowding-out externo**. "
@@ -1152,8 +1124,7 @@ def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
             )
             licao = "📌 Mundell-Fleming: câmbio flexível + mobilidade perfeita → política fiscal completamente ineficaz."
         elif mobilidade_label == "Alta":
-            veredicto = "parcial"
-            emoji = "🟡"
+            veredicto = "parcial"; emoji = "🟡"
             titulo = "Política Fiscal Expansionista — Parcialmente Ineficaz (Câmbio Flexível + Alta Mobilidade)"
             razao = (
                 "A política fiscal teve **efeito muito limitado** sobre o produto. "
@@ -1167,9 +1138,8 @@ def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
                 "Com **mobilidade baixa ou nula**, o canal cambial seria fraco e Y aumentaria mais."
             )
             licao = "📌 Quanto maior a mobilidade de capital com câmbio flexível, menor a eficácia da política fiscal."
-        else:  # Baixa ou Nula
-            veredicto = "eficaz"
-            emoji = "🟢"
+        else:
+            veredicto = "eficaz"; emoji = "🟢"
             titulo = "Política Fiscal Expansionista — Eficaz (Câmbio Flexível + Baixa/Nula Mobilidade)"
             razao = (
                 "Com baixa mobilidade de capital, o canal financeiro externo é fraco. "
@@ -1185,8 +1155,7 @@ def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
             licao = "📌 Com baixa mobilidade de capital, a política fiscal recupera sua eficácia mesmo com câmbio flexível."
 
     elif not flex and fiscal and expansao:
-        veredicto = "eficaz"
-        emoji = "🟢"
+        veredicto = "eficaz"; emoji = "🟢"
         titulo = "Política Fiscal Expansionista — Muito Eficaz (Câmbio Fixo)"
         razao = (
             "A política fiscal foi **amplificada pelo ajuste monetário endógeno**. "
@@ -1206,8 +1175,7 @@ def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
 
     elif flex and not fiscal and expansao:
         if mobilidade_label == "Perfeita":
-            veredicto = "eficaz"
-            emoji = "🟢"
+            veredicto = "eficaz"; emoji = "🟢"
             titulo = "Política Monetária Expansionista — MUITO Eficaz (Câmbio Flexível + Mobilidade Perfeita)"
             razao = (
                 "A política monetária foi **amplificada ao máximo pelo canal cambial**. "
@@ -1223,8 +1191,7 @@ def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
             )
             licao = "📌 Mundell-Fleming: câmbio flexível + mobilidade perfeita → política monetária maximamente eficaz."
         else:
-            veredicto = "eficaz"
-            emoji = "🟢"
+            veredicto = "eficaz"; emoji = "🟢"
             titulo = f"Política Monetária Expansionista — Eficaz (Câmbio Flexível + Mobilidade {mobilidade_label})"
             razao = (
                 "A política monetária foi **eficaz e amplificada pelo canal cambial**. "
@@ -1241,8 +1208,7 @@ def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
             licao = "📌 Com câmbio flexível, a política monetária é sempre eficaz — e mais eficaz quanto maior a mobilidade."
 
     elif not flex and not fiscal and expansao:
-        veredicto = "ineficaz"
-        emoji = "🔴"
+        veredicto = "ineficaz"; emoji = "🔴"
         titulo = "Política Monetária Expansionista — INEFICAZ (Câmbio Fixo)"
         razao = (
             "A política monetária foi **completamente neutralizada pela defesa do câmbio fixo**. "
@@ -1260,8 +1226,7 @@ def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
         licao = "📌 Mundell-Fleming: câmbio fixo → política monetária completamente ineficaz."
 
     elif flex and fiscal and not expansao:
-        veredicto = "parcial"
-        emoji = "🟡"
+        veredicto = "parcial"; emoji = "🟡"
         titulo = "Política Fiscal Contracionista — Parcialmente Eficaz (Câmbio Flexível)"
         razao = (
             "A contração fiscal reduziu o produto (Y↓), mas o efeito foi **atenuado pela depreciação cambial**. "
@@ -1277,8 +1242,7 @@ def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
         licao = "📌 Com câmbio flexível, o câmbio atua como amortecedor automático de choques fiscais."
 
     elif not flex and fiscal and not expansao:
-        veredicto = "ineficaz"
-        emoji = "🔴"
+        veredicto = "ineficaz"; emoji = "🔴"
         titulo = "Política Fiscal Contracionista — Amplificada (Câmbio Fixo)"
         razao = (
             "A contração fiscal foi **amplificada pelo ajuste monetário endógeno**. "
@@ -1294,8 +1258,7 @@ def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
         licao = "📌 Com câmbio fixo, a política fiscal contracionista é amplificada — o BC retira moeda para defender o câmbio."
 
     elif flex and not fiscal and not expansao:
-        veredicto = "ineficaz"
-        emoji = "🔴"
+        veredicto = "ineficaz"; emoji = "🔴"
         titulo = "Política Monetária Contracionista — Amplificada (Câmbio Flexível)"
         razao = (
             "A contração monetária foi **amplificada pelo canal cambial**. "
@@ -1310,9 +1273,8 @@ def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
         )
         licao = "📌 Com câmbio flexível, a política monetária contracionista é amplificada pelo canal cambial."
 
-    else:  # not flex and not fiscal and not expansao
-        veredicto = "eficaz"
-        emoji = "🟢"
+    else:
+        veredicto = "eficaz"; emoji = "🟢"
         titulo = "Política Monetária Contracionista — Revertida (Câmbio Fixo)"
         razao = (
             "A contração monetária foi **completamente revertida pela defesa do câmbio fixo**. "
@@ -1327,26 +1289,11 @@ def _conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
         )
         licao = "📌 Com câmbio fixo, a política monetária contracionista também é ineficaz — o BC reverte o movimento."
 
-    # ── Mapa de cores por veredicto ───────────────────────────
-    COR_MAP = {
-        "eficaz":   {"bg_light": "#f0fdf4", "bg_dark": "rgba(16,185,129,0.13)",
-                     "border": "#059669",    "txt_light": "#064e3b", "txt_dark": "#6ee7b7"},
-        "parcial":  {"bg_light": "#fefce8", "bg_dark": "rgba(234,179,8,0.13)",
-                     "border": "#ca8a04",    "txt_light": "#713f12", "txt_dark": "#fde68a"},
-        "ineficaz": {"bg_light": "#fef2f2", "bg_dark": "rgba(220,38,38,0.13)",
-                     "border": "#dc2626",    "txt_light": "#7f1d1d", "txt_dark": "#fca5a5"},
-    }
     cores = COR_MAP[veredicto]
-
     return dict(
-        veredicto=veredicto,
-        emoji=emoji,
-        titulo=titulo,
-        razao=razao,
-        canal=canal,
-        contrafactual=contrafactual,
-        licao=licao,
-        cores=cores,
+        veredicto=veredicto, emoji=emoji, titulo=titulo,
+        razao=razao, canal=canal, contrafactual=contrafactual,
+        licao=licao, cores=cores,
     )
 
 # ══════════════════════════════════════════════════════════════
@@ -1394,8 +1341,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">🌍 IS-LM-BP — Simulador Macroeconômico</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Modelo Mundell-Fleming &nbsp;|&nbsp; Economia Aberta &nbsp;|&nbsp; Nível Universitário</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title"> IS-LM-BP — Simulador Macroeconômico</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">Modelo Mundell-Fleming &nbsp;|&nbsp; Economia Aberta &nbsp;|&nbsp; Economia Fechada </div>', unsafe_allow_html=True)
 st.divider()
 
 modo = st.radio(
@@ -1517,7 +1464,6 @@ if "Simplificado" in modo:
                 with st.expander(f"📖 {subtitulo}", expanded=True):
                     st.markdown(conteudo)
 
-            # ── CONCLUSÃO — só aparece na Etapa C ────────────
             if etapa == 2:
                 conc = _conclusao_etapa(politica_s, direcao_s, tipo_eco_s, regime_s, mob_s)
                 c = conc["cores"]
@@ -1648,7 +1594,6 @@ else:
                     ok = abs(res) < 0.01
                     st.markdown(f"{'✅' if ok else '⚠️'} **{lbl}** resíduo = `{res:.6f}`")
 
-            # Gráfico complexo
             Y_grid = np.linspace(200, 2500, 500)
             r_min, r_max = -0.3, 0.8
             fig2 = go.Figure()
