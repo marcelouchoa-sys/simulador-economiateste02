@@ -5,6 +5,7 @@ from core.parameters import DEFAULT_PARAMS
 from ui.funcoes.consumo_ui import render as render_consumo
 from ui.funcoes.oferta_demanda_ui import render as render_oferta_demanda
 from ui.funcoes.mercado_trabalho_ui import render as render_mercado_trabalho
+from ui.funcoes.investimento_ui import render as render_investimento
 
 st.set_page_config(layout="wide", page_title="Simulador Macro UFRRJ")
 
@@ -42,6 +43,9 @@ st.divider()
 # ── Roteamento ────────────────────────────────────────────────────
 if funcao == "Consumo":
     render_consumo(p)
+
+elif funcao == "Investimento":
+    render_investimento()
 
 elif funcao == "Oferta e Demanda":
     render_oferta_demanda()
