@@ -2,10 +2,15 @@
 import streamlit as st
 
 from core.parameters import DEFAULT_PARAMS
-from ui.funcoes.consumo_ui import render as render_consumo
-from ui.funcoes.oferta_demanda_ui import render as render_oferta_demanda
+from ui.funcoes.consumo_ui          import render as render_consumo
+from ui.funcoes.investimento_ui     import render as render_investimento
+from ui.funcoes.demanda_moeda_ui    import render as render_demanda_moeda
+from ui.funcoes.oferta_moeda_ui     import render as render_oferta_moeda
+from ui.funcoes.demanda_agregada_ui import render as render_demanda_agregada
+from ui.funcoes.oferta_agregada_ui  import render as render_oferta_agregada
+from ui.funcoes.producao_ui         import render as render_producao
+from ui.funcoes.oferta_demanda_ui   import render as render_oferta_demanda
 from ui.funcoes.mercado_trabalho_ui import render as render_mercado_trabalho
-from ui.funcoes.investimento_ui import render as render_investimento
 
 st.set_page_config(layout="wide", page_title="Simulador Macro UFRRJ")
 
@@ -47,11 +52,23 @@ if funcao == "Consumo":
 elif funcao == "Investimento":
     render_investimento()
 
+elif funcao == "Demanda por Moeda":
+    render_demanda_moeda()
+
+elif funcao == "Oferta de Moeda":
+    render_oferta_moeda()
+
+elif funcao == "Demanda Agregada":
+    render_demanda_agregada()
+
+elif funcao == "Oferta Agregada":
+    render_oferta_agregada()
+
+elif funcao == "Produção":
+    render_producao()
+
 elif funcao == "Oferta e Demanda":
     render_oferta_demanda()
 
 elif funcao == "Mercado de Trabalho":
     render_mercado_trabalho()
-
-else:
-    st.info(f"🚧 A função **{funcao}** está sendo implementada. Em breve disponível.")
