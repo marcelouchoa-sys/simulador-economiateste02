@@ -15,7 +15,8 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════
     # PAINEL DE CONFIGURAÇÃO — inline, acima do gráfico
     # ══════════════════════════════════════════════════════════
-    with st.expander("Configurar Simulação", expanded=not st.session_state.get("did_ok", False)):
+    mostrar = st.checkbox("Configurar Simulacao", value=not st.session_state.get("did_ok", False), key="cfg_sim")
+    if mostrar:
 
         c1, c2, c3, c4, c5 = st.columns([1, 1, 1, 1, 1])
 
