@@ -11,8 +11,17 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 
-def render() -> None:
-    """Renderiza a aba Mercado de Trabalho completa."""
+def render(p: dict | None = None) -> None:
+    """Renderiza a aba Mercado de Trabalho completa.
+    Aceita o dict de parâmetros global para sincronizar Y_atual e Y_pleno.
+    """
+    if p is None:
+        p = {}
+    # Garantir chaves no estado global
+    if "Y_atual" not in p:
+        p["Y_atual"] = 1800.0
+    if "Yn" not in p:
+        p["Yn"] = 1200.0
 
     st.subheader("👷 Mercado de Trabalho — Emprego, Salário e Desemprego")
     st.markdown(
@@ -59,8 +68,10 @@ def render() -> None:
         mostrar_wmin = st.checkbox("Ativar piso salarial", value=True, key="mt_show")
         st.markdown("---")
         st.markdown("**📦 Produto e Lei de Okun**")
-        Y_atual   = st.number_input("Produto Atual (Y)",             value=1800.0, step=50.0, key="mt_y")
-        Y_pleno   = st.number_input("Produto de Pleno Emprego (Yₙ)", value=2000.0, step=50.0, key="mt_yn")
+        Y_atual   = st.number_input("Produto Atual (Y)",             value=float(p["Y_atual"]), step=50.0, key="mt_y")
+        Y_pleno   = st.number_input("Produto de Pleno Emprego (Yₙ)", value=float(p["Yn"]),     step=50.0, key="mt_yn")
+        p["Y_atual"] = Y_atual
+        p["Yn"]      = Y_pleno
         beta_okun = st.slider("Coeficiente de Okun (β)", 0.1, 0.5, 0.3, 0.05,
                               key="mt_beta",
                               help="Variação do desemprego para cada 1% de desvio do produto")

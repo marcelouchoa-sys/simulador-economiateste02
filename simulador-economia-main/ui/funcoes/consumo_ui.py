@@ -14,7 +14,6 @@ from models.funcoes.consumo import (
     resolver_consumo,
     resolver_poupanca,
     multiplicador_fiscal,
-    multiplicador_imposto,
     calcular_ponto_equilibrio,
     analise_proporcional,
 )
