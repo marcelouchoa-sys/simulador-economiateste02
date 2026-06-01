@@ -70,8 +70,13 @@ h3 { font-size: 1.1rem !important; font-weight: 600 !important; color: #1D1D1F !
     border-bottom: 2px solid #0066CC !important;
 }
 
-/* Expander — apenas borda e fundo, sem tocar no summary para nao quebrar icone */
-details[data-testid="stExpander"] {
+/* Remove icone nativo do expander */
+[data-testid="stExpander"] summary svg {
+    display: none !important;
+}
+
+/* Estilo do expander */
+[data-testid="stExpander"] details {
     border: 1px solid #E5E5EA !important;
     border-radius: 12px !important;
     background: #F5F5F7 !important;
