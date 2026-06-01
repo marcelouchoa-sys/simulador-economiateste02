@@ -119,7 +119,7 @@ section[data-testid="stSidebar"] { display: none !important; }
 # ── Header ────────────────────────────────────────────────────────
 st.markdown("""
 <div style="padding-top: 14px;">
-    <div class="lbex-header-titulo">Laboratorio de Economia</div>
+    <div class="lbex-header-titulo">Laboratório de Economia</div>
     <div class="lbex-header-sub">
         LBEX — Laboratorio Brasileiro de Economia Experimental &nbsp;·&nbsp; UFRRJ
     </div>
@@ -142,7 +142,7 @@ with col1:
     <span class="card-tag tag-blue">Disponivel</span>
 </div>
 """, unsafe_allow_html=True)
-    st.page_link("pages/1_\U0001f4da_Funcoes.py", label="Acessar modulo", use_container_width=True)
+    st.page_link("pages/1_📚_Funcoes.py", label="Acessar modulo", use_container_width=True)
 
 with col2:
     st.markdown("""
@@ -153,7 +153,7 @@ with col2:
     <span class="card-tag tag-purple">Disponivel</span>
 </div>
 """, unsafe_allow_html=True)
-    st.page_link("pages/2_\U0001f3db\ufe0f_Escolas_Econômicas.py", label="Acessar modulo", use_container_width=True)
+    st.page_link("pages/2_🏛️_Escolas_Economicas.py", label="Acessar modulo", use_container_width=True)
 
 with col3:
     st.markdown("""
@@ -164,7 +164,7 @@ with col3:
     <span class="card-tag tag-green">Disponivel</span>
 </div>
 """, unsafe_allow_html=True)
-    st.page_link("pages/3_\U0001f30d_Economia_Aberta.py", label="Acessar modulo", use_container_width=True)
+    st.page_link("pages/3_🌍_Economia_Aberta.py", label="Acessar modulo", use_container_width=True)
 
 with col4:
     st.markdown("""
@@ -175,7 +175,7 @@ with col4:
     <span class="card-tag tag-slate">Em construcao</span>
 </div>
 """, unsafe_allow_html=True)
-    st.page_link("pages/4_\U0001f9ea_Laboratorio.py", label="Acessar modulo", use_container_width=True)
+    st.page_link("pages/4_🧪_Laboratorio.py", label="Acessar modulo", use_container_width=True)
 
 # ── Proximas bancadas ─────────────────────────────────────────────
 st.markdown('<hr class="lbex-divider">', unsafe_allow_html=True)
