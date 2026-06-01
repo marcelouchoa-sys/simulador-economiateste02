@@ -136,8 +136,8 @@ col1, col2, col3, col4 = st.columns(4, gap="medium")
 with col1:
     st.markdown("""
 <div class="lbex-card card-blue">
-    <div class="card-titulo">Funcoes Economicas</div>
-    <div class="card-desc">Analise individualmente as funcoes macroeconomicas fundamentais.
+    <div class="card-titulo">Funções Econômicas</div>
+    <div class="card-desc">Analise individualmente as funções macroeconômicas fundamentais.
     Consumo, investimento, oferta agregada, mercado de trabalho e mais.</div>
     <span class="card-tag tag-blue">Disponivel</span>
 </div>
@@ -147,13 +147,13 @@ with col1:
 with col2:
     st.markdown("""
 <div class="lbex-card card-purple">
-    <div class="card-titulo">Escolas Economicas</div>
+    <div class="card-titulo">Escolas Econômicas</div>
     <div class="card-desc">Compare as grandes correntes do pensamento economico.
     Classica, Keynesiana, Monetarista e Pos-Keynesiana com analise comparativa.</div>
     <span class="card-tag tag-purple">Disponivel</span>
 </div>
 """, unsafe_allow_html=True)
-    st.page_link("pages/2_\U0001f3db\ufe0f_Escolas_Economicas.py", label="Acessar modulo", use_container_width=True)
+    st.page_link("pages/2_\U0001f3db\ufe0f_Escolas_Econômicas.py", label="Acessar modulo", use_container_width=True)
 
 with col3:
     st.markdown("""
@@ -169,7 +169,7 @@ with col3:
 with col4:
     st.markdown("""
 <div class="lbex-card card-slate">
-    <div class="card-titulo">Laboratorio</div>
+    <div class="card-titulo">Laboratório</div>
     <div class="card-desc">Construa e analise economias completas. Monte modelos,
     aplique politicas e visualize resultados integrados em tempo real.</div>
     <span class="card-tag tag-slate">Em construcao</span>
