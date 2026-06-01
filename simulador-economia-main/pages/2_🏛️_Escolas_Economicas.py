@@ -9,6 +9,7 @@ from ui.escolas.comparativo_ui    import render as render_comparativo
 
 st.set_page_config(page_title="Escolas Econômicas — LBEX", page_icon="", layout="wide")
 aplicar_design()
+st.page_link("app.py", label="← Voltar ao início")
 
 page_header(
     "Escolas Econômicas",

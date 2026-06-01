@@ -4,6 +4,7 @@ from ui.design import aplicar_design, page_header, section_label, divider
 
 st.set_page_config(page_title="Laboratório — LBEX", page_icon="", layout="wide")
 aplicar_design()
+st.page_link("app.py", label="← Voltar ao início")
 
 page_header(
     "Laboratório",

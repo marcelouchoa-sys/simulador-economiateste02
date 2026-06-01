@@ -14,6 +14,7 @@ from ui.funcoes.mercado_trabalho_ui import render as render_mercado_trabalho
 
 st.set_page_config(layout="wide", page_title="Funções Econômicas — LBEX")
 aplicar_design()
+st.page_link("app.py", label="← Voltar ao início")
 
 # ── Estado global ─────────────────────────────────────────────────
 if "params"not in st.session_state:

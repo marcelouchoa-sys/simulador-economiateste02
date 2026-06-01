@@ -6,6 +6,7 @@ from ui.islmbp.complexo_ui import render as render_complexo
 
 st.set_page_config(page_title="Economia Aberta — LBEX", page_icon="", layout="wide")
 aplicar_design()
+st.page_link("app.py", label="← Voltar ao início")
 
 from core.parameters import DEFAULT_PARAMS
 if "params"not in st.session_state:
