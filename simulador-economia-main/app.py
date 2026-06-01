@@ -117,11 +117,7 @@ section[data-testid="stSidebar"] { display: none !important; }
 """, unsafe_allow_html=True)
 
 # ── Header ────────────────────────────────────────────────────────
-col_logo, col_header = st.columns([1, 5])
-with col_logo:
-    st.image(str(LOGO_PATH), use_container_width=True)
-with col_header:
-    st.markdown("""
+st.markdown("""
 <div style="padding-top: 14px;">
     <div class="lbex-header-titulo">Laboratorio de Economia</div>
     <div class="lbex-header-sub">
