@@ -111,6 +111,8 @@ div[data-testid="stPageLink"] a:hover {
     box-shadow: 0 8px 28px rgba(0,0,0,0.11) !important;
     transform: translateY(-2px) !important;
 }
+section[data-testid="stSidebar"] { display: none !important; }
+[data-testid="collapsedControl"]  { display: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
