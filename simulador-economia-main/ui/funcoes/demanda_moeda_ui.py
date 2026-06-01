@@ -1,6 +1,6 @@
 # ui/funcoes/demanda_moeda_ui.py
 """
-Aba Demanda por Moeda — extraída de pages/1_📚_Funcoes.py
+Aba Demanda por Moeda — extraída de pages/1__Funcoes.py
 Expõe render() para ser chamada pela página principal.
 """
 
@@ -16,7 +16,7 @@ R_GRID = np.linspace(0, 20, 300)
 
 
 def render() -> None:
-    st.subheader("💵 Demanda por Moeda — Preferência pela Liquidez")
+    st.subheader("Demanda por Moeda — Preferência pela Liquidez")
     st.markdown(
         "Explore os motivos pelos quais os agentes demandam moeda e como "
         "isso determina a curva LM e a taxa de juros de equilíbrio."
@@ -36,7 +36,7 @@ def render() -> None:
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        st.subheader("🛠️ Parâmetros")
+        st.subheader("Parâmetros")
 
         k = st.slider("Sensibilidade a Y (k)", 0.1, 1.0, 0.5, 0.05,
                       help="Quanto a demanda por moeda sobe para cada unidade de Y")
@@ -45,11 +45,11 @@ def render() -> None:
         P = st.slider("Nível de Preços (P)", 0.5, 3.0, 1.0, 0.1)
         M = st.slider("Oferta de Moeda (M)", 100.0, 2000.0, 1000.0, 50.0)
 
-        st.markdown("**🏛️ Escola Econômica**")
+        st.markdown("** Escola Econômica**")
         escola = st.radio("Visão teórica:", ["Keynesiana", "Clássica"], horizontal=True)
 
         st.divider()
-        st.markdown("**📍 Ponto de Análise**")
+        st.markdown("** Ponto de Análise**")
         Y_ref = st.slider("Renda de Referência (Y)", 100.0, 2500.0, 1200.0, 50.0)
         r_ref = st.slider("Juros de Referência (r %)", 0.0, 20.0, 5.0, 0.5)
 
@@ -59,12 +59,12 @@ def render() -> None:
         r_lm_ref = resolver_lm(np.array([Y_ref]), k, h, M, P)[0]
 
         st.divider()
-        st.subheader("📊 Indicadores")
+        st.subheader("Indicadores")
         st.metric("Md/P no ponto", f"{max(Md_ref[0], 0):.1f}")
         st.metric("Ms/P (oferta real)", f"{M/P:.1f}")
         st.metric("r LM em Y ref.", f"{r_lm_ref:.2f}%",
-                  delta=f"{'excesso Md' if Md_ref[0] > M/P else 'excesso Ms'}",
-                  delta_color="inverse" if Md_ref[0] > M/P else "normal")
+                  delta=f"{'excesso Md'if Md_ref[0] > M/P else 'excesso Ms'}",
+                  delta_color="inverse"if Md_ref[0] > M/P else "normal")
 
     with col2:
         # ── Gráficos ──────────────────────────────────────────────
@@ -104,7 +104,7 @@ def render() -> None:
         fig.add_trace(go.Scatter(
             x=[Y_ref], y=[r_lm_ref], mode="markers+text",
             name=f"Equilíbrio LM", marker=dict(size=12, color="#FF9800"),
-            text=[f" r={r_lm_ref:.1f}%"], textposition="top right",
+            text=[f"r={r_lm_ref:.1f}%"], textposition="top right",
         ), row=1, col=2)
 
         fig.update_xaxes(title_text="Md/P", showgrid=True, row=1, col=1)
@@ -119,7 +119,7 @@ def render() -> None:
         st.plotly_chart(fig, use_container_width=True)
 
         # ── Gráfico: Md vs Y para r fixo ──────────────────────────
-        st.subheader("📈 Demanda por Moeda vs Renda (r fixo)")
+        st.subheader("Demanda por Moeda vs Renda (r fixo)")
         Md_y, _ = resolver_demanda_moeda(Y_GRID, np.full_like(Y_GRID, r_ref), k, h, P, escola)
         fig2 = go.Figure()
         fig2.add_trace(go.Scatter(x=Y_GRID, y=Md_y, name="Md/P",
@@ -135,13 +135,13 @@ def render() -> None:
     # ABAS ANALÍTICAS
     # ══════════════════════════════════════════════════════════════
     st.divider()
-    st.subheader("🔬 Decomposição Analítica")
+    st.subheader("Decomposição Analítica")
 
     aba1, aba2, aba3, aba4 = st.tabs([
-        "📐 Preferência pela Liquidez",
-        "📈 Curva LM",
-        "🏛️ Keynesiana vs Clássica",
-        "📘 Teoria Completa",
+        "Preferência pela Liquidez",
+        "Curva LM",
+        "Keynesiana vs Clássica",
+        "Teoria Completa",
     ])
 
     with aba1:
@@ -149,9 +149,9 @@ def render() -> None:
         st.markdown(f"""
 | Motivo | Determinante | Parcela em Md |
 |---|---|---|
-| 🛒 **Transação** | Renda (Y) | $k \\cdot Y = {k:.2f} \\times {Y_ref:.0f} = {k*Y_ref:.1f}$ |
-| 🛡️ **Precaução** | Renda (Y) | incluído em k |
-| 📊 **Especulação** | Juros (r) | $-h \\cdot r = -{h:.0f} \\times {r_ref:.1f} = {-h*r_ref:.1f}$ |
+|  **Transação** | Renda (Y) | $k \\cdot Y = {k:.2f} \\times {Y_ref:.0f} = {k*Y_ref:.1f}$ |
+|  **Precaução** | Renda (Y) | incluído em k |
+|  **Especulação** | Juros (r) | $-h \\cdot r = -{h:.0f} \\times {r_ref:.1f} = {-h*r_ref:.1f}$ |
 
 **Fórmula completa:**
 """)
@@ -162,7 +162,7 @@ def render() -> None:
 - **$h = {h:.0f}$**: cada 1 p.p. de juros reduz a demanda por moeda em {h:.0f}
   (motivo especulação — custo de oportunidade de reter moeda).
 
-> 💡 Quando $r$ é muito baixo (armadilha da liquidez), $h \\to \\infty$:
+>  Quando $r$ é muito baixo (armadilha da liquidez), $h \\to \\infty$:
 > a demanda por moeda é infinitamente elástica — a LM fica horizontal.
 """)
 
@@ -190,7 +190,7 @@ def render() -> None:
         col_a, col_b = st.columns(2)
         with col_a:
             st.markdown(f"""
-**🔵 Preferência pela Liquidez (Keynes)**
+** Preferência pela Liquidez (Keynes)**
 
 $M^d/P = kY - hr$
 
@@ -203,7 +203,7 @@ $M^d/P = kY - hr$
 """)
         with col_b:
             st.markdown(f"""
-**🔴 Teoria Quantitativa da Moeda (Clássica)**
+** Teoria Quantitativa da Moeda (Clássica)**
 
 $MV = PY \;\Rightarrow\; M^d/P = \\frac{{1}}{{V}} Y$
 
@@ -215,7 +215,7 @@ $MV = PY \;\Rightarrow\; M^d/P = \\frac{{1}}{{V}} Y$
 """)
 
     with aba4:
-        st.markdown("### 📘 Teoria Completa da Demanda por Moeda")
+        st.markdown("### Teoria Completa da Demanda por Moeda")
         st.markdown("#### 1. Por que as pessoas demandam moeda?")
         st.markdown("""
 A moeda não rende juros diretamente — então por que mantê-la?
@@ -235,7 +235,7 @@ O equilíbrio determina a taxa de juros que iguala oferta e demanda por moeda.
 Uma expansão monetária ($M\\uparrow$) desloca a LM para baixo/direita,
 reduzindo $r^*$ e estimulando o investimento.
 """)
-        st.markdown("#### 3. 📐 Resumo das Equações")
+        st.markdown("#### 3.  Resumo das Equações")
         st.latex(r"M^d/P = kY - hr \quad \text{(Keynesiana)}")
         st.latex(r"M^d/P = \frac{1}{V} Y \quad \text{(TQM)}")
         st.latex(r"r_{LM} = \frac{k}{h} Y - \frac{M}{hP} \quad \text{(Curva LM)}")

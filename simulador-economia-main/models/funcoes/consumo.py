@@ -38,8 +38,8 @@ def resolver_consumo(
 
     if escola.lower().startswith("key"):
         C = c0 + c1 * Yd - theta * r + alpha_w * W
-        juros_str = f" - {theta}·r" if theta != 0 else ""
-        riqueza_str = f" + {alpha_w}·W" if alpha_w != 0 else ""
+        juros_str = f" - {theta}·r"if theta != 0 else ""
+        riqueza_str = f" + {alpha_w}·W"if alpha_w != 0 else ""
         eq = f"C = {c0:.2f} + {c1:.2f}·Yd{juros_str}{riqueza_str}"
     else:
         C = c1 * Yd

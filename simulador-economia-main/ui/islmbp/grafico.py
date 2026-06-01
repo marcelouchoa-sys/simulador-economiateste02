@@ -162,10 +162,10 @@ def add_curva(fig, Y, r, name, color, width=3.5, dash="solid", label=None, label
         hovertemplate=f"<b>{name}</b><br>Y=%{{x:.3f}}<br>i=%{{y:.3f}}<extra></extra>",
     ))
     if label:
-        lx = float(Y[-1]) if label_side == "right" else float(Y[0])
-        ly = float(r[-1]) if label_side == "right" else float(r[0])
-        xanchor = "left" if label_side == "right" else "right"
-        xshift  = 10 if label_side == "right" else -10
+        lx = float(Y[-1]) if label_side == "right"else float(Y[0])
+        ly = float(r[-1]) if label_side == "right"else float(r[0])
+        xanchor = "left"if label_side == "right"else "right"
+        xshift  = 10 if label_side == "right"else -10
         fig.add_annotation(
             x=lx, y=ly, text=f"<b>{label}</b>",
             showarrow=False, xanchor=xanchor, yanchor="middle",
@@ -298,7 +298,7 @@ def grafico_etapa(politica, direcao, tipo_eco, regime, mobilidade_label, etapa):
         "C — Novo Equilíbrio",
     ]
     titulo = (
-        f"IS-LM{'·BP ' if aberta else ' '}— {politica} {direcao}"
+        f"IS-LM{'·BP 'if aberta else ' '}— {politica} {direcao}"
         f"  │  Etapa {etapa_labels[etapa]}"
     )
     fig = fig_base(titulo)
@@ -421,10 +421,10 @@ def grafico_multiplas_bp(politica, direcao, tipo_eco, regime):
     fig.add_annotation(
         x=geo["YA"] * 1.35, y=geo["rA"] * 1.45,
         text="<b>Graus de mobilidade de capital:</b><br>"
-             "🟢 Nula → BP vertical<br>"
-             "🟢 Baixa → BP íngreme (acima da LM)<br>"
-             "🟢 Alta → BP suave (abaixo da LM)<br>"
-             "🟢 Perfeita → BP horizontal",
+             "Nula → BP vertical<br>"
+             "Baixa → BP íngreme (acima da LM)<br>"
+             "Alta → BP suave (abaixo da LM)<br>"
+             "Perfeita → BP horizontal",
         showarrow=False,
         align="left",
         font=dict(size=11),

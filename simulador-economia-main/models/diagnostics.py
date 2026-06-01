@@ -16,7 +16,7 @@ def diagnosticar_choque(base, choque, params_base, params_choque):
     # Tipo de choque
     if dG != 0:
         linhas.append(f"**Choque Fiscal:** ΔG = {dG:+.0f}")
-        linhas.append(f"- Multiplicador realizado: ΔY/ΔG = {dY/dG:.3f}" if dG != 0 else "")
+        linhas.append(f"- Multiplicador realizado: ΔY/ΔG = {dY/dG:.3f}"if dG != 0 else "")
         linhas.append(f"- Multiplicador teórico: {base['mult']:.3f}")
         if dG > 0 and dr > 0:
             linhas.append(f"- **Crowding-out:** ↑G → ↑r → ↓I (ΔI = {dI:+.1f})")
@@ -25,7 +25,7 @@ def diagnosticar_choque(base, choque, params_base, params_choque):
     if dT != 0:
         mult_t = -params_base["c1"] / max(1 - params_base["c1"], 1e-9)
         linhas.append(f"**Choque Fiscal (Impostos):** ΔT = {dT:+.0f}")
-        linhas.append(f"- Multiplicador realizado: ΔY/ΔT = {dY/dT:.3f}" if dT != 0 else "")
+        linhas.append(f"- Multiplicador realizado: ΔY/ΔT = {dY/dT:.3f}"if dT != 0 else "")
         linhas.append(f"- Multiplicador teórico: {mult_t:.3f}")
         linhas.append(f"- Transmissão: ↑T → ↓Yd → ↓C → IS desloca esquerda → ↓Y, ↓r")
 

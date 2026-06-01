@@ -13,9 +13,9 @@ from ui.escolas.classica_ui import _card
 
 
 def render() -> None:
-    st.subheader("🔴 Escola Monetarista — Regras, Expectativas e Taxa Natural")
+    st.subheader("Escola Monetarista — Regras, Expectativas e Taxa Natural")
 
-    with st.expander("📖 Fundamentos da Escola Monetarista", expanded=False):
+    with st.expander("Fundamentos da Escola Monetarista", expanded=False):
         st.markdown("""
 | Princípio | Descrição |
 |---|---|
@@ -30,23 +30,23 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════════
     # CONTROLES
     # ══════════════════════════════════════════════════════════════
-    st.markdown("### ⚙️ Parâmetros")
+    st.markdown("### Parâmetros")
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown("**🏦 Política Monetária**")
+        st.markdown("** Política Monetária**")
         M_crescimento = st.slider("Crescimento de M (%/ano)", 0.0, 30.0, 5.0, 0.5, key="mn_dM",
                                   help="Regra de Friedman: manter crescimento fixo de M")
         pi_esperada   = st.slider("Inflação Esperada (πᵉ %)", 0.0, 20.0, 3.0, 0.5, key="mn_pie")
 
     with col2:
-        st.markdown("**📊 Estrutura**")
+        st.markdown("** Estrutura**")
         u_natural = st.slider("Taxa Natural de Desemprego (uₙ %)", 2.0, 10.0, 5.0, 0.5, key="mn_un")
         Yn        = st.slider("Produto Potencial (Yₙ)", 500.0, 2000.0, 1200.0, 50.0, key="mn_Yn")
         beta      = st.slider("β — Sensib. Phillips a u", 0.5, 3.0, 1.5, 0.1, key="mn_beta")
 
     with col3:
-        st.markdown("**🔄 Expectativas**")
+        st.markdown("** Expectativas**")
         lambda_adapt = st.slider("λ — Velocidade de Adaptação", 0.1, 1.0, 0.5, 0.05, key="mn_lambda",
                                  help="λ=1: expectativas se ajustam totalmente em 1 período")
         u_atual   = st.slider("Desemprego Atual (u %)", 1.0, 15.0, 4.0, 0.5, key="mn_u")
@@ -81,7 +81,7 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════════
     # MÉTRICAS
     # ══════════════════════════════════════════════════════════════
-    st.markdown("### 📊 Indicadores Monetaristas")
+    st.markdown("### Indicadores Monetaristas")
     pi_atual = pi_esperada - beta * (u_atual - u_natural)
     m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Inflação Atual (π)",         f"{pi_atual:.2f}%")
@@ -92,7 +92,7 @@ def render() -> None:
 
     if u_atual < u_natural:
         st.warning(
-            f"⚠️ **Armadilha de Friedman:** manter u = {u_atual:.1f}% < uₙ = {u_natural:.1f}% "
+            f" **Armadilha de Friedman:** manter u = {u_atual:.1f}% < uₙ = {u_natural:.1f}% "
             f"requer inflação crescente. No longo prazo, u retorna a uₙ com inflação mais alta."
         )
 
@@ -178,10 +178,10 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════════
     # ANÁLISE NARRATIVA
     # ══════════════════════════════════════════════════════════════
-    st.markdown("### 📝 Análise Monetarista")
+    st.markdown("### Análise Monetarista")
 
     _card(
-        "📉 1. A Curva de Phillips Acelerada",
+        " 1. A Curva de Phillips Acelerada",
         f"No curto prazo, com πᵉ = {pi_esperada:.1f}%, manter u = {u_atual:.1f}% gera π = {pi_atual:.1f}%. "
         f"Mas as expectativas se adaptam (λ = {lambda_adapt:.2f}): πᵉ sobe para acomodar a inflação realizada. "
         f"Para manter u abaixo de uₙ = {u_natural:.1f}%, é preciso sempre surpreender os agentes com mais inflação — "
@@ -189,7 +189,7 @@ def render() -> None:
         "red",
     )
     _card(
-        "🏦 2. A Regra de Friedman",
+        " 2. A Regra de Friedman",
         f"Friedman propôs que o BC adote uma regra fixa de crescimento monetário "
         f"(ex: ΔM = {M_crescimento:.1f}%/ano), em vez de política discricionária. "
         f"Razões: (1) defasagens longas e variáveis tornam a política ativa desestabilizadora; "
@@ -198,7 +198,7 @@ def render() -> None:
         "blue",
     )
     _card(
-        "🔄 3. Expectativas Adaptativas",
+        " 3. Expectativas Adaptativas",
         f"Com λ = {lambda_adapt:.2f}, os agentes revisam πᵉ corrigindo {lambda_adapt*100:.0f}% "
         f"do erro do período anterior. "
         f"Se π > πᵉ consistentemente, πᵉ converge gradualmente para π. "
@@ -211,8 +211,8 @@ def render() -> None:
     # ABAS ANALÍTICAS
     # ══════════════════════════════════════════════════════════════
     st.divider()
-    st.subheader("🔬 Aprofundamento Teórico")
-    aba1, aba2 = st.tabs(["📐 Curva de Phillips Acelerada", "📘 Debate Regras vs. Discrição"])
+    st.subheader("Aprofundamento Teórico")
+    aba1, aba2 = st.tabs(["Curva de Phillips Acelerada", "Debate Regras vs. Discrição"])
 
     with aba1:
         st.latex(r"\pi = \pi^e - \beta(u - u_n)")
@@ -230,7 +230,7 @@ Não existe trade-off permanente entre inflação e desemprego.
         st.markdown("""
 **Argumentos pró-regras (Friedman/Monetaristas):**
 - Defasagens: efeitos da política chegam com 6-18 meses de atraso.
-- Inconsistência temporal: governo tem incentivo a sempre "enganar" os agentes.
+- Inconsistência temporal: governo tem incentivo a sempre "enganar"os agentes.
 - Credibilidade: regras ancoram expectativas e reduzem custos de desinflação.
 
 **Argumentos pró-discrição (Keynesianos):**

@@ -1,4 +1,4 @@
-# pages/2_🏛️_Escolas_Economicas.py
+# pages/2__Escolas_Economicas.py
 import streamlit as st
 from ui.design import aplicar_design, page_header
 from ui.escolas.classica_ui       import render as render_classica
@@ -7,7 +7,7 @@ from ui.escolas.monetarista_ui    import render as render_monetarista
 from ui.escolas.pos_keynesiana_ui import render as render_pos_keynesiana
 from ui.escolas.comparativo_ui    import render as render_comparativo
 
-st.set_page_config(page_title="Escolas Econômicas — LBEX", page_icon="🏛️", layout="wide")
+st.set_page_config(page_title="Escolas Econômicas — LBEX", page_icon="", layout="wide")
 aplicar_design()
 
 page_header(
@@ -18,13 +18,13 @@ page_header(
 # ── Seletor de escola ─────────────────────────────────────────────
 ESCOLAS = ["Clássica", "Keynesiana", "Monetarista", "Pós-Keynesiana", "Comparativo"]
 
-if "escola_sel" not in st.session_state:
+if "escola_sel"not in st.session_state:
     st.session_state.escola_sel = "Clássica"
 
 cols = st.columns(len(ESCOLAS), gap="small")
 for col, nome in zip(cols, ESCOLAS):
     with col:
-        tipo = "primary" if st.session_state.escola_sel == nome else "secondary"
+        tipo = "primary"if st.session_state.escola_sel == nome else "secondary"
         if st.button(nome, use_container_width=True, type=tipo, key=f"btn_{nome}"):
             st.session_state.escola_sel = nome
 

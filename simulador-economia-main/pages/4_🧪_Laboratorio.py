@@ -1,8 +1,8 @@
-# pages/4_🧪_Laboratorio.py
+# pages/4__Laboratorio.py
 import streamlit as st
 from ui.design import aplicar_design, page_header, section_label, divider
 
-st.set_page_config(page_title="Laboratório — LBEX", page_icon="🧪", layout="wide")
+st.set_page_config(page_title="Laboratório — LBEX", page_icon="", layout="wide")
 aplicar_design()
 
 page_header(
@@ -41,7 +41,7 @@ for col, (titulo, desc, cor) in zip(cols, BANCADAS):
 <div class="lbex-card card-{cor}">
     <div class="card-titulo">{titulo}</div>
     <div class="card-desc">{desc}</div>
-    <span class="card-tag tag-{cor}">{"Em desenvolvimento" if cor == "slate" else "Em breve"}</span>
+    <span class="card-tag tag-{cor}">{"Em desenvolvimento"if cor == "slate"else "Em breve"}</span>
 </div>
 """, unsafe_allow_html=True)
 

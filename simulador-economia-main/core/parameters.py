@@ -39,5 +39,5 @@ DEFAULT_PARAMS = {
     "Y_star": 1500.0, # renda externa
     "e":     1.0,     # taxa de câmbio nominal (unidades domésticas/estrangeira)
     "e_fixed": 1.0,   # câmbio fixo de referência
-    "regime": "flex", # "flex" ou "fixo"
+    "regime": "flex", # "flex"ou "fixo"
 }

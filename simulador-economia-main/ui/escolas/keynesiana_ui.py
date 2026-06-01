@@ -13,9 +13,9 @@ from ui.escolas.classica_ui import _card
 
 
 def render() -> None:
-    st.subheader("📊 Escola Keynesiana — Demanda Efetiva Determina o Produto")
+    st.subheader("Escola Keynesiana — Demanda Efetiva Determina o Produto")
 
-    with st.expander("📖 Fundamentos da Escola Keynesiana", expanded=False):
+    with st.expander("Fundamentos da Escola Keynesiana", expanded=False):
         st.markdown("""
 | Princípio | Descrição |
 |---|---|
@@ -30,23 +30,23 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════════
     # CONTROLES
     # ══════════════════════════════════════════════════════════════
-    st.markdown("### ⚙️ Parâmetros")
+    st.markdown("### Parâmetros")
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown("**🏛️ Política Fiscal**")
+        st.markdown("** Política Fiscal**")
         G  = st.slider("Gasto do Governo (G)",    0.0, 100.0, 30.0, 1.0, key="kn_G")
         T  = st.slider("Impostos (T)",             0.0,  80.0, 20.0, 1.0, key="kn_T")
         TR = st.slider("Transferências (TR)",      0.0,  50.0, 10.0, 1.0, key="kn_TR")
 
     with col2:
-        st.markdown("**🏠 Setor Privado**")
+        st.markdown("** Setor Privado**")
         C0  = st.slider("Consumo Autônomo (C₀)",            0.0,  80.0, 20.0, 1.0,  key="kn_C0")
         mpc = st.slider("Propensão Marginal a Consumir (c)", 0.50, 0.95, 0.75, 0.01, key="kn_mpc")
         I0  = st.slider("Investimento Autônomo (I₀)",       0.0,  80.0, 25.0, 1.0,  key="kn_I0")
 
     with col3:
-        st.markdown("**💹 Juros e Referências**")
+        st.markdown("** Juros e Referências**")
         taxa_juros = st.slider("Taxa de Juros (r)", 0.0, 0.20, 0.05, 0.005,
                                format="%.3f", key="kn_r")
         b_inv      = st.slider("Sensibilidade Inv. a r (b)", 0.0, 200.0, 50.0, 5.0, key="kn_b")
@@ -92,12 +92,12 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════════
     # MÉTRICAS
     # ══════════════════════════════════════════════════════════════
-    st.markdown("### 📊 Equilíbrio Keynesiano")
+    st.markdown("### Equilíbrio Keynesiano")
     m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Produto de Equilíbrio (Y*)", f"{Y_eq:.1f}")
     m2.metric("Produto Potencial (Ȳ)",      f"{Y_pleno:.1f}")
     m3.metric("Hiato do Produto",           f"{hiato:+.1f}",
-              delta_color="normal" if hiato >= 0 else "inverse")
+              delta_color="normal"if hiato >= 0 else "inverse")
     m4.metric("Multiplicador Keynesiano",   f"{multiplicador:.2f}×")
     m5.metric("Desemprego Estimado",        f"{u_eq*100:.1f}%",
               delta=f"{(u_eq - u_natural)*100:+.1f}pp vs natural",
@@ -198,7 +198,7 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════════
     # ANÁLISE NARRATIVA
     # ══════════════════════════════════════════════════════════════
-    st.markdown("### 📝 Análise Completa da Situação Econômica")
+    st.markdown("### Análise Completa da Situação Econômica")
 
     narrativa_demanda = (
         f"C₀ = {C0:.1f}, c = {mpc:.2f} → cada R$ 1 de renda disponível: "
@@ -214,7 +214,7 @@ def render() -> None:
     )
 
     if abs(hiato) < 5:
-        cor_hiato = "✅"
+        cor_hiato = ""
         narrativa_hiato = (
             f"Y* = {Y_eq:.1f} ≈ Ȳ = {Y_pleno:.1f} (hiato = {hiato:+.1f}, {hiato_pct:+.1f}%). "
             f"Economia próxima ao pleno emprego. Desemprego estimado: {u_eq*100:.1f}% "
@@ -223,7 +223,7 @@ def render() -> None:
         politica_rec = "Nenhuma intervenção fiscal urgente necessária."
         cor_politica = "green"
     elif hiato < -5:
-        cor_hiato = "🔴"
+        cor_hiato = ""
         G_nec = abs(hiato) / mult_G
         T_nec = abs(hiato) / abs(mult_T)
         narrativa_hiato = (
@@ -240,7 +240,7 @@ def render() -> None:
         )
         cor_politica = "red"
     else:
-        cor_hiato = "🟡"
+        cor_hiato = ""
         G_corte = hiato / mult_G
         narrativa_hiato = (
             f"**Superaquecimento:** Y* = {Y_eq:.1f} supera Ȳ = {Y_pleno:.1f} em +{hiato:.1f} "
@@ -253,10 +253,10 @@ def render() -> None:
         )
         cor_politica = "orange"
 
-    _card("📦 1. Composição da Demanda Agregada",   narrativa_demanda,      "blue")
-    _card("⚙️ 2. Multiplicador Keynesiano e Equilíbrio", narrativa_multiplicador, "purple")
-    _card(f"{cor_hiato} 3. Hiato do Produto e Desemprego", narrativa_hiato,  "green" if abs(hiato) < 5 else "red" if hiato < -5 else "orange")
-    _card("🏛️ 4. Recomendação de Política Econômica",
+    _card(" 1. Composição da Demanda Agregada",   narrativa_demanda,      "blue")
+    _card(" 2. Multiplicador Keynesiano e Equilíbrio", narrativa_multiplicador, "purple")
+    _card(f"{cor_hiato} 3. Hiato do Produto e Desemprego", narrativa_hiato,  "green"if abs(hiato) < 5 else "red"if hiato < -5 else "orange")
+    _card(" 4. Recomendação de Política Econômica",
           f"{politica_rec}<br><br>"
           f"Multiplicadores: ΔG → <b>{mult_G:.2f}×</b> | "
           f"ΔT → <b>{mult_T:.2f}×</b> | ΔTR → <b>{mult_TR:.2f}×</b>",
@@ -266,11 +266,11 @@ def render() -> None:
     # ABAS ANALÍTICAS
     # ══════════════════════════════════════════════════════════════
     st.divider()
-    st.subheader("🔬 Aprofundamento Teórico")
+    st.subheader("Aprofundamento Teórico")
     aba1, aba2, aba3 = st.tabs([
-        "📐 Cruz Keynesiana",
-        "⚡ Multiplicador",
-        "📘 Rigidez de Preços",
+        "Cruz Keynesiana",
+        "Multiplicador",
+        "Rigidez de Preços",
     ])
 
     with aba1:
@@ -303,6 +303,6 @@ def render() -> None:
 4. **Ilusão monetária:** trabalhadores resistem a cortes nominais mesmo com deflação.
 5. **Poder de barganha sindical:** pisos salariais institucionalizados.
 
-> 📌 Consequência: quando a demanda cai, a economia não volta automaticamente ao
+>  Consequência: quando a demanda cai, a economia não volta automaticamente ao
 > pleno emprego — fica presa num equilíbrio com desemprego involuntário.
 """)

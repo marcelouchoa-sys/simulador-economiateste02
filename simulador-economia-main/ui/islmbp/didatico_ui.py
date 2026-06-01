@@ -15,17 +15,17 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════
     # PAINEL DE CONFIGURAÇÃO — inline, acima do gráfico
     # ══════════════════════════════════════════════════════════
-    with st.expander("⚙️ Configurar Simulação", expanded=not st.session_state.get("did_ok", False)):
+    with st.expander("Configurar Simulação", expanded=not st.session_state.get("did_ok", False)):
 
         c1, c2, c3, c4, c5 = st.columns([1, 1, 1, 1, 1])
 
         with c1:
-            st.markdown("**🌐 Economia**")
+            st.markdown("** Economia**")
             tipo_eco = st.radio("Tipo:", ["Fechada", "Aberta"],
                                 key="did_eco", label_visibility="collapsed")
 
         with c2:
-            st.markdown("**🔀 Regime**")
+            st.markdown("** Regime**")
             if tipo_eco == "Aberta":
                 regime = st.radio("Regime:", ["Flexível", "Fixo"],
                                   key="did_reg", label_visibility="collapsed")
@@ -34,17 +34,17 @@ def render() -> None:
                 regime = "Flexível"
 
         with c3:
-            st.markdown("**🏛️ Política**")
+            st.markdown("** Política**")
             politica = st.radio("Política:", ["Fiscal", "Monetária"],
                                 key="did_pol", label_visibility="collapsed")
 
         with c4:
-            st.markdown("**📈 Direção**")
+            st.markdown("** Direção**")
             direcao = st.radio("Direção:", ["Expansionista", "Contracionista"],
                                key="did_dir", label_visibility="collapsed")
 
         with c5:
-            st.markdown("**💱 Mobilidade de Capital**")
+            st.markdown("** Mobilidade de Capital**")
             if tipo_eco == "Aberta":
                 mob_opts    = ["Nula", "Baixa", "Alta", "Perfeita"]
                 default_mob = st.session_state.get("settings", {}).get("mobilidade_capital", "Alta")
@@ -53,7 +53,7 @@ def render() -> None:
                 sel_mob = st.radio("Mobilidade:", mob_opts,
                                    index=mob_opts.index(default_mob),
                                    key="did_mob", label_visibility="collapsed")
-                if "settings" not in st.session_state:
+                if "settings"not in st.session_state:
                     st.session_state["settings"] = {}
                 st.session_state["settings"]["mobilidade_capital"] = sel_mob
             else:
@@ -82,7 +82,7 @@ def render() -> None:
     if tipo_eco_s == "Aberta":
         eco_str += f" · {regime_s} · Mobilidade {mob_s}"
     st.caption(
-        f"🔵 Configuração ativa: **{eco_str}** | "
+        f"Configuração ativa: **{eco_str}** | "
         f"Política **{politica_s} {direcao_s}**"
     )
 
@@ -102,13 +102,13 @@ def render() -> None:
         # Legenda de pontos
         if etapa >= 1:
             lc1, lc2, lc3 = st.columns(3)
-            lc1.info("🔵 **A** — Equilíbrio inicial")
-            if etapa >= 1: lc2.warning("🟡 **B** — Desequilíbrio transitório")
-            if etapa >= 2: lc3.success("🟢 **C** — Novo equilíbrio")
+            lc1.info(" **A** — Equilíbrio inicial")
+            if etapa >= 1: lc2.warning(" **B** — Desequilíbrio transitório")
+            if etapa >= 2: lc3.success(" **C** — Novo equilíbrio")
 
         # Comparativo das 4 BPs (apenas economia aberta)
         if tipo_eco_s == "Aberta":
-            with st.expander("📊 Ver comparação de todos os graus de mobilidade", expanded=False):
+            with st.expander("Ver comparação de todos os graus de mobilidade", expanded=False):
                 fig_bp = grafico_multiplas_bp(politica_s, direcao_s, tipo_eco_s, regime_s)
                 st.plotly_chart(fig_bp, use_container_width=True)
                 st.caption(
@@ -125,17 +125,17 @@ def render() -> None:
 # ══════════════════════════════════════════════════════════════
 
 def _tela_boas_vindas() -> None:
-    st.markdown("### 🎓 Como usar o Modo Didático")
+    st.markdown("### Como usar o Modo Didático")
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.info("**1️⃣ Configure** acima:\n- Tipo de economia\n- Política e direção\n- Mobilidade de capital")
+        st.info("**1⃣ Configure** acima:\n- Tipo de economia\n- Política e direção\n- Mobilidade de capital")
     with col2:
-        st.info("**2️⃣ Simule** clicando em **▶ Simular**")
+        st.info("**2⃣ Simule** clicando em **▶ Simular**")
     with col3:
-        st.info("**3️⃣ Navegue** pelas etapas A → B → C\ne leia as explicações")
+        st.info("**3⃣ Navegue** pelas etapas A → B → C\ne leia as explicações")
 
     st.markdown("---")
-    st.markdown("#### 📐 O que você vai ver")
+    st.markdown("####  O que você vai ver")
     st.markdown("""
 | Etapa | O que acontece |
 |---|---|
@@ -173,12 +173,12 @@ def _barra_progresso(etapa: int) -> None:
     cols = st.columns(3)
     for i, (col, (lbl, cor_cls)) in enumerate(zip(cols, ETAPAS)):
         ativo  = (i == etapa)
-        bullet = "●" if ativo else "○"
-        bold   = "**" if ativo else ""
+        bullet = "●"if ativo else "○"
+        bold   = "**"if ativo else ""
         with col:
             st.markdown(
                 f'<div class="etapa-card {cor_cls if ativo else ""}" '
-                f'style="opacity:{"1" if i <= etapa else "0.35"}; padding:8px 12px;">'
+                f'style="opacity:{"1"if i <= etapa else "0.35"}; padding:8px 12px;">'
                 f'{bold}{bullet} {lbl}{bold}</div>',
                 unsafe_allow_html=True,
             )
@@ -214,7 +214,7 @@ def _painel_explicativo(politica, direcao, tipo_eco, regime, mob_s, etapa) -> No
     st.markdown("")
 
     for subtitulo, conteudo in txt["blocos"]:
-        with st.expander(f"📖 {subtitulo}", expanded=True):
+        with st.expander(f"{subtitulo}", expanded=True):
             st.markdown(conteudo)
 
     if etapa == 2:
@@ -233,11 +233,11 @@ def _painel_conclusao(politica, direcao, tipo_eco, regime, mob_s) -> None:
     fn = fn_map.get(conc["veredicto"], st.info)
     fn(f"**{conc['emoji']} Conclusão — {conc['titulo']}**")
 
-    with st.expander("📝 Por que a política foi (in)eficaz?", expanded=True):
+    with st.expander("Por que a política foi (in)eficaz?", expanded=True):
         st.markdown(conc["razao"])
-    with st.expander("🔗 Canal econômico dominante", expanded=True):
+    with st.expander("Canal econômico dominante", expanded=True):
         st.markdown(conc["canal"])
-    with st.expander("🔄 E se fosse diferente? (Contrafactual)", expanded=False):
+    with st.expander("E se fosse diferente? (Contrafactual)", expanded=False):
         st.markdown(conc["contrafactual"])
 
-    fn(f"📌 {conc['licao']}")
+    fn(f" {conc['licao']}")

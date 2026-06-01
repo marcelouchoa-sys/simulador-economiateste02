@@ -1,6 +1,6 @@
 # ui/funcoes/oferta_agregada_ui.py
 """
-Aba Oferta Agregada — extraída de pages/1_📚_Funcoes.py
+Aba Oferta Agregada — extraída de pages/1__Funcoes.py
 Expõe render() para ser chamada pela página principal.
 """
 
@@ -16,7 +16,7 @@ P_GRID = np.linspace(0.2, 3.5, 300)
 
 
 def render() -> None:
-    st.subheader("📦 Oferta Agregada — Curto e Longo Prazo")
+    st.subheader("Oferta Agregada — Curto e Longo Prazo")
     st.markdown(
         "A Oferta Agregada mostra a relação entre o nível de preços $P$ e o produto $Y$ "
         "que as firmas estão dispostas a ofertar. "
@@ -38,7 +38,7 @@ def render() -> None:
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        st.subheader("🛠️ Parâmetros")
+        st.subheader("Parâmetros")
 
         Pe    = st.slider("Expectativa de Preços (Pᵉ)", 0.5, 3.0, 1.0, 0.1,
                           help="Nível de preços esperado pelos trabalhadores ao negociar salários")
@@ -48,14 +48,14 @@ def render() -> None:
                           help="Quanto Y precisa variar para mover P em 1 unidade. α grande → OA mais plana")
 
         st.divider()
-        st.markdown("**📍 Choque de Oferta**")
+        st.markdown("** Choque de Oferta**")
         dPe   = st.slider("ΔPᵉ (choque de expectativas)", -0.5, 1.0, 0.0, 0.1,
                           help="Choque de expectativas inflacionárias")
         dYn   = st.slider("ΔYₙ (choque de produtividade)", -200.0, 200.0, 0.0, 20.0,
                           help="Mudança no produto potencial via tecnologia ou capital")
 
         st.divider()
-        st.markdown("**🎯 Produto Atual**")
+        st.markdown("** Produto Atual**")
         Y_atual = st.slider("Y atual", 500.0, 2000.0, 1100.0, 50.0)
 
         # Cálculos
@@ -65,10 +65,10 @@ def render() -> None:
         hiato_choque   = hiato_produto(Y_atual, Yn + dYn)
 
         st.divider()
-        st.subheader("📊 Indicadores")
+        st.subheader("Indicadores")
         st.metric("Hiato do Produto (Y−Yₙ)", f"{hiato_base:+.0f}",
-                  delta="Inflacionário" if hiato_base > 0 else "Recessivo",
-                  delta_color="inverse" if hiato_base > 0 else "normal")
+                  delta="Inflacionário"if hiato_base > 0 else "Recessivo",
+                  delta_color="inverse"if hiato_base > 0 else "normal")
         st.metric("P na OA base (Y atual)",   f"{P_oa_base[0]:.3f}")
         st.metric("P na OA choque",           f"{P_oa_choque[0]:.3f}",
                   delta=f"{P_oa_choque[0]-P_oa_base[0]:+.3f}")
@@ -100,7 +100,7 @@ def render() -> None:
             x=[Y_atual], y=[P_oa_base[0]],
             mode="markers+text", name="Situação atual",
             marker=dict(size=13, color="#FF9800", symbol="star"),
-            text=[f" Y={Y_atual:.0f}<br> P={P_oa_base[0]:.2f}"],
+            text=[f"Y={Y_atual:.0f}<br> P={P_oa_base[0]:.2f}"],
             textposition="top right",
         ), row=1, col=1)
         # Linha Pe
@@ -143,7 +143,7 @@ def render() -> None:
         st.plotly_chart(fig, use_container_width=True)
 
         # ── Gráfico: α e inclinação da OA ────────────────────────
-        st.subheader("📊 Sensibilidade α e Inclinação da OA")
+        st.subheader("Sensibilidade α e Inclinação da OA")
         alpha_range = np.linspace(10, 500, 200)
         inclinacao  = 1 / alpha_range  # dP/dY = 1/alpha
 
@@ -162,12 +162,12 @@ def render() -> None:
     # ABAS ANALÍTICAS
     # ══════════════════════════════════════════════════════════════
     st.divider()
-    st.subheader("🔬 Decomposição Analítica")
+    st.subheader("Decomposição Analítica")
 
     aba1, aba2, aba3 = st.tabs([
-        "📐 Curto vs Longo Prazo",
-        "⚡ Choques de Oferta",
-        "📘 Teoria Completa",
+        "Curto vs Longo Prazo",
+        "Choques de Oferta",
+        "Teoria Completa",
     ])
 
     with aba1:
@@ -187,7 +187,7 @@ Quando $P > P^e$: firmas percebem que seus preços subiram mais do que os custos
 **Situação atual:**
 - Hiato = $Y - Y_n = {Y_atual:.0f} - {Yn:.0f}$ = **{hiato_base:+.0f}**
 - P na OA = $P^e + hiato/\\alpha = {Pe:.2f} + {hiato_base/alpha:.3f}$ = **{P_oa_base[0]:.3f}**
-- {"⚠️ Economia **acima do potencial** → pressão inflacionária" if hiato_base > 0 else "⚠️ Economia **abaixo do potencial** → pressão deflacionária" if hiato_base < 0 else "✅ Economia **no potencial**"}
+- {"Economia **acima do potencial** → pressão inflacionária"if hiato_base > 0 else "Economia **abaixo do potencial** → pressão deflacionária"if hiato_base < 0 else "Economia **no potencial**"}
 """)
         st.markdown("**OA de Longo Prazo:**")
         st.latex(rf"Y = Y_n = {Yn:.0f}")
@@ -210,16 +210,16 @@ A OA LP é **vertical** — política de demanda não afeta Y no longo prazo.
 | ↑ Custo de insumos | Desloca CP para **cima/esquerda** | Choque do petróleo |
 
 **Com os choques atuais:**
-- ΔPᵉ = {dPe:+.1f}: OA desloca {"para cima (inflação maior)" if dPe > 0 else "para baixo (desinflação)" if dPe < 0 else "sem efeito"}
-- ΔYₙ = {dYn:+.0f}: produto potencial {"aumenta" if dYn > 0 else "cai" if dYn < 0 else "inalterado"}
+- ΔPᵉ = {dPe:+.1f}: OA desloca {"para cima (inflação maior)"if dPe > 0 else "para baixo (desinflação)"if dPe < 0 else "sem efeito"}
+- ΔYₙ = {dYn:+.0f}: produto potencial {"aumenta"if dYn > 0 else "cai"if dYn < 0 else "inalterado"}
 - Efeito em P (em Y={Y_atual:.0f}): {P_oa_base[0]:.3f} → **{P_oa_choque[0]:.3f}** (Δ = {P_oa_choque[0]-P_oa_base[0]:+.3f})
 
-> 📌 **Estagflação**: choque negativo de oferta (OA sobe) com DA inalterada →
+>  **Estagflação**: choque negativo de oferta (OA sobe) com DA inalterada →
 > P↑ e Y↓ simultaneamente — o pior dos mundos para a política econômica.
 """)
 
     with aba3:
-        st.markdown("### 📘 Teoria Completa da Oferta Agregada")
+        st.markdown("### Teoria Completa da Oferta Agregada")
         st.markdown("#### 1. Por que existem duas OAs?")
         st.markdown("""
 **A distinção curto/longo prazo** é central na macroeconomia moderna:
@@ -237,7 +237,7 @@ A velocidade de convergência depende da **credibilidade do BC**, da
 A OA de curto prazo é equivalente à **Curva de Phillips aumentada por expectativas**:
 inflação acima da esperada quando Y > Yₙ (hiato positivo).
 """)
-        st.markdown("#### 3. 📐 Resumo das Equações")
+        st.markdown("#### 3.  Resumo das Equações")
         st.latex(r"P = P^e + \frac{1}{\alpha}(Y - Y_n) \quad \text{(OA CP)}")
         st.latex(r"Y = Y_n \quad \text{(OA LP)}")
         st.latex(r"\text{Hiato} = Y - Y_n \quad \Rightarrow \quad P = P^e + \frac{\text{Hiato}}{\alpha}")

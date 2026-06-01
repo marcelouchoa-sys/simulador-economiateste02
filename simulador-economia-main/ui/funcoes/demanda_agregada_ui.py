@@ -1,6 +1,6 @@
 # ui/funcoes/demanda_agregada_ui.py
 """
-Aba Demanda Agregada — extraída de pages/1_📚_Funcoes.py
+Aba Demanda Agregada — extraída de pages/1__Funcoes.py
 Expõe render() para ser chamada pela página principal.
 """
 
@@ -15,7 +15,7 @@ P_GRID = np.linspace(0.2, 3.5, 300)
 
 
 def render() -> None:
-    st.subheader("📉 Demanda Agregada — O Locus IS-LM")
+    st.subheader("Demanda Agregada — O Locus IS-LM")
     st.markdown(
         "A curva DA é derivada analiticamente do modelo IS-LM. "
         "Para cada nível de preços $P$, ela mostra o produto $Y$ que equilibra "
@@ -38,25 +38,25 @@ def render() -> None:
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        st.subheader("🛠️ Parâmetros")
+        st.subheader("Parâmetros")
 
-        st.markdown("**🏠 Demanda Privada**")
+        st.markdown("** Demanda Privada**")
         c0 = st.slider("c₀ — Consumo Autônomo",    50.0,  300.0, 100.0, 10.0)
         c1 = st.slider("c₁ — Propensão a Consumir", 0.5,   0.95,  0.75,  0.01)
         I0 = st.slider("I₀ — Invest. Autônomo",    50.0,  400.0, 200.0, 10.0)
         b  = st.slider("b — Sensib. I a r",         10.0, 150.0,  50.0,  5.0)
 
-        st.markdown("**🏛️ Política Fiscal**")
+        st.markdown("** Política Fiscal**")
         G  = st.slider("G — Gastos do Governo",  100.0, 800.0, 300.0, 10.0)
         T  = st.slider("T — Impostos",            50.0, 500.0, 200.0, 10.0)
 
-        st.markdown("**💰 Política Monetária**")
+        st.markdown("** Política Monetária**")
         M  = st.slider("M — Oferta de Moeda",   200.0, 2000.0, 1000.0, 50.0)
         k  = st.slider("k — Sensib. Md a Y",      0.1,   1.0,    0.5,  0.05)
         h  = st.slider("h — Sensib. Md a r",     10.0, 300.0,  100.0, 10.0)
 
         st.divider()
-        st.markdown("**📍 Choque para Comparação**")
+        st.markdown("** Choque para Comparação**")
         dG = st.slider("ΔG (choque fiscal)",    -200.0, 200.0, 100.0, 10.0)
         dM = st.slider("ΔM (choque monetário)", -500.0, 500.0, 200.0, 50.0)
 
@@ -70,7 +70,7 @@ def render() -> None:
         )[0]
 
         st.divider()
-        st.subheader("📊 Indicadores (P = 1)")
+        st.subheader("Indicadores (P = 1)")
         st.metric("Y* base",   f"{Y_P1:.1f}")
         st.metric("Y* choque", f"{Y_P1_choque:.1f}",
                   delta=f"{Y_P1_choque - Y_P1:+.1f}")
@@ -146,7 +146,7 @@ def render() -> None:
         st.plotly_chart(fig, use_container_width=True)
 
         # ── Gráfico: sensibilidade do multiplicador ───────────────
-        st.subheader("📊 Multiplicador IS-LM vs Multiplicador Keynesiano Simples")
+        st.subheader("Multiplicador IS-LM vs Multiplicador Keynesiano Simples")
         c1_range = np.linspace(0.5, 0.95, 200)
         mult_simples = 1 / (1 - c1_range)
         mult_islm    = mult_simples / (1 + mult_simples * b * k / h)
@@ -168,12 +168,12 @@ def render() -> None:
     # ABAS ANALÍTICAS
     # ══════════════════════════════════════════════════════════════
     st.divider()
-    st.subheader("🔬 Decomposição Analítica")
+    st.subheader("Decomposição Analítica")
 
     aba1, aba2, aba3 = st.tabs([
-        "📐 Derivação da DA",
-        "🔀 Deslocadores da DA",
-        "📘 Teoria Completa",
+        "Derivação da DA",
+        "Deslocadores da DA",
+        "Teoria Completa",
     ])
 
     with aba1:
@@ -194,7 +194,7 @@ def render() -> None:
 - Denominador IS-LM = $1 + {mult:.3f}\\times{b:.0f}\\times{k:.2f}/{h:.0f}$ = **{denom:.3f}**
 - **$Y^* = {Y_P1:.1f}$**
 
-> 📌 O denominador IS-LM é sempre **maior que 1** — o multiplicador IS-LM
+>  O denominador IS-LM é sempre **maior que 1** — o multiplicador IS-LM
 > é sempre **menor** que o multiplicador keynesiano simples,
 > porque o aumento de Y eleva a demanda por moeda e os juros,
 > o que reduz o investimento (crowding-out parcial).
@@ -213,7 +213,7 @@ def render() -> None:
 | ↑ I₀ (animal spirits) | Direita | ↑ Y para todo P | Demanda privada autônoma |
 | ↑ P | Movimento ao longo | ↓ Y | M/P↓ → LM sobe → r↑ → I↓ |
 
-> ⚠️ Variação de **P** é movimento **ao longo** da DA.
+>  Variação de **P** é movimento **ao longo** da DA.
 > Variação de **G, M, T, c₁, I₀** é **deslocamento** da DA.
 """)
         Y_P1_fiscal = resolver_da(np.array([1.0]), c0, c1, T, I0, b, G+dG, k, h, M)[0]
@@ -227,7 +227,7 @@ def render() -> None:
 """)
 
     with aba3:
-        st.markdown("### 📘 Teoria Completa da Demanda Agregada")
+        st.markdown("### Teoria Completa da Demanda Agregada")
         st.markdown("""
 #### Por que a DA tem inclinação negativa?
 
@@ -244,7 +244,7 @@ O canal dominante no modelo IS-LM é o **Efeito Keynes**.
             r"-\frac{\text{mult} \cdot b \cdot M}{h \cdot P^2 \cdot (1 + \text{mult} \cdot b \cdot k/h)}"
             r"< 0"
         )
-        st.markdown("#### 📐 Resumo das Equações")
+        st.markdown("####  Resumo das Equações")
         st.latex(
             r"Y^{DA} = \frac{\text{mult} \cdot A + \text{mult} \cdot b \cdot M/(hP)}"
             r"{1 + \text{mult} \cdot b \cdot k/h}"

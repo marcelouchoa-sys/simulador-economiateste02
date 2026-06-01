@@ -1,6 +1,6 @@
 # ui/funcoes/oferta_moeda_ui.py
 """
-Aba Oferta de Moeda — extraída de pages/1_📚_Funcoes.py
+Aba Oferta de Moeda — extraída de pages/1__Funcoes.py
 Expõe render() para ser chamada pela página principal.
 """
 
@@ -16,7 +16,7 @@ R_GRID = np.linspace(0, 20, 300)
 
 
 def render() -> None:
-    st.subheader("🏦 Oferta de Moeda — Banco Central e Criação Monetária")
+    st.subheader("Oferta de Moeda — Banco Central e Criação Monetária")
     st.markdown(
         "Explore como a oferta de moeda é determinada e como "
         "diferentes regimes monetários afetam o equilíbrio no mercado de moeda."
@@ -36,19 +36,19 @@ def render() -> None:
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        st.subheader("🛠️ Parâmetros")
+        st.subheader("Parâmetros")
 
         M  = st.slider("Oferta Nominal de Moeda (M)", 100.0, 3000.0, 1000.0, 50.0,
                        help="Controlada pelo Banco Central via operações de mercado aberto")
         P  = st.slider("Nível de Preços (P)", 0.5, 3.0, 1.0, 0.1,
                        help="Divide M para obter a oferta real Ms/P")
 
-        st.markdown("**🏛️ Regime Monetário**")
+        st.markdown("** Regime Monetário**")
         regime = st.radio("Regime:", ["Exógena", "Endógena"], horizontal=True,
                           help="Exógena: BC controla M diretamente. Endógena: M responde ao crédito.")
 
         st.divider()
-        st.markdown("**📍 Demanda por Moeda (para comparação)**")
+        st.markdown("** Demanda por Moeda (para comparação)**")
         k   = st.slider("k — Sensibilidade a Y", 0.1, 1.0, 0.5, 0.05)
         h   = st.slider("h — Sensibilidade a r", 10.0, 300.0, 100.0, 10.0)
         Y_ref = st.slider("Renda de Referência (Y)", 100.0, 2500.0, 1200.0, 50.0)
@@ -60,7 +60,7 @@ def render() -> None:
         r_eq = max(0.0, min(r_eq, 20.0))
 
         st.divider()
-        st.subheader("📊 Indicadores")
+        st.subheader("Indicadores")
         st.metric("Oferta Real (Ms/P)", f"{MP:.1f}")
         st.metric("r* de Equilíbrio", f"{r_eq:.2f}%")
         st.metric("Md/P no equilíbrio",
@@ -103,7 +103,7 @@ def render() -> None:
         fig.add_trace(go.Scatter(
             x=[MP], y=[r_eq], mode="markers+text",
             name="Equilíbrio", marker=dict(size=14, color="#FF9800", symbol="star"),
-            text=[f" r*={r_eq:.1f}%"], textposition="top right",
+            text=[f"r*={r_eq:.1f}%"], textposition="top right",
         ), row=1, col=1)
 
         # Subplot 2 — efeito de choque monetário
@@ -141,7 +141,7 @@ def render() -> None:
         st.plotly_chart(fig, use_container_width=True)
 
         # ── Gráfico: Ms vs M nominal ──────────────────────────────
-        st.subheader("📊 Oferta Real vs Nível de Preços")
+        st.subheader("Oferta Real vs Nível de Preços")
         P_range = np.linspace(0.5, 3.0, 200)
         Ms_real = M / P_range
         fig2 = go.Figure()
@@ -161,12 +161,12 @@ def render() -> None:
     # ABAS ANALÍTICAS
     # ══════════════════════════════════════════════════════════════
     st.divider()
-    st.subheader("🔬 Decomposição Analítica")
+    st.subheader("Decomposição Analítica")
 
     aba1, aba2, aba3 = st.tabs([
-        "🏦 Criação de Moeda",
-        "⚖️ Exógena vs Endógena",
-        "📘 Teoria Completa",
+        "Criação de Moeda",
+        "Exógena vs Endógena",
+        "Teoria Completa",
     ])
 
     with aba1:
@@ -191,7 +191,7 @@ através de três instrumentos:
 - Nível de preços: $P = {P:.1f}$
 - Oferta real: $M/P = {MP:.1f}$
 
-> 💡 A oferta **nominal** $M$ é controlada pelo BC.
+>  A oferta **nominal** $M$ é controlada pelo BC.
 > A oferta **real** $M/P$ depende também dos preços —
 > por isso a inflação reduz o poder de compra da moeda.
 """)
@@ -200,7 +200,7 @@ através de três instrumentos:
         col_a, col_b = st.columns(2)
         with col_a:
             st.markdown(f"""
-**🔴 Oferta Exógena (Ortodoxa)**
+** Oferta Exógena (Ortodoxa)**
 
 $M^s/P = \\bar{{M}}/P$ — linha **vertical**
 
@@ -209,11 +209,11 @@ $M^s/P = \\bar{{M}}/P$ — linha **vertical**
 - Base da teoria convencional (IS-LM).
 - BC atinge qualquer $M$ desejado instantaneamente.
 
-> 📌 Com $M = {M:.0f}$ e $P = {P:.1f}$: $M^s/P = {MP:.1f}$
+>  Com $M = {M:.0f}$ e $P = {P:.1f}$: $M^s/P = {MP:.1f}$
 """)
         with col_b:
             st.markdown(f"""
-**🔵 Oferta Endógena (Pós-Keynesiana)**
+** Oferta Endógena (Pós-Keynesiana)**
 
 $M^s/P = \\bar{{M}}/P + \\phi \\cdot r$ — linha **positivamente inclinada**
 
@@ -224,18 +224,18 @@ $M^s/P = \\bar{{M}}/P + \\phi \\cdot r$ — linha **positivamente inclinada**
 - Banco comercial: cria depósitos ao conceder empréstimos.
 - Implica que a política monetária opera via **preço** ($r$), não **quantidade** ($M$).
 
-> 📌 Cada 1 p.p. de $r$ aumenta $M^s/P$ em $\\phi = 50$ unidades.
+>  Cada 1 p.p. de $r$ aumenta $M^s/P$ em $\\phi = 50$ unidades.
 """)
 
         st.info("""
-💡 **Debate moderno:** O Banco de Inglaterra (2014) e o FMI reconheceram
+ **Debate moderno:** O Banco de Inglaterra (2014) e o FMI reconheceram
 que bancos comerciais criam moeda ao conceder empréstimos — validando
 parcialmente a visão endógena. Na prática, o BC moderno opera fixando
 a taxa de juros (overnight), não a quantidade de moeda.
 """)
 
     with aba3:
-        st.markdown("### 📘 Teoria Completa da Oferta de Moeda")
+        st.markdown("### Teoria Completa da Oferta de Moeda")
         st.markdown("#### 1. O que é Moeda?")
         st.markdown("""
 Moeda é qualquer ativo aceito como meio de troca. Suas funções:
@@ -260,7 +260,7 @@ Com $Y = {Y_ref:.0f}$, $k = {k:.2f}$, $h = {h:.0f}$, $M/P = {MP:.1f}$:
         st.latex(
             rf"r^* = \frac{{{k:.2f} \times {Y_ref:.0f} - {MP:.1f}}}{{{h:.0f}}} = {r_eq:.2f}\%"
         )
-        st.markdown("#### 3. 📐 Resumo das Equações")
+        st.markdown("#### 3.  Resumo das Equações")
         st.latex(r"M^s/P = M/P \quad \text{(exógena)}")
         st.latex(r"M^s/P = M/P + \phi \cdot r \quad \text{(endógena, } \phi=50\text{)}")
         st.latex(r"r^* = \frac{kY - M/P}{h} \quad \text{(equilíbrio LM)}")

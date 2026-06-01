@@ -24,12 +24,12 @@ BP_INFO = {
         ajuste_flex=(
             "**Câmbio Flexível + Mobilidade Nula:**\n"
             "Déficit → depreciação (e↑) → X↑ e M↓ → IS desloca direita via NX↑.\n"
-            "⚠️ Os juros **não têm papel** — só o câmbio real importa."
+            "Os juros **não têm papel** — só o câmbio real importa."
         ),
         ajuste_fixo=(
             "**Câmbio Fixo + Mobilidade Nula:**\n"
             "BC vende reservas → M↓ → LM desloca esquerda → Y cai até NX = 0.\n"
-            "⚠️ Política monetária perde **autonomia total**."
+            "Política monetária perde **autonomia total**."
         ),
     ),
     "Baixa": dict(
@@ -94,17 +94,17 @@ BP_INFO = {
         abaixo_bp="**Impossível em equilíbrio:** r < r* → saída infinita → depreciação imediata → r = r*.",
         ajuste_flex=(
             "**Câmbio Flexível + Mobilidade Perfeita (Mundell-Fleming clássico):**\n\n"
-            "🔴 **Política Fiscal COMPLETAMENTE INEFICAZ:**\n"
+            " **Política Fiscal COMPLETAMENTE INEFICAZ:**\n"
             "G↑ → IS direita → r tende ↑ → entrada de capital → apreciação (e↓) → NX↓ → IS recua.\n"
             "**ΔY = 0** — o câmbio absorveu tudo.\n\n"
-            "🟢 **Política Monetária MUITO EFICAZ:**\n"
+            " **Política Monetária MUITO EFICAZ:**\n"
             "M↑ → LM direita → r tende ↓ → saída de capital → depreciação (e↑) → NX↑ → IS direita → Y↑↑."
         ),
         ajuste_fixo=(
             "**Câmbio Fixo + Mobilidade Perfeita (Mundell-Fleming clássico):**\n\n"
-            "🟢 **Política Fiscal MUITO EFICAZ:**\n"
+            " **Política Fiscal MUITO EFICAZ:**\n"
             "G↑ → IS direita → r tende ↑ → entrada de capital → BC compra divisas → M↑ → LM direita → Y↑↑.\n\n"
-            "🔴 **Política Monetária COMPLETAMENTE INEFICAZ:**\n"
+            " **Política Monetária COMPLETAMENTE INEFICAZ:**\n"
             "M↑ → LM direita → r tende ↓ → saída de capital → BC vende divisas → M↓ → LM retorna.\n"
             "**ΔY = 0**."
         ),
@@ -138,17 +138,17 @@ def texto_etapa(politica, direcao, tipo_eco, regime, mobilidade_label, etapa):
 def _etapa_A(fiscal, expansao, aberta, flex, mobilidade_label, bp):
     blocos = [
         (
-            "🔵 O que é o Ponto A?",
+            "O que é o Ponto A?",
             "A economia está em **equilíbrio simultâneo** nos mercados de "
             "**bens (IS)** e **moeda (LM)**"
-            + (", e no **balanço de pagamentos (BP)**" if aberta else "")
+            + (", e no **balanço de pagamentos (BP)**"if aberta else "")
             + ". O produto Y₀ e a taxa de juros i₀ são determinados pela interseção das curvas.",
         ),
         (
-            "📐 Como interpretar as curvas?",
+            "Como interpretar as curvas?",
             "**① Curva IS — Mercado de Bens:**\n"
             "- Inclinação **negativa**: juros altos → I↓ → Y↓\n"
-            "- Equação: C + I + G" + (" + NX" if aberta else "") + " = Y\n\n"
+            "- Equação: C + I + G" + (" + NX"if aberta else "") + " = Y\n\n"
             "**② Curva LM — Mercado Monetário:**\n"
             "- Inclinação **positiva**: Y alto → demanda por moeda ↑ → r↑\n"
             "- Equação: M/P = kY − hi\n"
@@ -164,21 +164,21 @@ def _etapa_A(fiscal, expansao, aberta, flex, mobilidade_label, bp):
 
     if aberta:
         blocos.append((
-            f"🌐 A Curva BP com Mobilidade {mobilidade_label}",
+            f"A Curva BP com Mobilidade {mobilidade_label}",
             bp["descricao"] + "\n\n"
             f"**Pontos acima da BP:** {bp['acima_bp']}\n\n"
             f"**Pontos abaixo da BP:** {bp['abaixo_bp']}",
         ))
 
-    politica_str = "Fiscal" if fiscal else "Monetária"
-    direcao_str  = "expansionista" if expansao else "contracionista"
+    politica_str = "Fiscal"if fiscal else "Monetária"
+    direcao_str  = "expansionista"if expansao else "contracionista"
     blocos.append((
-        "➡️ Próximo passo",
+        "Próximo passo",
         f"Será aplicada uma **política {politica_str.lower()} {direcao_str}**. "
         "Avance para a **Etapa B** para ver o efeito imediato sobre os mercados.",
     ))
 
-    return dict(titulo="📍 Estado A — Equilíbrio Inicial", cor="blue", blocos=blocos)
+    return dict(titulo="Estado A — Equilíbrio Inicial", cor="blue", blocos=blocos)
 
 
 # ══════════════════════════════════════════════════════════════
@@ -213,14 +213,14 @@ def _etapa_B(fiscal, expansao, aberta, flex, mobilidade_label, bp):
 
     blocos = [
         (
-            "⚡ 1. O Choque — Qual mercado foi afetado?",
+            " 1. O Choque — Qual mercado foi afetado?",
             f"**Instrumento:** {instrumento}\n\n"
             f"**Deslocamento:** {curva_move}\n\n"
             f"**Efeito sobre Y:** {efeito_Y}\n"
             f"**Efeito sobre i:** {efeito_r}",
         ),
         (
-            "📍 2. Interpretação do Ponto B",
+            " 2. Interpretação do Ponto B",
             ponto_B_desc + "\n\n"
             "O **Ponto B** é um **desequilíbrio transitório de curto prazo**:\n"
             "- A economia saiu de A mas **ainda não atingiu o novo equilíbrio**\n"
@@ -242,36 +242,36 @@ def _etapa_B(fiscal, expansao, aberta, flex, mobilidade_label, bp):
             mob = mobilidade_label
             pressao = (
                 f"Y↑ → importações↑ (NX↓), mas i↑ atrai capital (FC↑). "
-                f"Com mobilidade **{mob.lower()}**, {'FC domina → superávit.' if mob in ['Alta','Perfeita'] else 'resultado depende dos fluxos relativos.'}"
+                f"Com mobilidade **{mob.lower()}**, {'FC domina → superávit.'if mob in ['Alta','Perfeita'] else 'resultado depende dos fluxos relativos.'}"
             )
         else:
             pos_bp = "abaixo"
             mob = mobilidade_label
             pressao = (
                 f"Y↓ → importações↓ (NX↑), mas i↓ afasta capital (FC↓). "
-                f"Com mobilidade **{mob.lower()}**, {'FC domina → déficit.' if mob in ['Alta','Perfeita'] else 'resultado depende dos fluxos relativos.'}"
+                f"Com mobilidade **{mob.lower()}**, {'FC domina → déficit.'if mob in ['Alta','Perfeita'] else 'resultado depende dos fluxos relativos.'}"
             )
 
         blocos.append((
-            f"🌐 3. Posição do Ponto B em relação à BP ({mobilidade_label})",
+            f" 3. Posição do Ponto B em relação à BP ({mobilidade_label})",
             f"O Ponto B encontra-se **{pos_bp} da curva BP**.\n\n"
             f"**Pressão gerada:** {pressao}\n\n"
             f"**Por que a BP tem inclinação {bp['inclinacao']}?**\n{bp['descricao']}",
         ))
         blocos.append((
-            f"🔄 4. O que o câmbio {('Flexível' if flex else 'Fixo')} vai fazer?",
+            f" 4. O que o câmbio {('Flexível'if flex else 'Fixo')} vai fazer?",
             (bp["ajuste_flex"] if flex else bp["ajuste_fixo"])
             + "\n\n→ Avance para a **Etapa C** para ver o resultado final.",
         ))
     else:
         blocos.append((
-            "➡️ 3. Próximo passo (Economia Fechada)",
+            " 3. Próximo passo (Economia Fechada)",
             "Sem setor externo, o ajuste ocorre via variações em Y e i.\n"
             "Os mercados de bens e moeda convergem para o novo equilíbrio IS-LM.\n"
             "Avance para a **Etapa C**.",
         ))
 
-    return dict(titulo="⚡ Estado B — Choque de Curto Prazo", cor="orange", blocos=blocos)
+    return dict(titulo="Estado B — Choque de Curto Prazo", cor="orange", blocos=blocos)
 
 
 # ══════════════════════════════════════════════════════════════
@@ -284,17 +284,17 @@ def _etapa_C(fiscal, expansao, aberta, flex, mobilidade_label, bp):
     )
 
     blocos = [
-        ("✅ 1. Mecanismo de Ajuste Completo (A → B → C)", resultado),
+        (" 1. Mecanismo de Ajuste Completo (A → B → C)", resultado),
         (
-            "📊 2. Variações em relação ao Estado A",
+            " 2. Variações em relação ao Estado A",
             f"| Variável | Direção | Interpretação |\n"
             f"|---|---|---|\n"
             f"| **ΔY** | {delta_Y} | Variação no produto/renda |\n"
             f"| **Δi** | {delta_r} | Variação na taxa de juros |\n"
-            + (f"| **Δe** | {delta_e} | Variação na taxa de câmbio |\n" if aberta else ""),
+            + (f"| **Δe** | {delta_e} | Variação na taxa de câmbio |\n"if aberta else ""),
         ),
         (
-            "📚 3. Síntese Mundell-Fleming",
+            " 3. Síntese Mundell-Fleming",
             "A eficácia das políticas depende de:\n\n"
             "| Fator | Impacto |\n"
             "|---|---|\n"
@@ -309,14 +309,14 @@ def _etapa_C(fiscal, expansao, aberta, flex, mobilidade_label, bp):
 
     if aberta:
         blocos.append((
-            f"🌐 4. O papel da BP com mobilidade {mobilidade_label}",
+            f" 4. O papel da BP com mobilidade {mobilidade_label}",
             f"**Inclinação:** {bp['inclinacao']}\n\n"
             + bp["descricao"] + "\n\n"
-            f"**Mecanismo com câmbio {'flexível' if flex else 'fixo'}:**\n\n"
+            f"**Mecanismo com câmbio {'flexível'if flex else 'fixo'}:**\n\n"
             + (bp["ajuste_flex"] if flex else bp["ajuste_fixo"]),
         ))
 
-    return dict(titulo="✅ Estado C — Novo Equilíbrio", cor="green", blocos=blocos)
+    return dict(titulo="Estado C — Novo Equilíbrio", cor="green", blocos=blocos)
 
 
 def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
@@ -328,7 +328,7 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
                 "1. G↑ → IS direita → Y↑ e i↑ (B)\n"
                 "2. i > r* → entrada massiva de capital → **apreciação (e↓)**\n"
                 "3. e↓ → NX↓ → IS recua à posição original\n\n"
-                "🔴 **Política COMPLETAMENTE INEFICAZ** — crowding-out externo 100%.\n**ΔY ≈ 0**",
+                " **Política COMPLETAMENTE INEFICAZ** — crowding-out externo 100%.\n**ΔY ≈ 0**",
                 "≈ 0 (crowding-out 100%)", "≈ 0 (= r*)", "↓↓ (apreciação forte)"
             )
         elif mob == "Alta":
@@ -336,7 +336,7 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
                 "1. G↑ → IS direita → Y↑ e i↑ (B)\n"
                 "2. i > r* → entrada de capital → **apreciação (e↓)**\n"
                 "3. e↓ → NX↓ → IS recua parcialmente\n\n"
-                "🟡 **Política PARCIALMENTE INEFICAZ** — crowding-out externo forte.",
+                " **Política PARCIALMENTE INEFICAZ** — crowding-out externo forte.",
                 "↑ (pequeno)", "≈ r*", "↓ (apreciação moderada)"
             )
         elif mob == "Baixa":
@@ -344,7 +344,7 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
                 "1. G↑ → IS direita → Y↑ e i↑ (B)\n"
                 "2. i > r* → entrada moderada de capital → apreciação leve\n"
                 "3. NX↓ moderado → IS recua levemente\n\n"
-                "🟢 **Política PARCIALMENTE EFICAZ** — canal cambial fraco.",
+                " **Política PARCIALMENTE EFICAZ** — canal cambial fraco.",
                 "↑↑", "↑", "↓ (leve)"
             )
         else:
@@ -352,7 +352,7 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
                 "1. G↑ → IS direita → Y↑ e i↑ (B)\n"
                 "2. Sem fluxo de capital: ajuste via NX apenas\n"
                 "3. Y↑ → importações↑ → NX↓ → IS recua levemente\n\n"
-                "🟢 **Política EFICAZ** (mobilidade nula).",
+                " **Política EFICAZ** (mobilidade nula).",
                 "↑↑", "↑", "↑ (depreciação para NX = 0)"
             )
 
@@ -362,15 +362,15 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
                 "1. G↑ → IS direita → Y↑ e i↑ (B)\n"
                 "2. i > r* → entrada massiva → pressão de apreciação\n"
                 "3. BC compra divisas → M↑ → LM direita → i↓, Y↑↑\n\n"
-                "🟢 **Política MUITO EFICAZ** — multiplicador máximo.",
+                " **Política MUITO EFICAZ** — multiplicador máximo.",
                 "↑↑↑ (máximo)", "≈ 0 (= r*)", "fixo"
             )
         else:
             return (
                 "1. G↑ → IS direita → Y↑ e i↑ (B)\n"
-                f"2. i > r* → entrada {'intensa' if mob == 'Alta' else 'moderada'} → pressão de apreciação\n"
+                f"2. i > r* → entrada {'intensa'if mob == 'Alta'else 'moderada'} → pressão de apreciação\n"
                 "3. BC compra divisas → M↑ → LM direita\n\n"
-                "🟢 **Política EFICAZ** — BC amplifica o estímulo fiscal.",
+                " **Política EFICAZ** — BC amplifica o estímulo fiscal.",
                 "↑↑", "↑ (leve)", "fixo"
             )
 
@@ -380,15 +380,15 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
                 "1. M↑ → LM direita → Y↑ e i↓ (B)\n"
                 "2. i < r* → saída massiva → **depreciação (e↑)**\n"
                 "3. e↑ → NX↑ → IS direita → Y↑↑\n\n"
-                "🟢 **Política MUITO EFICAZ** — canal cambial amplifica ao máximo.",
+                " **Política MUITO EFICAZ** — canal cambial amplifica ao máximo.",
                 "↑↑↑ (máximo)", "↓ → r*", "↑↑ (depreciação forte)"
             )
         else:
             return (
                 "1. M↑ → LM direita → Y↑ e i↓ (B)\n"
-                f"2. i < r* → saída {'intensa' if mob == 'Alta' else 'moderada'} → depreciação (e↑)\n"
+                f"2. i < r* → saída {'intensa'if mob == 'Alta'else 'moderada'} → depreciação (e↑)\n"
                 "3. e↑ → NX↑ → IS direita\n\n"
-                "🟢 **Política EFICAZ** — canal cambial amplifica.",
+                " **Política EFICAZ** — canal cambial amplifica.",
                 "↑↑", "↓", "↑ (depreciação)"
             )
 
@@ -398,15 +398,15 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
                 "1. M↑ → LM direita → i↓ (B)\n"
                 "2. i < r* → saída massiva → pressão de depreciação\n"
                 "3. BC vende divisas → M↓ → LM retorna à posição original\n\n"
-                "🔴 **Política COMPLETAMENTE INEFICAZ** — BC reverte 100%.\n**ΔY = 0**",
+                " **Política COMPLETAMENTE INEFICAZ** — BC reverte 100%.\n**ΔY = 0**",
                 "≈ 0 (revertido)", "≈ 0 (= r*)", "fixo"
             )
         else:
             return (
                 "1. M↑ → LM direita → i↓ (B)\n"
-                f"2. i < r* → saída {'intensa' if mob == 'Alta' else 'moderada'} → pressão de depreciação\n"
+                f"2. i < r* → saída {'intensa'if mob == 'Alta'else 'moderada'} → pressão de depreciação\n"
                 "3. BC vende divisas → M↓ → LM recua\n\n"
-                "🔴 **Política INEFICAZ** — intervenção cambial neutraliza.",
+                " **Política INEFICAZ** — intervenção cambial neutraliza.",
                 "≈ 0", "≈ 0", "fixo"
             )
 
@@ -415,7 +415,7 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
             "1. G↓ → IS esquerda → Y↓ e i↓ (B)\n"
             "2. i < r* → saída de capital → **depreciação (e↑)**\n"
             "3. e↑ → NX↑ → IS direita (atenuação)\n\n"
-            "🟡 **Política PARCIALMENTE EFICAZ** — câmbio atenua a contração.",
+            " **Política PARCIALMENTE EFICAZ** — câmbio atenua a contração.",
             "↓ (atenuado)", "↓", "↑ (depreciação)"
         )
 
@@ -424,7 +424,7 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
             "1. G↓ → IS esquerda → Y↓ e i↓ (B)\n"
             "2. i < r* → saída de capital → pressão de depreciação\n"
             "3. BC vende divisas → M↓ → LM esquerda → Y↓↓\n\n"
-            "🔴 **Política AMPLIFICADA** — ajuste monetário endógeno amplifica a contração.",
+            " **Política AMPLIFICADA** — ajuste monetário endógeno amplifica a contração.",
             "↓↓ (amplificado)", "≈ 0 (= r*)", "fixo"
         )
 
@@ -433,7 +433,7 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
             "1. M↓ → LM esquerda → i↑ (B)\n"
             "2. i > r* → entrada de capital → **apreciação (e↓)**\n"
             "3. e↓ → NX↓ → IS esquerda → Y↓↓\n\n"
-            "🔴 **Política AMPLIFICADA** — canal cambial amplifica a contração.",
+            " **Política AMPLIFICADA** — canal cambial amplifica a contração.",
             "↓↓ (amplificado)", "↑ → r*", "↓ (apreciação)"
         )
 
@@ -442,7 +442,7 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
             "1. M↓ → LM esquerda → i↑ (B)\n"
             "2. i > r* → entrada de capital → pressão de apreciação\n"
             "3. BC compra divisas → M↑ → LM retorna\n\n"
-            "🔴 **Política COMPLETAMENTE INEFICAZ** — BC reverte 100%.",
+            " **Política COMPLETAMENTE INEFICAZ** — BC reverte 100%.",
             "≈ 0", "≈ 0 (= r*)", "fixo"
         )
 
@@ -451,7 +451,7 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
             "1. G↑ → IS direita → Y↑ (B)\n"
             "2. Y↑ → demanda por moeda↑ → i↑ ao longo da LM\n"
             "3. i↑ → investimento privado cai **(crowding-out)**: I↓\n\n"
-            "🟡 **Política PARCIALMENTE EFICAZ** — crowding-out reduz o multiplicador.",
+            " **Política PARCIALMENTE EFICAZ** — crowding-out reduz o multiplicador.",
             "↑ (< multiplicador simples)", "↑ (crowding-out)", "N/A"
         )
 
@@ -460,7 +460,7 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
             "1. G↓ → IS esquerda → Y↓\n"
             "2. Y↓ → demanda por moeda↓ → i↓\n"
             "3. i↓ → investimento privado sobe (crowding-in parcial)\n\n"
-            "🟡 **Política PARCIALMENTE EFICAZ** — crowding-in atenua a queda.",
+            " **Política PARCIALMENTE EFICAZ** — crowding-in atenua a queda.",
             "↓ (atenuado)", "↓", "N/A"
         )
 
@@ -469,7 +469,7 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
             "1. M↑ → LM direita → i↓\n"
             "2. i↓ → investimento privado sobe **(I↑)**\n"
             "3. I↑ → demanda agregada sobe → Y↑\n\n"
-            "🟢 **Política EFICAZ** — sem crowding-out, canal de transmissão direto.",
+            " **Política EFICAZ** — sem crowding-out, canal de transmissão direto.",
             "↑", "↓", "N/A"
         )
 
@@ -478,7 +478,7 @@ def _calcular_resultado(fiscal, expansao, aberta, flex, mob):
             "1. M↓ → LM esquerda → i↑\n"
             "2. i↑ → investimento privado cai **(I↓)**\n"
             "3. I↓ → demanda agregada cai → Y↓\n\n"
-            "🔴 **Política EFICAZ** (sentido contracionista).",
+            " **Política EFICAZ** (sentido contracionista).",
             "↓", "↑", "N/A"
         )
 
@@ -498,16 +498,16 @@ def conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
     )
 
     # Determinar veredicto a partir do resultado
-    if "COMPLETAMENTE INEFICAZ" in resultado or "ΔY ≈ 0" in resultado or "ΔY = 0" in resultado:
-        veredicto = "ineficaz"; emoji = "🔴"
-    elif "MUITO EFICAZ" in resultado or "máximo" in delta_Y:
-        veredicto = "eficaz"; emoji = "🟢"
-    elif "PARCIALMENTE" in resultado or "atenuado" in delta_Y:
-        veredicto = "parcial"; emoji = "🟡"
-    elif "EFICAZ" in resultado:
-        veredicto = "eficaz"; emoji = "🟢"
+    if "COMPLETAMENTE INEFICAZ"in resultado or "ΔY ≈ 0"in resultado or "ΔY = 0"in resultado:
+        veredicto = "ineficaz"; emoji = ""
+    elif "MUITO EFICAZ"in resultado or "máximo"in delta_Y:
+        veredicto = "eficaz"; emoji = ""
+    elif "PARCIALMENTE"in resultado or "atenuado"in delta_Y:
+        veredicto = "parcial"; emoji = ""
+    elif "EFICAZ"in resultado:
+        veredicto = "eficaz"; emoji = ""
     else:
-        veredicto = "parcial"; emoji = "🟡"
+        veredicto = "parcial"; emoji = ""
 
     # Canal dominante
     if fiscal and expansao:
@@ -561,9 +561,9 @@ def conclusao_etapa(politica, direcao, tipo_eco, regime, mobilidade_label):
     )
 
     titulo_map = {
-        "eficaz":   f"{'Política Fiscal' if fiscal else 'Política Monetária'} — Eficaz",
-        "parcial":  f"{'Política Fiscal' if fiscal else 'Política Monetária'} — Parcialmente Eficaz",
-        "ineficaz": f"{'Política Fiscal' if fiscal else 'Política Monetária'} — Ineficaz",
+        "eficaz":   f"{'Política Fiscal'if fiscal else 'Política Monetária'} — Eficaz",
+        "parcial":  f"{'Política Fiscal'if fiscal else 'Política Monetária'} — Parcialmente Eficaz",
+        "ineficaz": f"{'Política Fiscal'if fiscal else 'Política Monetária'} — Ineficaz",
     }
 
     return dict(

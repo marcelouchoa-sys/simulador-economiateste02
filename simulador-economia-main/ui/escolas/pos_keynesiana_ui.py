@@ -13,9 +13,9 @@ from ui.escolas.classica_ui import _card
 
 
 def render() -> None:
-    st.subheader("🟣 Escola Pós-Keynesiana — Demanda, Distribuição e Instabilidade")
+    st.subheader("Escola Pós-Keynesiana — Demanda, Distribuição e Instabilidade")
 
-    with st.expander("📖 Fundamentos da Escola Pós-Keynesiana", expanded=False):
+    with st.expander("Fundamentos da Escola Pós-Keynesiana", expanded=False):
         st.markdown("""
 | Princípio | Descrição |
 |---|---|
@@ -30,11 +30,11 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════════
     # CONTROLES
     # ══════════════════════════════════════════════════════════════
-    st.markdown("### ⚙️ Parâmetros — Modelo Kaleckiano")
+    st.markdown("### Parâmetros — Modelo Kaleckiano")
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown("**💼 Distribuição de Renda**")
+        st.markdown("** Distribuição de Renda**")
         participacao_salarios = st.slider("Participação dos Salários (ω = W/Y)", 0.3, 0.8, 0.6, 0.01,
                                           key="pk_omega",
                                           help="Fração da renda que vai para salários (1-ω = participação dos lucros)")
@@ -42,7 +42,7 @@ def render() -> None:
                            help="Preço = (1+m) × Custo. Markup determina a participação dos lucros")
 
     with col2:
-        st.markdown("**📦 Decisões de Gasto**")
+        st.markdown("** Decisões de Gasto**")
         inv_capitalistas = st.slider("Investimento dos Capitalistas (I)", 50.0, 500.0, 200.0, 10.0,
                                      key="pk_I",
                                      help="Kalecki: lucros = investimento + consumo dos capitalistas")
@@ -52,7 +52,7 @@ def render() -> None:
                                           key="pk_cw")
 
     with col3:
-        st.markdown("**🏦 Fragilidade Financeira (Minsky)**")
+        st.markdown("** Fragilidade Financeira (Minsky)**")
         divida_pib = st.slider("Dívida/PIB (%)", 0.0, 200.0, 60.0, 5.0, key="pk_debt")
         taxa_juros = st.slider("Taxa de Juros (r %)", 0.0, 20.0, 5.0, 0.5, key="pk_r")
         crescimento = st.slider("Crescimento do PIB (%)", -5.0, 10.0, 3.0, 0.5, key="pk_g")
@@ -118,7 +118,7 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════════
     # MÉTRICAS
     # ══════════════════════════════════════════════════════════════
-    st.markdown("### 📊 Indicadores Pós-Keynesianos")
+    st.markdown("### Indicadores Pós-Keynesianos")
     m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Produto (Y) — Kalecki",         f"{Y_kalecki:.1f}")
     m2.metric("Lucros Realizados",              f"{lucros_realizados:.1f}")
@@ -126,13 +126,13 @@ def render() -> None:
     m4.metric("Inflação de Conflito Estimada",  f"{inflacao_conflito:.1f}%")
     m5.metric("Regime Minsky",                  regime_minsky.capitalize(),
               delta=desc_minsky[:30] + "...",
-              delta_color="normal" if regime_minsky == "hedge" else "inverse")
+              delta_color="normal"if regime_minsky == "hedge"else "inverse")
 
     if lucros_realizados > 0:
         diferenca_lucros = abs(lucros_realizados - lucros_kalecki) / lucros_kalecki * 100
         if diferenca_lucros > 5:
             st.warning(
-                f"⚠️ **Inconsistência Kaleckiana:** lucros realizados ({lucros_realizados:.1f}) "
+                f" **Inconsistência Kaleckiana:** lucros realizados ({lucros_realizados:.1f}) "
                 f"diferem da identidade I+Cc ({lucros_kalecki:.1f}) em {diferenca_lucros:.1f}%. "
                 f"Isso ocorre porque ω e Y são endógenos — ajuste os parâmetros."
             )
@@ -169,7 +169,7 @@ def render() -> None:
         x=[inv_capitalistas], y=[lucros_kalecki],
         mode="markers+text", name="Ponto Atual",
         marker=dict(size=13, color="#FF9800", symbol="star"),
-        text=[f" L={lucros_kalecki:.0f}"], textposition="top right",
+        text=[f"L={lucros_kalecki:.0f}"], textposition="top right",
     ), row=1, col=1)
     fig.add_annotation(
         x=inv_capitalistas * 0.5, y=lucros_kalecki * 0.7,
@@ -230,10 +230,10 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════════
     # ANÁLISE NARRATIVA
     # ══════════════════════════════════════════════════════════════
-    st.markdown("### 📝 Análise Pós-Keynesiana")
+    st.markdown("### Análise Pós-Keynesiana")
 
     _card(
-        "💡 1. Identidade de Kalecki — Os Capitalistas Ganham o que Gastam",
+        " 1. Identidade de Kalecki — Os Capitalistas Ganham o que Gastam",
         f"**Lucros = Investimento + Consumo dos Capitalistas** = {inv_capitalistas:.0f} + {consumo_capitalistas:.0f} = **{lucros_kalecki:.0f}**. "
         f"Esta é uma identidade contábil, não uma teoria comportamental. "
         f"Os capitalistas, ao gastarem em investimento e consumo, criam a renda que retorna como lucros. "
@@ -244,7 +244,7 @@ def render() -> None:
         "purple",
     )
     _card(
-        "💵 2. Moeda Endógena — Bancos Criam Moeda",
+        " 2. Moeda Endógena — Bancos Criam Moeda",
         f"Na visão pós-keynesiana, o Banco Central não controla M diretamente. "
         f"Quando uma firma pede um empréstimo, o banco cria um depósito — 'moeda do nada'. "
         f"O BC acomoda essa demanda por crédito fixando a taxa de juros (r = {taxa_juros:.1f}%). "
@@ -253,7 +253,7 @@ def render() -> None:
         "blue",
     )
     _card(
-        f"⚠️ 3. Regime Minsky — {regime_minsky.capitalize()}",
+        f" 3. Regime Minsky — {regime_minsky.capitalize()}",
         f"{desc_minsky}. "
         f"Com Dívida/PIB = {divida_pib:.0f}%, juros de {taxa_juros:.1f}% e crescimento de {crescimento:.1f}%, "
         f"o serviço da dívida consome {servico_divida:.1f}% do PIB e a folga financeira é de "
@@ -263,25 +263,25 @@ def render() -> None:
         cor_minsky,
     )
     _card(
-        "🔥 4. Inflação de Conflito Distributivo",
+        " 4. Inflação de Conflito Distributivo",
         f"Com markup m = {markup:.2f}, a participação dos lucros compatível é "
         f"π_L = (m-1)/m = {participacao_lucros_markup:.2f}, "
         f"implicando ω compatível = {omega_compat:.2f}. "
         f"Os trabalhadores buscam ω = {participacao_salarios:.2f}. "
-        f"{'Há conflito: trabalhadores exigem mais do que o markup permite → inflação estimada de ' + str(inflacao_conflito.__format__('.1f')) + '%.' if inflacao_conflito > 0.5 else 'Não há conflito: ω alvo dos trabalhadores é compatível com o markup — inflação baixa.'} "
+        f"{'Há conflito: trabalhadores exigem mais do que o markup permite → inflação estimada de ' + str(inflacao_conflito.__format__('.1f')) + '%.'if inflacao_conflito > 0.5 else 'Não há conflito: ω alvo dos trabalhadores é compatível com o markup — inflação baixa.'} "
         f"Nesta visão, inflação não é excesso de demanda — é resultado de disputas distributivas.",
-        "orange" if inflacao_conflito > 0.5 else "green",
+        "orange"if inflacao_conflito > 0.5 else "green",
     )
 
     # ══════════════════════════════════════════════════════════════
     # ABAS ANALÍTICAS
     # ══════════════════════════════════════════════════════════════
     st.divider()
-    st.subheader("🔬 Aprofundamento Teórico")
+    st.subheader("Aprofundamento Teórico")
     aba1, aba2, aba3 = st.tabs([
-        "📐 Kalecki — Determinação dos Lucros",
-        "🏦 Minsky — Hipótese de Instabilidade",
-        "📘 Pós-Keynesiana vs Keynesiana Ortodoxa",
+        "Kalecki — Determinação dos Lucros",
+        "Minsky — Hipótese de Instabilidade",
+        "Pós-Keynesiana vs Keynesiana Ortodoxa",
     ])
 
     with aba1:
@@ -323,7 +323,7 @@ Em períodos de bonança: firmas hedge tornam-se especulativas, especulativas to
 O sistema acumula fragilidade até a crise de Minsky — momento de venda de ativos em pânico.
 """)
         if regime_minsky == "ponzi":
-            st.error(f"🚨 Regime Ponzi detectado: Dívida/PIB = {divida_pib:.0f}%, r = {taxa_juros:.1f}%, g = {crescimento:.1f}%")
+            st.error(f"Regime Ponzi detectado: Dívida/PIB = {divida_pib:.0f}%, r = {taxa_juros:.1f}%, g = {crescimento:.1f}%")
 
     with aba3:
         st.markdown("""

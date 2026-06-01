@@ -1,6 +1,6 @@
 # ui/funcoes/investimento_ui.py
 """
-Aba Investimento — extraída de pages/1_📚_Funcoes.py
+Aba Investimento — extraída de pages/1__Funcoes.py
 Expõe render() para ser chamada pela página principal.
 """
 
@@ -18,7 +18,7 @@ R_GRID = np.linspace(0, 20, 300)
 def render() -> None:
     """Renderiza a aba Investimento completa."""
 
-    st.subheader("📈 Investimento — Decisão de Capital e Sensibilidade aos Juros")
+    st.subheader("Investimento — Decisão de Capital e Sensibilidade aos Juros")
     st.markdown(
         "Explore como as firmas decidem investir sob diferentes visões teóricas. "
         "A curva de investimento relaciona a **taxa de juros real** com o "
@@ -39,30 +39,30 @@ def render() -> None:
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        st.subheader("🛠️ Parâmetros")
+        st.subheader("Parâmetros")
 
         I0 = st.slider("Investimento Autônomo (I₀)", 50.0, 500.0, 200.0, 10.0,
-                       help="Investimento independente dos juros — 'animal spirits' de Keynes")
+                       help="Investimento independente dos juros — 'animal spirits'de Keynes")
         b  = st.slider("Sensibilidade aos Juros (b)", 1.0, 100.0, 50.0, 1.0,
                        help="Quanto o investimento cai para cada 1 p.p. de aumento nos juros")
 
-        st.markdown("**🏛️ Escola Econômica**")
+        st.markdown("** Escola Econômica**")
         escola = st.radio("Visão teórica:", ["Keynesiana", "Clássica"],
                           horizontal=True,
                           help="Clássica dobra a sensibilidade b (mercado de fundos emprestáveis)")
 
         st.divider()
-        st.markdown("**📉 Simulação de Crowding-Out**")
+        st.markdown("** Simulação de Crowding-Out**")
         r_base   = st.slider("Juros Base (r₀ %)",   0.0, 15.0, 5.0,  0.5)
         r_choque = st.slider("Juros Choque (r₁ %)", 0.0, 20.0, 10.0, 0.5)
 
         # ── Indicadores ──────────────────────────────────────────
-        I_base   = I0 - b * r_base   if escola == "Keynesiana" else I0 - 2*b*r_base
-        I_choque = I0 - b * r_choque if escola == "Keynesiana" else I0 - 2*b*r_choque
-        delta_I  = efeito_crowding_out(r_base, r_choque, b if escola == "Keynesiana" else 2*b)
+        I_base   = I0 - b * r_base   if escola == "Keynesiana"else I0 - 2*b*r_base
+        I_choque = I0 - b * r_choque if escola == "Keynesiana"else I0 - 2*b*r_choque
+        delta_I  = efeito_crowding_out(r_base, r_choque, b if escola == "Keynesiana"else 2*b)
 
         st.divider()
-        st.subheader("📊 Indicadores")
+        st.subheader("Indicadores")
         st.metric("I ao Juros Base",   f"{max(I_base, 0):.1f}")
         st.metric("I ao Juros Choque", f"{max(I_choque, 0):.1f}",
                   delta=f"{delta_I:.1f}", delta_color="inverse")
@@ -147,7 +147,7 @@ def render() -> None:
         st.plotly_chart(fig, use_container_width=True)
 
         # ── Gráfico de sensibilidade ──────────────────────────────
-        st.subheader("📊 Sensibilidade do Crowding-Out")
+        st.subheader("Sensibilidade do Crowding-Out")
         b_range = np.linspace(1, 150, 200)
         delta_range = -b_range * (r_choque - r_base)
         if escola == "Clássica":
@@ -175,13 +175,13 @@ def render() -> None:
     # ABAS ANALÍTICAS
     # ══════════════════════════════════════════════════════════════
     st.divider()
-    st.subheader("🔬 Decomposição Analítica")
+    st.subheader("Decomposição Analítica")
 
     aba1, aba2, aba3, aba4 = st.tabs([
-        "📐 Função Investimento",
-        "📉 Crowding-Out",
-        "🏛️ Keynesiana vs Clássica",
-        "📘 Teoria Completa",
+        "Função Investimento",
+        "Crowding-Out",
+        "Keynesiana vs Clássica",
+        "Teoria Completa",
     ])
 
     with aba1:
@@ -203,7 +203,7 @@ def render() -> None:
 
 def _aba_funcao(I0, b, escola, eq_sel, r_base, I_base) -> None:
     st.markdown("**Equação atual:**")
-    st.latex(rf"I = {I0:.0f} - {b if escola == 'Keynesiana' else 2*b:.0f} \cdot r")
+    st.latex(rf"I = {I0:.0f} - {b if escola == 'Keynesiana'else 2*b:.0f} \cdot r")
     st.markdown(f"""
 **Interpretação dos parâmetros:**
 
@@ -211,12 +211,12 @@ def _aba_funcao(I0, b, escola, eq_sel, r_base, I_base) -> None:
   Representa os *animal spirits* de Keynes — a propensão espontânea das firmas
   a investir, independente do custo do capital.
 - **$b = {b:.0f}$** — Sensibilidade aos juros: para cada **1 p.p.** de aumento
-  na taxa de juros, o investimento cai **{b if escola == 'Keynesiana' else 2*b:.0f} unidades**.
+  na taxa de juros, o investimento cai **{b if escola == 'Keynesiana'else 2*b:.0f} unidades**.
 
 **Com $r = {r_base:.1f}\\%$:**
 """)
     st.latex(
-        rf"I = {I0:.0f} - {b if escola == 'Keynesiana' else 2*b:.0f} \times {r_base:.1f} = {max(I_base,0):.1f}"
+        rf"I = {I0:.0f} - {b if escola == 'Keynesiana'else 2*b:.0f} \times {r_base:.1f} = {max(I_base,0):.1f}"
     )
     st.markdown("""
 **Por que a curva é negativamente inclinada?**
@@ -225,13 +225,13 @@ Investir tem um custo de oportunidade: a taxa de juros $r$.
 - Se $r$ sobe → o custo de financiar projetos aumenta → menos projetos são viáveis → $I$ cai.
 - Se $r$ cai → projetos antes inviáveis tornam-se lucrativos → $I$ sobe.
 
-> 💡 A inclinação da curva IS depende diretamente de $b$: quanto maior $b$,
+>  A inclinação da curva IS depende diretamente de $b$: quanto maior $b$,
 > mais inclinada é a IS e mais eficaz é a política monetária.
 """)
 
 
 def _aba_crowding_out(I0, b, escola, r_base, r_choque, I_base, I_choque, delta_I) -> None:
-    b_ef = b if escola == "Keynesiana" else 2 * b
+    b_ef = b if escola == "Keynesiana"else 2 * b
     st.markdown("**Cálculo do Crowding-Out:**")
     st.latex(r"\Delta I = -b \cdot \Delta r")
     st.latex(
@@ -252,13 +252,13 @@ elevando a taxa de juros de equilíbrio ($r\\uparrow$). Isso **reduz o investime
 - Investimento caiu de **{max(I_base,0):.1f}** para **{max(I_choque,0):.1f}**
 - **Crowding-out = {delta_I:.1f} unidades** de investimento privado perdidas
 
-> 📌 O crowding-out é **parcial** em economia fechada (IS-LM) e pode ser
+>  O crowding-out é **parcial** em economia fechada (IS-LM) e pode ser
 > **total** em economia aberta com câmbio flexível e mobilidade perfeita
 > (Mundell-Fleming).
 """)
     if abs(delta_I) > I0 * 0.5:
         st.warning(
-            f"⚠️ O crowding-out representa **{abs(delta_I)/I0*100:.0f}%** do investimento "
+            f"O crowding-out representa **{abs(delta_I)/I0*100:.0f}%** do investimento "
             "autônomo — efeito muito intenso. Considere reduzir b ou Δr."
         )
 
@@ -270,7 +270,7 @@ def _aba_escolas(I0, b, r_base, eq_key, eq_cla) -> None:
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(f"""
-**🔵 Visão Keynesiana**
+** Visão Keynesiana**
 
 $I = I_0 - b \\cdot r$
 
@@ -285,7 +285,7 @@ $I = I_0 - b \\cdot r$
 """)
     with col2:
         st.markdown(f"""
-**🔴 Visão Clássica (Fundos Emprestáveis)**
+** Visão Clássica (Fundos Emprestáveis)**
 
 $I = I_0 - 2b \\cdot r$
 
@@ -308,13 +308,13 @@ $I = I_0 - 2b \\cdot r$
 | Investimento | {I_key_val:.1f} | {I_cla_val:.1f} | {I_key_val - I_cla_val:.1f} |
 | Impacto de Δr=1p.p. | −{b:.0f} | −{2*b:.0f} | — |
 
-> 📌 A diferença cresce com $r$: quanto maiores os juros, maior a divergência
+>  A diferença cresce com $r$: quanto maiores os juros, maior a divergência
 > entre as escolas na previsão do nível de investimento.
 """)
 
 
 def _aba_teoria(I0, b, escola, r_base, r_choque, delta_I) -> None:
-    st.markdown("### 📘 Teoria Completa do Investimento")
+    st.markdown("### Teoria Completa do Investimento")
 
     # ── 1. O que determina o investimento ────────────────────────
     st.markdown("#### 1. O que determina o Investimento Agregado?")
@@ -354,7 +354,7 @@ A curva IS é derivada da condição de equilíbrio no mercado de bens:
     st.divider()
 
     # ── 3. Resumo das equações ────────────────────────────────────
-    st.markdown("#### 3. 📐 Resumo das Equações")
+    st.markdown("#### 3.  Resumo das Equações")
     st.latex(r"I = I_0 - b \cdot r \qquad \text{(Keynesiana)}")
     st.latex(r"I = I_0 - 2b \cdot r \qquad \text{(Clássica — fundos emprestáveis)}")
     st.latex(r"\Delta I = -b \cdot \Delta r \qquad \text{(Crowding-Out)}")

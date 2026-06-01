@@ -1,4 +1,4 @@
-# pages/1_📚_Funcoes.py
+# pages/1__Funcoes.py
 import streamlit as st
 from ui.design import aplicar_design, page_header
 from core.parameters import DEFAULT_PARAMS
@@ -16,7 +16,7 @@ st.set_page_config(layout="wide", page_title="Funções Econômicas — LBEX")
 aplicar_design()
 
 # ── Estado global ─────────────────────────────────────────────────
-if "params" not in st.session_state:
+if "params"not in st.session_state:
     st.session_state.params = DEFAULT_PARAMS.copy()
 for chave, valor in {"t": 0.2, "theta": 10.0, "m": 0.1,
                      "r": 0.05, "W": 1000.0, "alpha_w": 0.05}.items():

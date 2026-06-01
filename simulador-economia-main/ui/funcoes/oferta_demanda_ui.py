@@ -1,6 +1,6 @@
 # ui/funcoes/oferta_demanda_ui.py
 """
-Aba Oferta e Demanda — extraída de pages/1_📚_Funcoes.py
+Aba Oferta e Demanda — extraída de pages/1__Funcoes.py
 Expõe render() para ser chamada pela página principal.
 
 CORREÇÕES:
@@ -15,7 +15,7 @@ from plotly.subplots import make_subplots
 
 
 def render() -> None:
-    st.subheader("📈 Oferta e Demanda — Equilíbrio de Mercado")
+    st.subheader("Oferta e Demanda — Equilíbrio de Mercado")
     st.markdown(
         "Explore o equilíbrio de mercado, **excesso de oferta** e **escassez** "
         "com curvas lineares interativas. As curvas são definidas por:"
@@ -30,21 +30,21 @@ def render() -> None:
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.markdown("**📉 Curva de Demanda**")
+        st.markdown("** Curva de Demanda**")
         a_dem = st.slider("Intercepto da Demanda (a)", 2.0, 12.0, 7.0, 0.25, key="od_a",
                           help="Preço máximo que os consumidores pagariam (Q=0)")
         b_dem = st.slider("Inclinação da Demanda (b)", 0.001, 0.010, 0.004, 0.001,
                           format="%.3f", key="od_b",
                           help="Quanto P cai para cada unidade adicional de Q")
     with col2:
-        st.markdown("**📈 Curva de Oferta**")
+        st.markdown("** Curva de Oferta**")
         c_ofe = st.slider("Intercepto da Oferta (c)", 0.0, 4.0, 1.0, 0.25, key="od_c",
                           help="Preço mínimo para os produtores ofertarem (Q=0)")
         d_ofe = st.slider("Inclinação da Oferta (d)", 0.001, 0.010, 0.004, 0.001,
                           format="%.3f", key="od_d",
                           help="Quanto P sobe para cada unidade adicional de Q")
     with col3:
-        st.markdown("**💲 Preço Tabelado**")
+        st.markdown("** Preço Tabelado**")
         P_tabelado = st.slider("Preço Tabelado (P̄)", 1.0, 10.0, 6.0, 0.25, key="od_ptab",
                                help="Acima do equilíbrio → excesso de oferta; abaixo → escassez")
         mostrar_tabelado = st.checkbox("Mostrar cenário com preço tabelado",
@@ -71,7 +71,7 @@ def render() -> None:
     BT = EC + EP
 
     # ── Métricas ──────────────────────────────────────────────────
-    st.markdown("### 📊 Equilíbrio de Mercado")
+    st.markdown("### Equilíbrio de Mercado")
     m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Preço de Equilíbrio (P*)",     f"R$ {P_eq:.2f} mil")
     m2.metric("Quantidade de Equilíbrio (Q*)", f"{Q_eq/escala:.2f} mil")
@@ -80,14 +80,14 @@ def render() -> None:
         m4.metric("Qd ao P̄",                  f"{Q_dem_tab/escala:.2f} mil")
         m5.metric("Qs ao P̄",                  f"{Q_ofe_tab/escala:.2f} mil")
         if abs(excesso) > 10:
-            tipo = "Excesso de Oferta" if excesso > 0 else "Escassez"
+            tipo = "Excesso de Oferta"if excesso > 0 else "Escassez"
             st.info(f"**{tipo}:** |Qs − Qd| = {abs(excesso)/escala:.2f} mil unidades")
 
     # ── Gráficos ──────────────────────────────────────────────────
     n_cols  = 2 if mostrar_tabelado else 1
     titulo2 = (
         f"Preço Tabelado P̄={P_tabelado:.2f} → "
-        f"{'Excesso de Oferta' if excesso > 0 else 'Escassez' if excesso < 0 else 'Equilíbrio'}"
+        f"{'Excesso de Oferta'if excesso > 0 else 'Escassez'if excesso < 0 else 'Equilíbrio'}"
         if mostrar_tabelado else ""
     )
     fig_od = make_subplots(
@@ -144,8 +144,8 @@ def render() -> None:
             Q_min_a = min(Q_dem_tab, Q_ofe_tab) / escala
             Q_max_a = max(Q_dem_tab, Q_ofe_tab) / escala
             Q_mid_a = (Q_min_a + Q_max_a) / 2
-            label   = "Excesso" if excesso > 0 else "Escassez"
-            cor_a   = "#E65100" if excesso > 0 else "#1565C0"
+            label   = "Excesso"if excesso > 0 else "Escassez"
+            cor_a   = "#E65100"if excesso > 0 else "#1565C0"
             y_ann   = P_tabelado + (0.45 if excesso > 0 else -0.65)
             fig_od.add_shape(type="line", x0=Q_min_a, x1=Q_max_a, y0=y_ann, y1=y_ann,
                 line=dict(color=cor_a, width=1.5), row=1, col=2)
@@ -167,12 +167,12 @@ def render() -> None:
 
     # ── Abas Analíticas ───────────────────────────────────────────
     st.divider()
-    st.subheader("🔬 Decomposição Analítica")
+    st.subheader("Decomposição Analítica")
     aba1, aba2, aba3, aba4 = st.tabs([
-        "⚖️ Equilíbrio de Mercado",
-        "💲 Efeito do Preço Tabelado",
-        "📐 Elasticidades",
-        "📘 Teoria Completa",
+        "Equilíbrio de Mercado",
+        "Efeito do Preço Tabelado",
+        "Elasticidades",
+        "Teoria Completa",
     ])
     with aba1:
         _aba_equilibrio(a_dem, b_dem, c_ofe, d_ofe, Q_eq, P_eq, escala)
@@ -202,18 +202,18 @@ No equilíbrio, **toda a produção é vendida** e **toda a demanda é atendida*
 def _aba_preco_tabelado(mostrar_tabelado, a_dem, b_dem, c_ofe, d_ofe,
                         P_tabelado, P_eq, Q_dem_tab, Q_ofe_tab, excesso, escala) -> None:
     if not mostrar_tabelado:
-        st.info("Ative 'Mostrar cenário com preço tabelado' para ver esta análise.")
+        st.info("Ative 'Mostrar cenário com preço tabelado'para ver esta análise.")
         return
     st.latex(rf"Q_d(\bar{{P}}) = \frac{{{a_dem:.2f} - {P_tabelado:.2f}}}{{{b_dem:.3f}}} = {Q_dem_tab/escala:.3f} \text{{ mil}}")
     st.latex(rf"Q_s(\bar{{P}}) = \frac{{{P_tabelado:.2f} - {c_ofe:.2f}}}{{{d_ofe:.3f}}} = {Q_ofe_tab/escala:.3f} \text{{ mil}}")
     if abs(excesso) < 10:
         st.success(f"O preço tabelado P̄ = {P_tabelado:.2f} coincide com P* = {P_eq:.2f}. Sem distorção.")
     elif excesso > 0:
-        st.markdown(f"**📦 Excesso de Oferta ({abs(excesso)/escala:.2f} mil unidades)**\n\n"
+        st.markdown(f"** Excesso de Oferta ({abs(excesso)/escala:.2f} mil unidades)**\n\n"
             f"Com P̄ = {P_tabelado:.2f} **acima** do equilíbrio (P* = {P_eq:.2f}): "
             "produtores querem vender mais do que consumidores desejam comprar.")
     else:
-        st.markdown(f"**🔻 Escassez ({abs(excesso)/escala:.2f} mil unidades)**\n\n"
+        st.markdown(f"** Escassez ({abs(excesso)/escala:.2f} mil unidades)**\n\n"
             f"Com P̄ = {P_tabelado:.2f} **abaixo** do equilíbrio (P* = {P_eq:.2f}): "
             "consumidores demandam mais do que produtores estão dispostos a ofertar.")
 
@@ -241,14 +241,14 @@ def _aba_elasticidades(b_dem, d_ofe, P_eq, Q_eq) -> None:
 def _aba_teoria_completa(a_dem, b_dem, c_ofe, d_ofe, P_eq, Q_eq,
                          mostrar_tabelado, P_tabelado, Q_dem_tab, Q_ofe_tab,
                          excesso, escala, EC, EP, BT) -> None:
-    st.markdown("### 📘 Teoria Completa de Oferta e Demanda")
+    st.markdown("### Teoria Completa de Oferta e Demanda")
 
     st.markdown("#### 1. O que representam as curvas?")
     col_t1, col_t2 = st.columns(2)
     with col_t1:
-        st.markdown(f"**📉 Demanda:** $a={a_dem:.2f}$, $b={b_dem:.3f}$ — negativamente inclinada (substituição + efeito renda).")
+        st.markdown(f"** Demanda:** $a={a_dem:.2f}$, $b={b_dem:.3f}$ — negativamente inclinada (substituição + efeito renda).")
     with col_t2:
-        st.markdown(f"**📈 Oferta:** $c={c_ofe:.2f}$, $d={d_ofe:.3f}$ — positivamente inclinada (custo marginal crescente).")
+        st.markdown(f"** Oferta:** $c={c_ofe:.2f}$, $d={d_ofe:.3f}$ — positivamente inclinada (custo marginal crescente).")
 
     st.divider()
     st.markdown("#### 2. Equilíbrio")
@@ -259,9 +259,9 @@ def _aba_teoria_completa(a_dem, b_dem, c_ofe, d_ofe, P_eq, Q_eq,
     st.markdown("#### 3. Deslocadores")
     col_d1, col_d2 = st.columns(2)
     with col_d1:
-        st.markdown("**Demanda (mudam $a$):** ↑Renda ➡️ | ↑Substituto ➡️ | ↑Complementar ⬅️")
+        st.markdown("**Demanda (mudam $a$):** ↑Renda  | ↑Substituto  | ↑Complementar ⬅")
     with col_d2:
-        st.markdown("**Oferta (mudam $c$):** ↑Custo ⬅️ | ↑Tecnologia ➡️ | ↑Subsídio ➡️")
+        st.markdown("**Oferta (mudam $c$):** ↑Custo ⬅ | ↑Tecnologia  | ↑Subsídio ")
 
     st.divider()
 
@@ -280,7 +280,7 @@ def _aba_teoria_completa(a_dem, b_dem, c_ofe, d_ofe, P_eq, Q_eq,
         rf"EP = \frac{{1}}{{2}}({P_eq:.2f} - {c_ofe:.2f}) \times \frac{{{Q_eq:.0f}}}{{{escala}}} = {EP/escala:.2f}"
     )
     st.caption("Unidade: R$ mil × mil unidades (consistente com os eixos do gráfico)")
-    st.success(f"🏆 Benefício Total = **{BT/escala:.2f}** — o equilíbrio competitivo maximiza o bem-estar social.")
+    st.success(f"Benefício Total = **{BT/escala:.2f}** — o equilíbrio competitivo maximiza o bem-estar social.")
 
     st.divider()
     st.markdown("#### 5. Perda de Peso Morto")
@@ -292,9 +292,9 @@ def _aba_teoria_completa(a_dem, b_dem, c_ofe, d_ofe, P_eq, Q_eq,
             rf"\times \frac{{|{Q_eq:.0f} - {Q_transac:.0f}|}}{{{escala}}} = {PPM/escala:.2f}"
         )
         if PPM > 0:
-            st.error(f"⚠️ Perda de peso morto = **{PPM/escala:.2f}** — transações benéficas que deixam de ocorrer.")
+            st.error(f"Perda de peso morto = **{PPM/escala:.2f}** — transações benéficas que deixam de ocorrer.")
         else:
-            st.success("✅ Preço tabelado coincide com o equilíbrio. Sem perda de eficiência.")
+            st.success("Preço tabelado coincide com o equilíbrio. Sem perda de eficiência.")
     else:
         st.info("Ative o preço tabelado para ver a análise de perda de peso morto.")
 

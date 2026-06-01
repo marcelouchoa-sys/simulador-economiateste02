@@ -18,31 +18,31 @@ def diagnosticar_choque_aberto(base, choque, params_b, params_c):
 
     # ── Tipo de choque ─────────────────────────────
     if abs(dG) > 0.1:
-        linhas.append(f"📊 Choque Fiscal: ΔG = {dG:+.1f}")
+        linhas.append(f"Choque Fiscal: ΔG = {dG:+.1f}")
     if abs(dM) > 0.1:
-        linhas.append(f"💰 Choque Monetário: ΔM = {dM:+.1f}")
+        linhas.append(f"Choque Monetário: ΔM = {dM:+.1f}")
     if abs(dr_star) > 0.001:
-        linhas.append(f"🌍 Choque Externo: Δr* = {dr_star*100:+.2f} pp")
+        linhas.append(f"Choque Externo: Δr* = {dr_star*100:+.2f} pp")
 
     # ── Regime ────────────────────────────────────
-    linhas.append(f"\n🌐 Regime Cambial: {'Flexível' if regime=='flex' else 'Fixo'}")
+    linhas.append(f"\n Regime Cambial: {'Flexível'if regime=='flex'else 'Fixo'}")
 
     # ── Coerência macro ───────────────────────────
     bp_teorico = dNX + dCF
     erro = dBP - bp_teorico
 
-    linhas.append("\n🔎 Consistência Macroeconômica:")
+    linhas.append("\n Consistência Macroeconômica:")
     linhas.append(f"- ΔBP observado: {dBP:+.3f}")
     linhas.append(f"- ΔNX + ΔCF: {bp_teorico:+.3f}")
     linhas.append(f"- Erro: {erro:+.5f}")
 
     if abs(erro) > 0.01:
-        linhas.append("⚠️ Inconsistência detectada no balanço de pagamentos!")
+        linhas.append("Inconsistência detectada no balanço de pagamentos!")
     else:
-        linhas.append("✅ BP consistente com NX + CF")
+        linhas.append("BP consistente com NX + CF")
 
     # ── Interpretação externa ─────────────────────
-    linhas.append("\n🌍 Setor Externo:")
+    linhas.append("\n Setor Externo:")
 
     if dNX > 0:
         linhas.append("- Exportações líquidas aumentaram (ganho de competitividade)")
@@ -55,7 +55,7 @@ def diagnosticar_choque_aberto(base, choque, params_b, params_c):
         linhas.append("- Saída de capital (juros domésticos baixos)")
 
     # ── Regime cambial efeito ─────────────────────
-    linhas.append("\n⚙️ Mecanismo de Ajuste:")
+    linhas.append("\n Mecanismo de Ajuste:")
 
     if regime == "flex":
         if de > 0:
@@ -68,11 +68,11 @@ def diagnosticar_choque_aberto(base, choque, params_b, params_c):
     # ── Multiplicador ─────────────────────────────
     if abs(dG) > 0.1:
         mult = dY / dG
-        linhas.append(f"\n📐 Multiplicador Fiscal: {mult:.3f}")
+        linhas.append(f"\n Multiplicador Fiscal: {mult:.3f}")
 
-        if regime == "flex" and dNX < 0:
-            linhas.append("⚠️ Reduzido por apreciação cambial (crowding-out externo)")
-        if regime == "flex" and dNX > 0:
-            linhas.append("✅ Amplificado por depreciação cambial")
+        if regime == "flex"and dNX < 0:
+            linhas.append("Reduzido por apreciação cambial (crowding-out externo)")
+        if regime == "flex"and dNX > 0:
+            linhas.append("Amplificado por depreciação cambial")
 
     return "\n".join(linhas)

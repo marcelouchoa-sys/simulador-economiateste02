@@ -11,9 +11,9 @@ from plotly.subplots import make_subplots
 
 
 def render() -> None:
-    st.subheader("🏺 Escola Clássica — Oferta Determina o Produto")
+    st.subheader("Escola Clássica — Oferta Determina o Produto")
 
-    with st.expander("📖 Fundamentos da Escola Clássica", expanded=False):
+    with st.expander("Fundamentos da Escola Clássica", expanded=False):
         st.markdown("""
 | Princípio | Descrição |
 |---|---|
@@ -28,11 +28,11 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════════
     # CONTROLES
     # ══════════════════════════════════════════════════════════════
-    st.markdown("### ⚙️ Parâmetros")
+    st.markdown("### Parâmetros")
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown("**🏭 Lado da Oferta**")
+        st.markdown("** Lado da Oferta**")
         produtividade = st.slider("Produtividade Total (A)", 0.5, 2.0, 1.0, 0.05,
                                   key="cl_A")
         tecnologia    = st.slider("Tecnologia (θ)", 0.5, 2.0, 1.0, 0.05,
@@ -41,14 +41,14 @@ def render() -> None:
                                   key="cl_L")
 
     with col2:
-        st.markdown("**💰 Lado Monetário**")
+        st.markdown("** Lado Monetário**")
         oferta_monetaria = st.slider("Oferta Monetária (M)", 50.0, 300.0, 100.0, 10.0,
                                      key="cl_M")
         velocidade       = st.slider("Velocidade da Moeda (V)", 0.5, 3.0, 1.0, 0.1,
                                      key="cl_V")
 
     with col3:
-        st.markdown("**👷 Fatores de Produção**")
+        st.markdown("** Fatores de Produção**")
         salario_nominal = st.slider("Salário Nominal (W)", 0.5, 3.0, 1.0, 0.1,
                                     key="cl_W")
         capital         = st.slider("Estoque de Capital (K)", 50.0, 200.0, 100.0, 10.0,
@@ -72,14 +72,14 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════════
     # MÉTRICAS
     # ══════════════════════════════════════════════════════════════
-    st.markdown("### 📊 Equilíbrio Macroeconômico Clássico")
+    st.markdown("### Equilíbrio Macroeconômico Clássico")
     m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Produto Potencial (Y*)",    f"{Y_potencial:.1f}")
     m2.metric("Nível de Preços (P*)",      f"{P_equilibrio:.3f}")
     m3.metric("Salário Real Eq. (w*)",     f"{salario_real_eq:.3f}")
     m4.metric("Salário Real Atual (w)",    f"{salario_real_atual:.3f}")
     m5.metric("Desvio Salarial",           f"{desvio_w:+.1f}%",
-              delta_color="inverse" if abs(desvio_w) > 5 else "off")
+              delta_color="inverse"if abs(desvio_w) > 5 else "off")
 
     # ══════════════════════════════════════════════════════════════
     # GRÁFICOS
@@ -183,7 +183,7 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════════
     # ANÁLISE NARRATIVA
     # ══════════════════════════════════════════════════════════════
-    st.markdown("### 📝 Análise Completa da Situação Econômica")
+    st.markdown("### Análise Completa da Situação Econômica")
 
     # Narrativa Função de Produção
     narrativa_producao = (
@@ -212,9 +212,9 @@ def render() -> None:
             f"≈ w* = {salario_real_eq:.3f} (desvio de apenas {desvio_w:+.1f}%). "
             f"Sem pressão sobre preços ou salários nominais."
         )
-        cor_trabalho = "✅"
+        cor_trabalho = ""
     elif desvio_w > 0:
-        cor_trabalho = "⚠️"
+        cor_trabalho = ""
         narrativa_trabalho = (
             f"O salário real (w = {salario_real_atual:.3f}) está **{desvio_w:.1f}% acima** "
             f"do equilíbrio (w* = {salario_real_eq:.3f}). Há excesso de oferta de trabalho. "
@@ -222,19 +222,19 @@ def render() -> None:
             f"Y* = {Y_potencial:.1f} permanece inalterado durante o ajuste."
         )
     else:
-        cor_trabalho = "⚠️"
+        cor_trabalho = ""
         narrativa_trabalho = (
             f"O salário real (w = {salario_real_atual:.3f}) está **{abs(desvio_w):.1f}% abaixo** "
             f"do equilíbrio (w* = {salario_real_eq:.3f}). Excesso de demanda por trabalho. "
             f"O ajuste eleva W nominalmente ou reduz P, restaurando w* sem alterar Y* = {Y_potencial:.1f}."
         )
 
-    _card("🏭 1. Produto Potencial e Função de Produção", narrativa_producao, "blue")
-    _card("💰 2. Nível de Preços e Neutralidade da Moeda", narrativa_monetaria, "blue")
+    _card(" 1. Produto Potencial e Função de Produção", narrativa_producao, "blue")
+    _card(" 2. Nível de Preços e Neutralidade da Moeda", narrativa_monetaria, "blue")
     _card(f"{cor_trabalho} 3. Mercado de Trabalho e Ajuste Automático",
-          narrativa_trabalho, "green" if abs(desvio_w) < 2 else "orange")
+          narrativa_trabalho, "green"if abs(desvio_w) < 2 else "orange")
     _card(
-        "🔑 4. Conclusão — Dicotomia Clássica",
+        " 4. Conclusão — Dicotomia Clássica",
         f"A economia opera em dois planos independentes: o **setor real** "
         f"(Y* = {Y_potencial:.1f}, w* = {salario_real_eq:.3f}) é determinado por fatores de produção; "
         f"o **setor nominal** (P* = {P_equilibrio:.3f}) é determinado por M e V. "
@@ -247,11 +247,11 @@ def render() -> None:
     # ABAS ANALÍTICAS
     # ══════════════════════════════════════════════════════════════
     st.divider()
-    st.subheader("🔬 Aprofundamento Teórico")
+    st.subheader("Aprofundamento Teórico")
     aba1, aba2, aba3 = st.tabs([
-        "📐 Função de Produção",
-        "💵 Teoria Quantitativa",
-        "📘 Dicotomia Clássica",
+        "Função de Produção",
+        "Teoria Quantitativa",
+        "Dicotomia Clássica",
     ])
 
     with aba1:
@@ -299,12 +299,12 @@ def render() -> None:
 def _card(titulo: str, conteudo: str, cor: str = "blue") -> None:
     """Renderiza um card com bordas coloridas usando componentes nativos."""
     icone_cor = {
-        "blue":   "🔵",
-        "green":  "🟢",
-        "orange": "🟡",
-        "red":    "🔴",
-        "purple": "🟣",
-    }.get(cor, "⚪")
+        "blue":   "",
+        "green":  "",
+        "orange": "",
+        "red":    "",
+        "purple": "",
+    }.get(cor, "")
     fn_map = {
         "green":  st.success,
         "red":    st.error,

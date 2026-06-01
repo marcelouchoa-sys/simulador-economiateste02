@@ -1,6 +1,6 @@
 # ui/funcoes/consumo_ui.py
 """
-Aba Consumo — extraída de pages/1_📚_Funcoes.py
+Aba Consumo — extraída de pages/1__Funcoes.py
 Expõe render(p) para ser chamada pela página principal.
 """
 
@@ -37,21 +37,21 @@ def render(p: dict) -> None:
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        st.subheader("🛠️ Parâmetros")
+        st.subheader("Parâmetros")
 
         c0 = st.slider("Consumo Autônomo (c0)",               0.0,  500.0, float(p["c0"]),      10.0)
         c1 = st.slider("Propensão Marginal a Consumir (c1)",  0.01,   0.99, float(p["c1"]),      0.01)
 
-        st.write("**🏛️ Política Fiscal**")
+        st.write("** Política Fiscal**")
         T_fixo = st.slider("Imposto Fixo (T)",                0.0,  500.0, float(p["T"]),       10.0)
         t_aliq = st.slider("Alíquota sobre Renda (t)",        0.0,    0.5, float(p["t"]),       0.05)
 
-        st.write("**🌐 Transmissão e Riqueza**")
+        st.write("** Transmissão e Riqueza**")
         W_riqueza = st.slider("Riqueza das Famílias (W)",     0.0, 5000.0, float(p["W"]),      100.0)
         alpha_w   = st.slider("Efeito Riqueza (αw)",          0.0,   0.15, float(p["alpha_w"]), 0.01)
         theta     = st.slider("Sensibilidade a Juros (θ)",    0.0,  100.0, float(p["theta"]),   5.0)
 
-        st.write("**💰 Taxa de Juros**")
+        st.write("** Taxa de Juros**")
         r_juros = st.slider("Taxa de Juros (r)", 0.0, 0.20, float(p["r"]), 0.005, format="%.3f")
 
         # Persistir no estado global
@@ -65,7 +65,7 @@ def render(p: dict) -> None:
         m_fisc = multiplicador_fiscal(c1, t=t_aliq, m=p["m"])
 
         st.divider()
-        st.subheader("📊 Indicadores")
+        st.subheader("Indicadores")
         st.metric("Multiplicador da Economia", f"{m_fisc:.3f}")
         if y_star and y_star > 0:
             st.metric("Renda de Equilíbrio (S=0)", f"{y_star:.2f}")
@@ -105,7 +105,7 @@ def render(p: dict) -> None:
         st.plotly_chart(fig, use_container_width=True)
 
         # ── Gráfico 3: Propensões ─────────────────────────────────
-        st.subheader("📈 Dinâmica das Propensões")
+        st.subheader("Dinâmica das Propensões")
         fig_p = go.Figure()
         fig_p.add_trace(go.Scatter(x=Y_GRID, y=pmec_grid, name="PMeC",
                                    fill="tozeroy", line=dict(color="orange")))
@@ -119,13 +119,13 @@ def render(p: dict) -> None:
     # ABAS ANALÍTICAS
     # ══════════════════════════════════════════════════════════════
     st.divider()
-    st.subheader("🔬 Decomposição Analítica da Simulação")
+    st.subheader("Decomposição Analítica da Simulação")
 
     aba1, aba2, aba3, aba4 = st.tabs([
         "Interseção de Equilíbrio",
         "Mecânica da Riqueza (W)",
         "Transmissão de Juros (θ)",
-        "📘 Consumo Expandido",
+        "Consumo Expandido",
     ])
 
     with aba1:
@@ -148,7 +148,7 @@ def render(p: dict) -> None:
 # ══════════════════════════════════════════════════════════════════
 
 def _aba_equilibrio(y_star: float | None, c1: float, t_aliq: float) -> None:
-    y_str = f"{y_star:.2f}" if y_star else "indefinido"
+    y_str = f"{y_star:.2f}"if y_star else "indefinido"
     st.write(f"""
 **O Ponto de Break-even e o Ajuste de Estoques:**
 No nível de renda $Y^* = {y_str}$, a economia atinge o equilíbrio de fluxo.
@@ -181,7 +181,7 @@ A variável $\\theta = {theta}$ integra o mercado de bens ao mercado monetário
 - Sob a ótica da Síntese Neoclássica, o consumo possui um custo de oportunidade
   definido pela taxa $r = {r_juros*100:.1f}\\%$.
 - Elevações nos juros provocam uma contração de **{theta * r_juros:.2f}** unidades
-  no consumo autônomo, "empurrando" a curva para baixo e reduzindo a renda de
+  no consumo autônomo, "empurrando"a curva para baixo e reduzindo a renda de
   equilíbrio.
 """)
 
@@ -224,34 +224,34 @@ def _aba_consumo_expandido(
 
     c1_mais5 = 1.0 / max(1 - (c1 + 0.05) * (1 - t_aliq), 1e-9)
     st.markdown(f"""
-**📌 Propensão Marginal a Consumir — $c_1 = {c1:.3f}$**
+** Propensão Marginal a Consumir — $c_1 = {c1:.3f}$**
 - A cada R\\$ 1,00 adicional de **renda disponível** $(Y - T)$, as famílias gastam
   **R\\$ {c1:.2f}** em consumo e poupam **R\\$ {1-c1:.2f}**.
-- {"⚠️ **Valor alto (> 0,75):** economia com forte propensão ao consumo — multiplicador elevado e maior sensibilidade a choques." if c1 > 0.75 else "✅ **Valor moderado:** equilíbrio saudável entre consumo e poupança."}
+- {" **Valor alto (> 0,75):** economia com forte propensão ao consumo — multiplicador elevado e maior sensibilidade a choques."if c1 > 0.75 else " **Valor moderado:** equilíbrio saudável entre consumo e poupança."}
 - **Se você aumentar $c_1$ em +0,05:** o multiplicador passaria de **{mult:.3f}** para
   **{c1_mais5:.3f}** — amplificando qualquer choque de demanda em {((c1_mais5/mult)-1)*100:.1f}%.
 """)
 
     st.markdown(f"""
-**💰 Efeito Riqueza — $\\alpha_w = {alpha_w:.3f}$, $W = {W_riqueza:.1f}$**
+** Efeito Riqueza — $\\alpha_w = {alpha_w:.3f}$, $W = {W_riqueza:.1f}$**
 - A cada R\\$ 1,00 de **riqueza acumulada**, as famílias consomem R\\$ {alpha_w:.3f} a mais.
 - Com $W = {W_riqueza:.1f}$, o efeito riqueza total é:
 """)
     st.latex(rf"\alpha_w \times W = {alpha_w:.3f} \times {W_riqueza:.1f} = {efeito_riqueza:.2f}")
 
     if W_riqueza == 0:
-        st.warning("⚠️ **Riqueza = 0:** o efeito riqueza está desativado.")
+        st.warning(" **Riqueza = 0:** o efeito riqueza está desativado.")
     else:
-        st.success(f"✅ A riqueza contribui com **{efeito_riqueza:.2f}** unidades ao consumo autônomo efetivo.")
+        st.success(f"A riqueza contribui com **{efeito_riqueza:.2f}** unidades ao consumo autônomo efetivo.")
 
     st.divider()
 
     # ── 3. Renda vs Riqueza ───────────────────────────────────────
-    st.markdown("### 3. 📊 Renda (Fluxo) vs Riqueza (Estoque)")
+    st.markdown("### 3. Renda (Fluxo) vs Riqueza (Estoque)")
     col_a, col_b = st.columns(2)
     with col_a:
         st.markdown("""
-**🔄 Renda — Variável de Fluxo**
+** Renda — Variável de Fluxo**
 - Medida **por período** (mês, trimestre, ano)
 - Exemplos: salário, lucros, aluguéis recebidos
 - Na fórmula: $Y - T$ (renda disponível após impostos)
@@ -259,7 +259,7 @@ def _aba_consumo_expandido(
 """)
     with col_b:
         st.markdown("""
-**🏦 Riqueza — Variável de Estoque**
+** Riqueza — Variável de Estoque**
 - Medida em um **ponto no tempo**
 - Exemplos: saldo bancário, imóveis, carteira de ações
 - Na fórmula: $W$ (patrimônio líquido acumulado)
@@ -267,14 +267,14 @@ def _aba_consumo_expandido(
 """)
 
     st.markdown("""
-> 💡 **Analogia:** A renda é como a **água que entra** numa banheira (fluxo).
+>  **Analogia:** A renda é como a **água que entra** numa banheira (fluxo).
 > A riqueza é o **volume de água** que já está dentro dela (estoque).
 """)
 
     st.divider()
 
     # ── 4. O Multiplicador ────────────────────────────────────────
-    st.markdown("### 4. ⚡ O Multiplicador Keynesiano")
+    st.markdown("### 4. O Multiplicador Keynesiano")
 
     st.markdown("**Fórmula geral com alíquota sobre a renda:**")
     st.latex(
@@ -323,7 +323,7 @@ Imagine que o governo aumenta os gastos em **ΔG = 100**:
     st.dataframe(pd.DataFrame(rodadas), use_container_width=True, hide_index=True)
 
     st.success(
-        f"💡 **Conclusão:** Com $c_1 = {c1:.2f}$ e alíquota $t = {t_aliq:.2f}$, "
+        f" **Conclusão:** Com $c_1 = {c1:.2f}$ e alíquota $t = {t_aliq:.2f}$, "
         f"um aumento de 100 resulta em **ΔY\\* = {mult*100:.1f}** — "
         f"ou seja, **{mult:.2f}× o choque original**. "
         f"A alíquota reduz o multiplicador de {mult_simples:.3f} para {mult:.3f}."
@@ -332,7 +332,7 @@ Imagine que o governo aumenta os gastos em **ΔG = 100**:
     st.divider()
 
     # ── 5. Resumo das Equações ────────────────────────────────────
-    st.markdown("### 5. 📐 Resumo das Equações")
+    st.markdown("### 5. Resumo das Equações")
     st.latex(
         r"C = \underbrace{c_0}_{\text{autônomo}}"
         r"+ \underbrace{c_1(Y-T)}_{\text{renda disponível}}"

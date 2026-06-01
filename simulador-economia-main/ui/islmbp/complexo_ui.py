@@ -29,7 +29,7 @@ COR_BP1 = "#34d399"
 def render() -> None:
     """Renderiza o modo complexo completo."""
 
-    st.markdown("### 🔢 Modo Complexo — Parâmetros Numéricos")
+    st.markdown("### Modo Complexo — Parâmetros Numéricos")
     st.caption(
         "Altere os parâmetros abaixo e clique em **Calcular**. "
         "Todas as abas refletem os mesmos valores simultaneamente."
@@ -40,10 +40,10 @@ def render() -> None:
     # ══════════════════════════════════════════════════════════
     p, p_shock, aberta_cx, regime_cx, kf_preset, mostrar_mult_bp = _painel_parametros()
 
-    executar = st.button("🚀 Calcular Equilíbrio", type="primary", use_container_width=False)
+    executar = st.button("Calcular Equilíbrio", type="primary", use_container_width=False)
     st.divider()
 
-    if not executar and "cx_resultado" not in st.session_state:
+    if not executar and "cx_resultado"not in st.session_state:
         st.info("Configure os parâmetros acima e clique em **Calcular Equilíbrio**.")
         return
 
@@ -67,7 +67,7 @@ def render() -> None:
             st.info("Verifique os parâmetros — o sistema pode não ter solução com esses valores.")
             return
 
-    if "cx_resultado" not in st.session_state:
+    if "cx_resultado"not in st.session_state:
         return
 
     eq_b, eq_c, p_, p_shock_, aberta_, regime_, kf_preset_, mostrar_mult_bp_ = st.session_state["cx_resultado"]
@@ -81,13 +81,13 @@ def render() -> None:
     # ABAS DE FUNÇÕES INTEGRADAS
     # ══════════════════════════════════════════════════════════
     abas = st.tabs([
-        "📈 IS-LM-BP",
-        "💰 Investimento",
-        "🛒 Consumo",
-        "💵 Demanda por Moeda",
-        "🌐 Setor Externo",
-        "📊 Balanço de Pagamentos",
-        "🔬 Consistência",
+        "IS-LM-BP",
+        "Investimento",
+        "Consumo",
+        "Demanda por Moeda",
+        "Setor Externo",
+        "Balanço de Pagamentos",
+        "Consistência",
     ])
 
     with abas[0]:
@@ -120,30 +120,30 @@ def _painel_parametros():
     p       = DEFAULT_PARAMS.copy()
     p_shock = DEFAULT_PARAMS.copy()
 
-    with st.expander("⚙️ Parâmetros Base e Choque", expanded=True):
+    with st.expander("Parâmetros Base e Choque", expanded=True):
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            st.markdown("**🏛️ Política Fiscal**")
+            st.markdown("** Política Fiscal**")
             p["G"]  = st.number_input("G — Gasto do Governo",  value=float(p["G"]),  step=10., key="cx_G")
             p["T"]  = st.number_input("T — Impostos",          value=float(p["T"]),  step=10., key="cx_T")
-            st.markdown("**💰 Política Monetária**")
+            st.markdown("** Política Monetária**")
             p["M"]  = st.number_input("M — Oferta de Moeda",   value=float(p["M"]),  step=50., key="cx_M")
             p["P"]  = st.number_input("P — Nível de Preços",   value=float(p["P"]),  step=0.1, key="cx_P")
 
         with col2:
-            st.markdown("**📐 Parâmetros IS**")
+            st.markdown("** Parâmetros IS**")
             p["c0"] = st.number_input("c0 — Consumo Autônomo",      value=float(p["c0"]), step=10.,  key="cx_c0")
             p["c1"] = st.number_input("c1 — Propensão a Consumir",  value=float(p["c1"]), step=0.01, key="cx_c1", format="%.2f")
             p["I0"] = st.number_input("I0 — Invest. Autônomo",      value=float(p["I0"]), step=10.,  key="cx_I0")
             p["b"]  = st.number_input("b — Sensib. I a r",          value=float(p["b"]),  step=5.,   key="cx_b")
 
         with col3:
-            st.markdown("**📐 Parâmetros LM**")
+            st.markdown("** Parâmetros LM**")
             p["k"]  = st.number_input("k — Sensib. Md a Y",  value=float(p["k"]), step=0.05, key="cx_k", format="%.2f")
             p["h"]  = st.number_input("h — Sensib. Md a r",  value=float(p["h"]), step=10.,  key="cx_h")
 
-            st.markdown("**🌐 Economia Aberta**")
+            st.markdown("** Economia Aberta**")
             aberta_cx = st.checkbox("Ativar economia aberta", value=False, key="cx_aberta")
             p["aberta"] = aberta_cx
 
@@ -153,7 +153,7 @@ def _painel_parametros():
 
             if aberta_cx:
                 regime_cx = st.radio("Regime cambial:", ["flex", "fixo"],
-                                     format_func=lambda x: "Flexível" if x == "flex" else "Fixo",
+                                     format_func=lambda x: "Flexível"if x == "flex"else "Fixo",
                                      key="cx_regime", horizontal=True)
                 p["regime"] = regime_cx
                 kf_preset   = st.select_slider("Mobilidade de Capital:",
@@ -169,7 +169,7 @@ def _painel_parametros():
                     p["e_fixed"] = st.number_input("e fixo (meta BC)", value=float(p.get("e_fixed", 1.)), step=0.05, key="cx_ef")
 
         with col4:
-            st.markdown("**⚡ Choque (Cenário 2)**")
+            st.markdown("** Choque (Cenário 2)**")
             dG = st.number_input("ΔG", value=0., step=10., key="cx_dG")
             dT = st.number_input("ΔT", value=0., step=10., key="cx_dT")
             dM = st.number_input("ΔM", value=0., step=50., key="cx_dM")
@@ -201,7 +201,7 @@ def _painel_parametros():
 # ══════════════════════════════════════════════════════════════
 
 def _metricas_principais(eq_b, eq_c, aberta):
-    st.markdown("### 📊 Resultados do Equilíbrio")
+    st.markdown("### Resultados do Equilíbrio")
     m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Produto (Y*)",     f"{eq_b['Y']:.2f}",            f"{eq_c['Y']-eq_b['Y']:+.2f}")
     m2.metric("Juros (r*)",       f"{eq_b['r']*100:.3f}%",       f"{(eq_c['r']-eq_b['r'])*100:+.3f}pp")
@@ -213,7 +213,7 @@ def _metricas_principais(eq_b, eq_c, aberta):
         m5.metric("NX",           "N/A (fechada)", "")
 
     # Tabela completa
-    with st.expander("📋 Tabela completa de resultados", expanded=False):
+    with st.expander("Tabela completa de resultados", expanded=False):
         linhas = [
             ("Y — Produto",              eq_b["Y"],        eq_c["Y"]),
             ("r — Taxa de Juros (%)",    eq_b["r"]*100,    eq_c["r"]*100),
@@ -238,7 +238,7 @@ def _metricas_principais(eq_b, eq_c, aberta):
 # ══════════════════════════════════════════════════════════════
 
 def _aba_islmbp(eq_b, eq_c, p, p_shock, aberta, regime, kf_preset, mostrar_mult_bp):
-    st.markdown("#### 📈 Gráfico IS-LM-BP — Base vs. Choque")
+    st.markdown("####  Gráfico IS-LM-BP — Base vs. Choque")
 
     # Range dinâmico centrado no equilíbrio real
     Y_center = (eq_b["Y"] + eq_c["Y"]) / 2
@@ -338,7 +338,7 @@ def _aba_islmbp(eq_b, eq_c, p, p_shock, aberta, regime, kf_preset, mostrar_mult_
 # ══════════════════════════════════════════════════════════════
 
 def _aba_investimento(eq_b, eq_c, p, p_shock):
-    st.markdown("#### 💰 Função Investimento — I = I₀ − b·r")
+    st.markdown("####  Função Investimento — I = I₀ − b·r")
     st.latex(r"I = I_0 - b \cdot r")
 
     r_range = np.linspace(0, 0.25, 300)
@@ -355,7 +355,7 @@ def _aba_investimento(eq_b, eq_c, p, p_shock):
             x=[eq["I"]], y=[eq["r"] * 100],
             mode="markers+text", name=nm,
             marker=dict(size=12, color=cor, symbol="star"),
-            text=[f" I={eq['I']:.1f}"], textposition="middle right",
+            text=[f"I={eq['I']:.1f}"], textposition="middle right",
         ))
 
     fig.update_layout(
@@ -368,10 +368,10 @@ def _aba_investimento(eq_b, eq_c, p, p_shock):
     c1.metric("I base",           f"{eq_b['I']:.2f}")
     c2.metric("I choque",         f"{eq_c['I']:.2f}", f"{eq_c['I']-eq_b['I']:+.2f}")
     c3.metric("Crowding-out (ΔI)", f"{eq_c['I']-eq_b['I']:+.2f}",
-              delta_color="inverse" if eq_c["I"] < eq_b["I"] else "normal")
+              delta_color="inverse"if eq_c["I"] < eq_b["I"] else "normal")
 
     if eq_c["I"] < eq_b["I"]:
-        st.warning(f"⚠️ **Crowding-out:** a política elevou os juros de {eq_b['r']*100:.2f}% para {eq_c['r']*100:.2f}%, "
+        st.warning(f" **Crowding-out:** a política elevou os juros de {eq_b['r']*100:.2f}% para {eq_c['r']*100:.2f}%, "
                    f"reduzindo o investimento privado em {eq_b['I']-eq_c['I']:.2f}.")
 
 
@@ -380,7 +380,7 @@ def _aba_investimento(eq_b, eq_c, p, p_shock):
 # ══════════════════════════════════════════════════════════════
 
 def _aba_consumo(eq_b, eq_c, p, p_shock):
-    st.markdown("#### 🛒 Função Consumo — C = c₀ + c₁(Y − T)")
+    st.markdown("####  Função Consumo — C = c₀ + c₁(Y − T)")
     st.latex(r"C = c_0 + c_1(Y - T)")
 
     Y_range  = np.linspace(200, 2500, 300)
@@ -422,7 +422,7 @@ def _aba_consumo(eq_b, eq_c, p, p_shock):
 # ══════════════════════════════════════════════════════════════
 
 def _aba_demanda_moeda(eq_b, eq_c, p, p_shock):
-    st.markdown("#### 💵 Demanda por Moeda e Curva LM")
+    st.markdown("####  Demanda por Moeda e Curva LM")
     st.latex(r"M^d/P = kY - hr \qquad r_{LM} = \frac{kY - M/P}{h}")
 
     Y_range = np.linspace(200, 2500, 300)
@@ -466,7 +466,7 @@ def _aba_demanda_moeda(eq_b, eq_c, p, p_shock):
 # ══════════════════════════════════════════════════════════════
 
 def _aba_setor_externo(eq_b, eq_c, p, p_shock, aberta):
-    st.markdown("#### 🌐 Setor Externo — NX, CF e Câmbio")
+    st.markdown("####  Setor Externo — NX, CF e Câmbio")
 
     if not aberta:
         st.info("Ative a economia aberta para ver o setor externo.")
@@ -518,7 +518,7 @@ def _aba_setor_externo(eq_b, eq_c, p, p_shock, aberta):
 # ══════════════════════════════════════════════════════════════
 
 def _aba_bp(eq_b, eq_c, p, p_shock, aberta):
-    st.markdown("#### 📊 Balanço de Pagamentos — NX + CF = 0")
+    st.markdown("####  Balanço de Pagamentos — NX + CF = 0")
 
     if not aberta:
         st.info("Ative a economia aberta para ver o Balanço de Pagamentos.")
@@ -556,8 +556,8 @@ def _aba_bp(eq_b, eq_c, p, p_shock, aberta):
     bp_b = eq_b["NX"] + eq_b["CF"]
     bp_c = eq_c["NX"] + eq_c["CF"]
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("BP base",   f"{bp_b:.4f}", delta="≈ 0 ✅" if abs(bp_b) < 0.1 else "⚠️ Desequilíbrio")
-    c2.metric("BP choque", f"{bp_c:.4f}", delta="≈ 0 ✅" if abs(bp_c) < 0.1 else "⚠️ Desequilíbrio")
+    c1.metric("BP base",   f"{bp_b:.4f}", delta="≈ 0 "if abs(bp_b) < 0.1 else "Desequilíbrio")
+    c2.metric("BP choque", f"{bp_c:.4f}", delta="≈ 0 "if abs(bp_c) < 0.1 else "Desequilíbrio")
     c3.metric("NX choque", f"{eq_c['NX']:.2f}", f"{eq_c['NX']-eq_b['NX']:+.2f}")
     c4.metric("CF choque", f"{eq_c['CF']:.2f}", f"{eq_c['CF']-eq_b['CF']:+.2f}")
 
@@ -567,13 +567,13 @@ def _aba_bp(eq_b, eq_c, p, p_shock, aberta):
 # ══════════════════════════════════════════════════════════════
 
 def _aba_consistencia(eq_b, eq_c):
-    st.markdown("#### 🔬 Verificação de Consistência do Solver")
+    st.markdown("####  Verificação de Consistência do Solver")
     st.caption("Resíduos das equações de equilíbrio — valores próximos de 0 indicam solução correta.")
 
     for label, eq, sufixo in [("Base (E₀)", eq_b, "b"), ("Choque (E₁)", eq_c, "c")]:
         st.markdown(f"**{label}:**")
         for nome, res in [("IS", eq["IS_res"]), ("LM", eq["LM_res"]), ("BP", eq["BP_res"])]:
             ok  = abs(res) < 0.01
-            ico = "✅" if ok else "⚠️"
+            ico = ""if ok else ""
             st.markdown(f"{ico} **{nome}** resíduo = `{res:.8f}`")
         st.markdown("")
