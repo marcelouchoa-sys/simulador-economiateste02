@@ -217,6 +217,14 @@ section[data-testid="stSidebar"] [data-testid="stSidebarNavItems"] a[aria-curren
 .page-sub    { font-size: 0.88rem; color: #6E6E73; margin-top: 4px; font-weight: 400; }
 .lbex-footer { font-size: 0.74rem; color: #AEAEB2; text-align: center; padding: 8px 0; }
 
+details summary svg,
+details summary span[data-testid="stExpanderToggleIcon"] {
+    display: none !important;
+}
+
+section[data-testid="stSidebar"] { display: none !important; }
+[data-testid="collapsedControl"]  { display: none !important; }
+
 </style>
 """
 
