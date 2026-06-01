@@ -34,19 +34,19 @@ def render() -> None:
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown("** Política Fiscal**")
+        st.markdown("**Política Fiscal**")
         G  = st.slider("Gasto do Governo (G)",    0.0, 100.0, 30.0, 1.0, key="kn_G")
         T  = st.slider("Impostos (T)",             0.0,  80.0, 20.0, 1.0, key="kn_T")
         TR = st.slider("Transferências (TR)",      0.0,  50.0, 10.0, 1.0, key="kn_TR")
 
     with col2:
-        st.markdown("** Setor Privado**")
+        st.markdown("**Setor Privado**")
         C0  = st.slider("Consumo Autônomo (C₀)",            0.0,  80.0, 20.0, 1.0,  key="kn_C0")
         mpc = st.slider("Propensão Marginal a Consumir (c)", 0.50, 0.95, 0.75, 0.01, key="kn_mpc")
         I0  = st.slider("Investimento Autônomo (I₀)",       0.0,  80.0, 25.0, 1.0,  key="kn_I0")
 
     with col3:
-        st.markdown("** Juros e Referências**")
+        st.markdown("**Juros e Referências**")
         taxa_juros = st.slider("Taxa de Juros (r)", 0.0, 0.20, 0.05, 0.005,
                                format="%.3f", key="kn_r")
         b_inv      = st.slider("Sensibilidade Inv. a r (b)", 0.0, 200.0, 50.0, 5.0, key="kn_b")

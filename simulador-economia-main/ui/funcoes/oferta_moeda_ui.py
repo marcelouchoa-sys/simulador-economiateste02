@@ -43,12 +43,12 @@ def render() -> None:
         P  = st.slider("Nível de Preços (P)", 0.5, 3.0, 1.0, 0.1,
                        help="Divide M para obter a oferta real Ms/P")
 
-        st.markdown("** Regime Monetário**")
+        st.markdown("**Regime Monetário**")
         regime = st.radio("Regime:", ["Exógena", "Endógena"], horizontal=True,
                           help="Exógena: BC controla M diretamente. Endógena: M responde ao crédito.")
 
         st.divider()
-        st.markdown("** Demanda por Moeda (para comparação)**")
+        st.markdown("**Demanda por Moeda (para comparação)**")
         k   = st.slider("k — Sensibilidade a Y", 0.1, 1.0, 0.5, 0.05)
         h   = st.slider("h — Sensibilidade a r", 10.0, 300.0, 100.0, 10.0)
         Y_ref = st.slider("Renda de Referência (Y)", 100.0, 2500.0, 1200.0, 50.0)

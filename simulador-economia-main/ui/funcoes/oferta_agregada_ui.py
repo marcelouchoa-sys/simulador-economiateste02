@@ -48,14 +48,14 @@ def render() -> None:
                           help="Quanto Y precisa variar para mover P em 1 unidade. α grande → OA mais plana")
 
         st.divider()
-        st.markdown("** Choque de Oferta**")
+        st.markdown("**Choque de Oferta**")
         dPe   = st.slider("ΔPᵉ (choque de expectativas)", -0.5, 1.0, 0.0, 0.1,
                           help="Choque de expectativas inflacionárias")
         dYn   = st.slider("ΔYₙ (choque de produtividade)", -200.0, 200.0, 0.0, 20.0,
                           help="Mudança no produto potencial via tecnologia ou capital")
 
         st.divider()
-        st.markdown("** Produto Atual**")
+        st.markdown("**Produto Atual**")
         Y_atual = st.slider("Y atual", 500.0, 2000.0, 1100.0, 50.0)
 
         # Cálculos

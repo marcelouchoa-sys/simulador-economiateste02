@@ -20,12 +20,12 @@ def render() -> None:
         c1, c2, c3, c4, c5 = st.columns([1, 1, 1, 1, 1])
 
         with c1:
-            st.markdown("** Economia**")
+            st.markdown("**Economia**")
             tipo_eco = st.radio("Tipo:", ["Fechada", "Aberta"],
                                 key="did_eco", label_visibility="collapsed")
 
         with c2:
-            st.markdown("** Regime**")
+            st.markdown("**Regime**")
             if tipo_eco == "Aberta":
                 regime = st.radio("Regime:", ["Flexível", "Fixo"],
                                   key="did_reg", label_visibility="collapsed")
@@ -34,17 +34,17 @@ def render() -> None:
                 regime = "Flexível"
 
         with c3:
-            st.markdown("** Política**")
+            st.markdown("**Política**")
             politica = st.radio("Política:", ["Fiscal", "Monetária"],
                                 key="did_pol", label_visibility="collapsed")
 
         with c4:
-            st.markdown("** Direção**")
+            st.markdown("**Direção**")
             direcao = st.radio("Direção:", ["Expansionista", "Contracionista"],
                                key="did_dir", label_visibility="collapsed")
 
         with c5:
-            st.markdown("** Mobilidade de Capital**")
+            st.markdown("**Mobilidade de Capital**")
             if tipo_eco == "Aberta":
                 mob_opts    = ["Nula", "Baixa", "Alta", "Perfeita"]
                 default_mob = st.session_state.get("settings", {}).get("mobilidade_capital", "Alta")

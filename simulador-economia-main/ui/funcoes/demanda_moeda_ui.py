@@ -45,11 +45,11 @@ def render() -> None:
         P = st.slider("Nível de Preços (P)", 0.5, 3.0, 1.0, 0.1)
         M = st.slider("Oferta de Moeda (M)", 100.0, 2000.0, 1000.0, 50.0)
 
-        st.markdown("** Escola Econômica**")
+        st.markdown("**Escola Econômica**")
         escola = st.radio("Visão teórica:", ["Keynesiana", "Clássica"], horizontal=True)
 
         st.divider()
-        st.markdown("** Ponto de Análise**")
+        st.markdown("**Ponto de Análise**")
         Y_ref = st.slider("Renda de Referência (Y)", 100.0, 2500.0, 1200.0, 50.0)
         r_ref = st.slider("Juros de Referência (r %)", 0.0, 20.0, 5.0, 0.5)
 

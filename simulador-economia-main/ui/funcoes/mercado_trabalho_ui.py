@@ -43,7 +43,7 @@ def render(p: dict | None = None) -> None:
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown("** Demanda por Trabalho (Empresas)**")
+        st.markdown("**Demanda por Trabalho (Empresas)**")
         a_ld = st.slider("Intercepto da Demanda (a)", 2.0, 20.0, 12.0, 0.5,
                          key="mt_a",
                          help="Salário real máximo que as empresas pagariam com L=0 (PMgL máximo)")
@@ -52,7 +52,7 @@ def render(p: dict | None = None) -> None:
                          help="Queda do salário real para cada trabalhador adicional (PMgL decrescente)")
 
     with col2:
-        st.markdown("** Oferta de Trabalho (Trabalhadores)**")
+        st.markdown("**Oferta de Trabalho (Trabalhadores)**")
         c_ls = st.slider("Intercepto da Oferta (c)", 0.0, 6.0, 1.0, 0.25,
                          key="mt_c",
                          help="Salário real mínimo de reserva (abaixo disso ninguém trabalha)")
@@ -61,13 +61,13 @@ def render(p: dict | None = None) -> None:
                          help="Aumento do salário real exigido para cada trabalhador adicional")
 
     with col3:
-        st.markdown("** Política Salarial e Produto**")
+        st.markdown("**Política Salarial e Produto**")
         w_min        = st.slider("Salário Mínimo (w̄/P)", 1.0, 18.0, 9.0, 0.25,
                                  key="mt_wmin",
                                  help="Piso salarial legal. Se acima do equilíbrio → desemprego involuntário")
         mostrar_wmin = st.checkbox("Ativar piso salarial", value=True, key="mt_show")
         st.markdown("---")
-        st.markdown("** Produto e Lei de Okun**")
+        st.markdown("**Produto e Lei de Okun**")
         Y_atual   = st.number_input("Produto Atual (Y)",             value=float(p["Y_atual"]), step=50.0, key="mt_y")
         Y_pleno   = st.number_input("Produto de Pleno Emprego (Yₙ)", value=float(p["Yn"]),     step=50.0, key="mt_yn")
         p["Y_atual"] = Y_atual
@@ -266,10 +266,10 @@ def render(p: dict | None = None) -> None:
         st.metric("Taxa Efetiva (u)",        f"{u_efetivo:.2f}%")
         st.metric("Hiato do Produto (Y−Yₙ)", f"{gap_produto:+.0f}",
                   delta=f"{gap_pct:+.1f}%", delta_color="normal")
-        if gap_pct < -2:   st.error(" **Recessão profunda**")
-        elif gap_pct < 0:  st.warning(" **Hiato negativo**")
-        elif gap_pct > 2:  st.info(" **Sobreaquecimento**")
-        else:              st.success(" **Próximo ao pleno emprego**")
+        if gap_pct < -2:   st.error("**Recessão profunda**")
+        elif gap_pct < 0:  st.warning("**Hiato negativo**")
+        elif gap_pct > 2:  st.info("**Sobreaquecimento**")
+        else:              st.success("**Próximo ao pleno emprego**")
 
     # ══════════════════════════════════════════════════════════════
     # ABAS ANALÍTICAS

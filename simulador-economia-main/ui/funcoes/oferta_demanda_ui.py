@@ -30,21 +30,21 @@ def render() -> None:
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.markdown("** Curva de Demanda**")
+        st.markdown("**Curva de Demanda**")
         a_dem = st.slider("Intercepto da Demanda (a)", 2.0, 12.0, 7.0, 0.25, key="od_a",
                           help="Preço máximo que os consumidores pagariam (Q=0)")
         b_dem = st.slider("Inclinação da Demanda (b)", 0.001, 0.010, 0.004, 0.001,
                           format="%.3f", key="od_b",
                           help="Quanto P cai para cada unidade adicional de Q")
     with col2:
-        st.markdown("** Curva de Oferta**")
+        st.markdown("**Curva de Oferta**")
         c_ofe = st.slider("Intercepto da Oferta (c)", 0.0, 4.0, 1.0, 0.25, key="od_c",
                           help="Preço mínimo para os produtores ofertarem (Q=0)")
         d_ofe = st.slider("Inclinação da Oferta (d)", 0.001, 0.010, 0.004, 0.001,
                           format="%.3f", key="od_d",
                           help="Quanto P sobe para cada unidade adicional de Q")
     with col3:
-        st.markdown("** Preço Tabelado**")
+        st.markdown("**Preço Tabelado**")
         P_tabelado = st.slider("Preço Tabelado (P̄)", 1.0, 10.0, 6.0, 0.25, key="od_ptab",
                                help="Acima do equilíbrio → excesso de oferta; abaixo → escassez")
         mostrar_tabelado = st.checkbox("Mostrar cenário com preço tabelado",
@@ -209,11 +209,11 @@ def _aba_preco_tabelado(mostrar_tabelado, a_dem, b_dem, c_ofe, d_ofe,
     if abs(excesso) < 10:
         st.success(f"O preço tabelado P̄ = {P_tabelado:.2f} coincide com P* = {P_eq:.2f}. Sem distorção.")
     elif excesso > 0:
-        st.markdown(f"** Excesso de Oferta ({abs(excesso)/escala:.2f} mil unidades)**\n\n"
+        st.markdown(f"**Excesso de Oferta ({abs(excesso)/escala:.2f} mil unidades)**\n\n"
             f"Com P̄ = {P_tabelado:.2f} **acima** do equilíbrio (P* = {P_eq:.2f}): "
             "produtores querem vender mais do que consumidores desejam comprar.")
     else:
-        st.markdown(f"** Escassez ({abs(excesso)/escala:.2f} mil unidades)**\n\n"
+        st.markdown(f"**Escassez ({abs(excesso)/escala:.2f} mil unidades)**\n\n"
             f"Com P̄ = {P_tabelado:.2f} **abaixo** do equilíbrio (P* = {P_eq:.2f}): "
             "consumidores demandam mais do que produtores estão dispostos a ofertar.")
 
@@ -246,9 +246,9 @@ def _aba_teoria_completa(a_dem, b_dem, c_ofe, d_ofe, P_eq, Q_eq,
     st.markdown("#### 1. O que representam as curvas?")
     col_t1, col_t2 = st.columns(2)
     with col_t1:
-        st.markdown(f"** Demanda:** $a={a_dem:.2f}$, $b={b_dem:.3f}$ — negativamente inclinada (substituição + efeito renda).")
+        st.markdown(f"**Demanda:** $a={a_dem:.2f}$, $b={b_dem:.3f}$ — negativamente inclinada (substituição + efeito renda).")
     with col_t2:
-        st.markdown(f"** Oferta:** $c={c_ofe:.2f}$, $d={d_ofe:.3f}$ — positivamente inclinada (custo marginal crescente).")
+        st.markdown(f"**Oferta:** $c={c_ofe:.2f}$, $d={d_ofe:.3f}$ — positivamente inclinada (custo marginal crescente).")
 
     st.divider()
     st.markdown("#### 2. Equilíbrio")

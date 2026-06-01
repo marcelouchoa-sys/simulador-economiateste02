@@ -42,16 +42,16 @@ def render(p: dict) -> None:
         c0 = st.slider("Consumo Autônomo (c0)",               0.0,  500.0, float(p["c0"]),      10.0)
         c1 = st.slider("Propensão Marginal a Consumir (c1)",  0.01,   0.99, float(p["c1"]),      0.01)
 
-        st.write("** Política Fiscal**")
+        st.write("**Política Fiscal**")
         T_fixo = st.slider("Imposto Fixo (T)",                0.0,  500.0, float(p["T"]),       10.0)
         t_aliq = st.slider("Alíquota sobre Renda (t)",        0.0,    0.5, float(p["t"]),       0.05)
 
-        st.write("** Transmissão e Riqueza**")
+        st.write("**Transmissão e Riqueza**")
         W_riqueza = st.slider("Riqueza das Famílias (W)",     0.0, 5000.0, float(p["W"]),      100.0)
         alpha_w   = st.slider("Efeito Riqueza (αw)",          0.0,   0.15, float(p["alpha_w"]), 0.01)
         theta     = st.slider("Sensibilidade a Juros (θ)",    0.0,  100.0, float(p["theta"]),   5.0)
 
-        st.write("** Taxa de Juros**")
+        st.write("**Taxa de Juros**")
         r_juros = st.slider("Taxa de Juros (r)", 0.0, 0.20, float(p["r"]), 0.005, format="%.3f")
 
         # Persistir no estado global
@@ -240,7 +240,7 @@ def _aba_consumo_expandido(
     st.latex(rf"\alpha_w \times W = {alpha_w:.3f} \times {W_riqueza:.1f} = {efeito_riqueza:.2f}")
 
     if W_riqueza == 0:
-        st.warning(" **Riqueza = 0:** o efeito riqueza está desativado.")
+        st.warning("**Riqueza = 0:** o efeito riqueza está desativado.")
     else:
         st.success(f"A riqueza contribui com **{efeito_riqueza:.2f}** unidades ao consumo autônomo efetivo.")
 

@@ -124,26 +124,26 @@ def _painel_parametros():
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            st.markdown("** Política Fiscal**")
+            st.markdown("**Política Fiscal**")
             p["G"]  = st.number_input("G — Gasto do Governo",  value=float(p["G"]),  step=10., key="cx_G")
             p["T"]  = st.number_input("T — Impostos",          value=float(p["T"]),  step=10., key="cx_T")
-            st.markdown("** Política Monetária**")
+            st.markdown("**Política Monetária**")
             p["M"]  = st.number_input("M — Oferta de Moeda",   value=float(p["M"]),  step=50., key="cx_M")
             p["P"]  = st.number_input("P — Nível de Preços",   value=float(p["P"]),  step=0.1, key="cx_P")
 
         with col2:
-            st.markdown("** Parâmetros IS**")
+            st.markdown("**Parâmetros IS**")
             p["c0"] = st.number_input("c0 — Consumo Autônomo",      value=float(p["c0"]), step=10.,  key="cx_c0")
             p["c1"] = st.number_input("c1 — Propensão a Consumir",  value=float(p["c1"]), step=0.01, key="cx_c1", format="%.2f")
             p["I0"] = st.number_input("I0 — Invest. Autônomo",      value=float(p["I0"]), step=10.,  key="cx_I0")
             p["b"]  = st.number_input("b — Sensib. I a r",          value=float(p["b"]),  step=5.,   key="cx_b")
 
         with col3:
-            st.markdown("** Parâmetros LM**")
+            st.markdown("**Parâmetros LM**")
             p["k"]  = st.number_input("k — Sensib. Md a Y",  value=float(p["k"]), step=0.05, key="cx_k", format="%.2f")
             p["h"]  = st.number_input("h — Sensib. Md a r",  value=float(p["h"]), step=10.,  key="cx_h")
 
-            st.markdown("** Economia Aberta**")
+            st.markdown("**Economia Aberta**")
             aberta_cx = st.checkbox("Ativar economia aberta", value=False, key="cx_aberta")
             p["aberta"] = aberta_cx
 
@@ -169,7 +169,7 @@ def _painel_parametros():
                     p["e_fixed"] = st.number_input("e fixo (meta BC)", value=float(p.get("e_fixed", 1.)), step=0.05, key="cx_ef")
 
         with col4:
-            st.markdown("** Choque (Cenário 2)**")
+            st.markdown("**Choque (Cenário 2)**")
             dG = st.number_input("ΔG", value=0., step=10., key="cx_dG")
             dT = st.number_input("ΔT", value=0., step=10., key="cx_dT")
             dM = st.number_input("ΔM", value=0., step=50., key="cx_dM")
@@ -371,7 +371,7 @@ def _aba_investimento(eq_b, eq_c, p, p_shock):
               delta_color="inverse"if eq_c["I"] < eq_b["I"] else "normal")
 
     if eq_c["I"] < eq_b["I"]:
-        st.warning(f" **Crowding-out:** a política elevou os juros de {eq_b['r']*100:.2f}% para {eq_c['r']*100:.2f}%, "
+        st.warning(f"**Crowding-out:** a política elevou os juros de {eq_b['r']*100:.2f}% para {eq_c['r']*100:.2f}%, "
                    f"reduzindo o investimento privado em {eq_b['I']-eq_c['I']:.2f}.")
 
 

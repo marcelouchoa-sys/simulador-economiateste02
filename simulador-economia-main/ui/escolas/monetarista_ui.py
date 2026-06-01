@@ -34,19 +34,19 @@ def render() -> None:
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown("** Política Monetária**")
+        st.markdown("**Política Monetária**")
         M_crescimento = st.slider("Crescimento de M (%/ano)", 0.0, 30.0, 5.0, 0.5, key="mn_dM",
                                   help="Regra de Friedman: manter crescimento fixo de M")
         pi_esperada   = st.slider("Inflação Esperada (πᵉ %)", 0.0, 20.0, 3.0, 0.5, key="mn_pie")
 
     with col2:
-        st.markdown("** Estrutura**")
+        st.markdown("**Estrutura**")
         u_natural = st.slider("Taxa Natural de Desemprego (uₙ %)", 2.0, 10.0, 5.0, 0.5, key="mn_un")
         Yn        = st.slider("Produto Potencial (Yₙ)", 500.0, 2000.0, 1200.0, 50.0, key="mn_Yn")
         beta      = st.slider("β — Sensib. Phillips a u", 0.5, 3.0, 1.5, 0.1, key="mn_beta")
 
     with col3:
-        st.markdown("** Expectativas**")
+        st.markdown("**Expectativas**")
         lambda_adapt = st.slider("λ — Velocidade de Adaptação", 0.1, 1.0, 0.5, 0.05, key="mn_lambda",
                                  help="λ=1: expectativas se ajustam totalmente em 1 período")
         u_atual   = st.slider("Desemprego Atual (u %)", 1.0, 15.0, 4.0, 0.5, key="mn_u")

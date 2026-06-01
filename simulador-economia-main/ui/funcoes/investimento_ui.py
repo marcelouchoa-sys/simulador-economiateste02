@@ -46,13 +46,13 @@ def render() -> None:
         b  = st.slider("Sensibilidade aos Juros (b)", 1.0, 100.0, 50.0, 1.0,
                        help="Quanto o investimento cai para cada 1 p.p. de aumento nos juros")
 
-        st.markdown("** Escola Econômica**")
+        st.markdown("**Escola Econômica**")
         escola = st.radio("Visão teórica:", ["Keynesiana", "Clássica"],
                           horizontal=True,
                           help="Clássica dobra a sensibilidade b (mercado de fundos emprestáveis)")
 
         st.divider()
-        st.markdown("** Simulação de Crowding-Out**")
+        st.markdown("**Simulação de Crowding-Out**")
         r_base   = st.slider("Juros Base (r₀ %)",   0.0, 15.0, 5.0,  0.5)
         r_choque = st.slider("Juros Choque (r₁ %)", 0.0, 20.0, 10.0, 0.5)
 

@@ -50,12 +50,12 @@ def render() -> None:
         K_ref = st.slider("K — Capital de Referência", 10.0, 3000.0, 1000.0, 50.0,
                           help="Ponto específico para calcular produtividades marginais")
 
-        st.markdown("** Escola Econômica**")
+        st.markdown("**Escola Econômica**")
         escola = st.radio("Visão:", ["Keynesiana", "Clássica"], horizontal=True,
                           help="Clássica: pleno emprego. Keynesiana: L pode ser subempregado.")
 
         st.divider()
-        st.markdown("** Comparação de Cenários**")
+        st.markdown("**Comparação de Cenários**")
         dA  = st.slider("ΔA (choque tecnológico)", -0.5, 1.0, 0.2, 0.1)
         dL  = st.slider("ΔL (choque de trabalho)", -100.0, 200.0, 50.0, 10.0)
 

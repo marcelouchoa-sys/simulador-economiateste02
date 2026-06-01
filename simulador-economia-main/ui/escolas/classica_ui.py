@@ -32,7 +32,7 @@ def render() -> None:
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown("** Lado da Oferta**")
+        st.markdown("**Lado da Oferta**")
         produtividade = st.slider("Produtividade Total (A)", 0.5, 2.0, 1.0, 0.05,
                                   key="cl_A")
         tecnologia    = st.slider("Tecnologia (θ)", 0.5, 2.0, 1.0, 0.05,
@@ -41,14 +41,14 @@ def render() -> None:
                                   key="cl_L")
 
     with col2:
-        st.markdown("** Lado Monetário**")
+        st.markdown("**Lado Monetário**")
         oferta_monetaria = st.slider("Oferta Monetária (M)", 50.0, 300.0, 100.0, 10.0,
                                      key="cl_M")
         velocidade       = st.slider("Velocidade da Moeda (V)", 0.5, 3.0, 1.0, 0.1,
                                      key="cl_V")
 
     with col3:
-        st.markdown("** Fatores de Produção**")
+        st.markdown("**Fatores de Produção**")
         salario_nominal = st.slider("Salário Nominal (W)", 0.5, 3.0, 1.0, 0.1,
                                     key="cl_W")
         capital         = st.slider("Estoque de Capital (K)", 50.0, 200.0, 100.0, 10.0,

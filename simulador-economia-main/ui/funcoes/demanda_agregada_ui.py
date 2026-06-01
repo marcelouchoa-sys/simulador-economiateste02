@@ -40,23 +40,23 @@ def render() -> None:
     with col1:
         st.subheader("Parâmetros")
 
-        st.markdown("** Demanda Privada**")
+        st.markdown("**Demanda Privada**")
         c0 = st.slider("c₀ — Consumo Autônomo",    50.0,  300.0, 100.0, 10.0)
         c1 = st.slider("c₁ — Propensão a Consumir", 0.5,   0.95,  0.75,  0.01)
         I0 = st.slider("I₀ — Invest. Autônomo",    50.0,  400.0, 200.0, 10.0)
         b  = st.slider("b — Sensib. I a r",         10.0, 150.0,  50.0,  5.0)
 
-        st.markdown("** Política Fiscal**")
+        st.markdown("**Política Fiscal**")
         G  = st.slider("G — Gastos do Governo",  100.0, 800.0, 300.0, 10.0)
         T  = st.slider("T — Impostos",            50.0, 500.0, 200.0, 10.0)
 
-        st.markdown("** Política Monetária**")
+        st.markdown("**Política Monetária**")
         M  = st.slider("M — Oferta de Moeda",   200.0, 2000.0, 1000.0, 50.0)
         k  = st.slider("k — Sensib. Md a Y",      0.1,   1.0,    0.5,  0.05)
         h  = st.slider("h — Sensib. Md a r",     10.0, 300.0,  100.0, 10.0)
 
         st.divider()
-        st.markdown("** Choque para Comparação**")
+        st.markdown("**Choque para Comparação**")
         dG = st.slider("ΔG (choque fiscal)",    -200.0, 200.0, 100.0, 10.0)
         dM = st.slider("ΔM (choque monetário)", -500.0, 500.0, 200.0, 50.0)
 

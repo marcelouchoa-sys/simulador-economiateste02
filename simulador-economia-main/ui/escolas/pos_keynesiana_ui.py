@@ -34,7 +34,7 @@ def render() -> None:
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown("** Distribuição de Renda**")
+        st.markdown("**Distribuição de Renda**")
         participacao_salarios = st.slider("Participação dos Salários (ω = W/Y)", 0.3, 0.8, 0.6, 0.01,
                                           key="pk_omega",
                                           help="Fração da renda que vai para salários (1-ω = participação dos lucros)")
@@ -42,7 +42,7 @@ def render() -> None:
                            help="Preço = (1+m) × Custo. Markup determina a participação dos lucros")
 
     with col2:
-        st.markdown("** Decisões de Gasto**")
+        st.markdown("**Decisões de Gasto**")
         inv_capitalistas = st.slider("Investimento dos Capitalistas (I)", 50.0, 500.0, 200.0, 10.0,
                                      key="pk_I",
                                      help="Kalecki: lucros = investimento + consumo dos capitalistas")
@@ -52,7 +52,7 @@ def render() -> None:
                                           key="pk_cw")
 
     with col3:
-        st.markdown("** Fragilidade Financeira (Minsky)**")
+        st.markdown("**Fragilidade Financeira (Minsky)**")
         divida_pib = st.slider("Dívida/PIB (%)", 0.0, 200.0, 60.0, 5.0, key="pk_debt")
         taxa_juros = st.slider("Taxa de Juros (r %)", 0.0, 20.0, 5.0, 0.5, key="pk_r")
         crescimento = st.slider("Crescimento do PIB (%)", -5.0, 10.0, 3.0, 0.5, key="pk_g")
