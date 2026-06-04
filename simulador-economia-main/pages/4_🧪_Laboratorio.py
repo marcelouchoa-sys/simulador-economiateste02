@@ -1,8 +1,12 @@
 # pages/4__Laboratorio.py
+from pathlib import Path
 import streamlit as st
 from ui.design import aplicar_design, page_header, section_label, divider
 
-st.set_page_config(page_title="Laboratório — LBEX", page_icon="", layout="wide")
+BASE_DIR  = Path(__file__).parent.parent
+LOGO_PATH = str(BASE_DIR / "assets" / "logo.webp")
+
+st.set_page_config(page_title="Laboratório — LBEX", page_icon=LOGO_PATH, layout="wide")
 aplicar_design()
 st.page_link("app.py", label="← Voltar ao início")
 
