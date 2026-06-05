@@ -2,7 +2,7 @@
 from pathlib import Path
 import streamlit as st
 from core.parameters import DEFAULT_PARAMS
-from core.auth import init_auth_state, is_logged_in, get_user_nome
+from core.auth import init_auth_state
 import base64
 
 BASE_DIR  = Path(__file__).parent
@@ -392,30 +392,11 @@ st.markdown(f"""
         <a href="#sobre">Sobre o OikosLab</a>
         <a href="#sobreMim">Sobre mim</a>
         <a href="#contato">Contato</a>
-        <a href="#modulos" class="oikos-nav-btn">Acessar</a>
+        <a href="/Login" class="oikos-nav-btn">Entrar</a>
     </nav>
 </div>
 <div class="header-spacer"></div>
 """, unsafe_allow_html=True)
-
-# Botão de auth (Streamlit nativo — aparece no canto direito)
-col_esp, col_auth = st.columns([8, 1])
-with col_auth:
-    if is_logged_in():
-        nome = get_user_nome()
-        if st.button(f"{nome[0].upper()}  {nome}", key="header_user", use_container_width=True):
-            st.session_state["mostrar_auth"] = not st.session_state.get("mostrar_auth", False)
-    else:
-        if st.button("Entrar", key="header_login", type="primary", use_container_width=True):
-            st.session_state["mostrar_auth"] = not st.session_state.get("mostrar_auth", False)
-
-# Modal de auth
-if st.session_state.get("mostrar_auth", False):
-    col_esp2, col_modal = st.columns([2, 1])
-    with col_modal:
-        from ui.auth_ui import render_auth_modal
-        render_auth_modal()
-    st.divider()
 
 # ══════════════════════════════════════════════════════════════════
 # HERO
