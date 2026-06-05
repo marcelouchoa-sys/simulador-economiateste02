@@ -193,8 +193,12 @@ def restore_session() -> None:
                 "email": resp.user.email,
                 "nome":  nome or resp.user.email.split("@")[0],
             }
+            st.session_state.auth_token   = resp.session.access_token
+            st.session_state.auth_refresh = resp.session.refresh_token
     except Exception:
-        pass
+        st.session_state.user         = None
+        st.session_state.auth_token   = None
+        st.session_state.auth_refresh = None
 
 
 def require_login(modulo: str = "") -> bool:

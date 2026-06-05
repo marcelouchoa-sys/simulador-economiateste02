@@ -2,3 +2,4 @@ streamlit
 plotly
 supabase
 python-dotenv
+streamlit-cookies-manager

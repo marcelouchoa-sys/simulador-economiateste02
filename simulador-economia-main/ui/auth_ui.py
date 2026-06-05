@@ -146,6 +146,7 @@ def _render_login() -> None:
                 ok, msg = login(email, senha)
             if ok:
                 st.success(msg)
+                st.query_params["logged"] = "1"
                 st.rerun()
             else:
                 st.error(msg)
