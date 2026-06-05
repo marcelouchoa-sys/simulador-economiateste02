@@ -332,6 +332,13 @@ def _aba_islmbp(eq_b, eq_c, p, p_shock, aberta, regime, kf_preset, mostrar_mult_
     )
     st.plotly_chart(fig, use_container_width=True)
 
+    from ui.auth_ui import botao_salvar
+    botao_salvar(
+        modulo="IS-LM-BP — Modo Complexo",
+        parametros={"G": p_.get("G"), "T": p_.get("T"), "M": p_.get("M"), "aberta": aberta_},
+        resultado={"Y_base": float(eq_b["Y"]), "r_base": float(eq_b["r"]), "Y_choque": float(eq_c["Y"]), "r_choque": float(eq_c["r"])},
+    )
+
 
 # ══════════════════════════════════════════════════════════════
 # ABA INVESTIMENTO

@@ -196,6 +196,13 @@ def render() -> None:
     with aba4:
         _aba_teoria(I0, b, escola, r_base, r_choque, delta_I)
 
+    from ui.auth_ui import botao_salvar
+    botao_salvar(
+        modulo="Funcoes — Investimento",
+        parametros={"I0": I0, "b": b, "escola": escola, "r_base": r_base, "r_choque": r_choque},
+        resultado={"I_base": float(max(I_base,0)), "I_choque": float(max(I_choque,0)), "delta_I": float(delta_I)},
+    )
+
 
 # ══════════════════════════════════════════════════════════════════
 # FUNÇÕES INTERNAS DE CADA ABA

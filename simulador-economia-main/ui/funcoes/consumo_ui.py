@@ -142,6 +142,13 @@ def render(p: dict) -> None:
 
     st.info(f"**Equação de Consumo Atualizada:** ${eq_c}$")
 
+    from ui.auth_ui import botao_salvar
+    botao_salvar(
+        modulo="Funcoes — Consumo",
+        parametros={"c0": float(p["c0"]), "c1": float(p["c1"]), "T": float(p["T"])},
+        resultado={"Y_star": float(y_star) if y_star else 0, "multiplicador": float(m_fisc)},
+    )
+
 
 # ══════════════════════════════════════════════════════════════════
 # FUNÇÕES INTERNAS DE CADA ABA

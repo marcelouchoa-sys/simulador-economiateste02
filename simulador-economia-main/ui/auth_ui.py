@@ -297,3 +297,29 @@ def render_header_auth() -> None:
     else:
         if st.button("Entrar", key="header_login_btn", type="primary"):
             st.session_state["mostrar_auth"] = True
+
+
+def botao_salvar(modulo: str, parametros: dict, resultado: dict = {}) -> None:
+    from core.auth import is_logged_in, salvar_simulacao
+    st.divider()
+    if not is_logged_in():
+        st.caption("Faca login para salvar esta simulacao.")
+        return
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        titulo = st.text_input(
+            "Nome da simulacao",
+            placeholder=f"Ex: {modulo} — cenario base",
+            key=f"titulo_sim_{modulo}",
+            label_visibility="collapsed",
+        )
+    with col2:
+        if st.button("Salvar simulacao", key=f"salvar_{modulo}", use_container_width=True):
+            if not titulo:
+                st.warning("Digite um nome para a simulacao.")
+            else:
+                ok, msg = salvar_simulacao(titulo, modulo, parametros, resultado)
+                if ok:
+                    st.success(msg)
+                else:
+                    st.error(msg)

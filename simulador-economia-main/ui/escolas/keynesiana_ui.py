@@ -306,3 +306,10 @@ def render() -> None:
 >  Consequência: quando a demanda cai, a economia não volta automaticamente ao
 > pleno emprego — fica presa num equilíbrio com desemprego involuntário.
 """)
+
+    from ui.auth_ui import botao_salvar
+    botao_salvar(
+        modulo="Escolas — Keynesiana",
+        parametros={"G": G, "T": T, "C0": C0, "mpc": mpc, "I0": I0},
+        resultado={"Y_eq": float(Y_eq), "hiato": float(hiato), "multiplicador": float(multiplicador)},
+    )

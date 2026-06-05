@@ -282,3 +282,10 @@ para o desenvolvimento de longo prazo (Solow, 1956).
         st.latex(r"PMgL = \frac{\partial Y}{\partial L} = (1-\alpha) A \left(\frac{K}{L}\right)^{\alpha}")
         st.latex(r"\text{Equilíbrio Clássico: } PMgK = r \quad PMgL = w/P")
         st.caption("Valores calculados dinamicamente com os parâmetros dos sliders.")
+
+    from ui.auth_ui import botao_salvar
+    botao_salvar(
+        modulo="Funcoes — Producao",
+        parametros={"A": A, "alpha": alpha, "K_ref": K_ref, "L": L},
+        resultado={"Y_ref": float(Y_ref[0]), "PMgK": float(PMgK_val), "PMgL": float(PMgL_val)},
+    )

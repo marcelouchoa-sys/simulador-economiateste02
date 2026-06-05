@@ -255,3 +255,10 @@ O canal dominante no modelo IS-LM é o **Efeito Keynes**.
             r" < \frac{1}{1-c_1} \quad \text{(mult. IS-LM < mult. keynesiano)}"
         )
         st.caption("Valores calculados dinamicamente com os parâmetros dos sliders.")
+
+    from ui.auth_ui import botao_salvar
+    botao_salvar(
+        modulo="Funcoes — Demanda Agregada",
+        parametros={"G": G, "T": T, "M": M, "c0": c0, "c1": c1},
+        resultado={"Y_P1": float(Y_P1)},
+    )

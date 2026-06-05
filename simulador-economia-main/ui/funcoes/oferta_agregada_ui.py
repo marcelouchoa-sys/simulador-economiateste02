@@ -242,3 +242,10 @@ inflação acima da esperada quando Y > Yₙ (hiato positivo).
         st.latex(r"Y = Y_n \quad \text{(OA LP)}")
         st.latex(r"\text{Hiato} = Y - Y_n \quad \Rightarrow \quad P = P^e + \frac{\text{Hiato}}{\alpha}")
         st.caption("Valores calculados dinamicamente com os parâmetros dos sliders.")
+
+    from ui.auth_ui import botao_salvar
+    botao_salvar(
+        modulo="Funcoes — Oferta Agregada",
+        parametros={"Pe": Pe, "Yn": Yn, "alpha": alpha, "Y_atual": Y_atual},
+        resultado={"hiato": float(hiato_base), "P_oa": float(P_oa_base[0])},
+    )

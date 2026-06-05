@@ -294,6 +294,13 @@ def render() -> None:
 - A síntese neoclássica (IS-LM) reconhece a dicotomia apenas no longo prazo.
 """)
 
+    from ui.auth_ui import botao_salvar
+    botao_salvar(
+        modulo="Escolas — Classica",
+        parametros={"produtividade": produtividade, "capital": capital, "trabalho": trabalho, "oferta_monetaria": oferta_monetaria},
+        resultado={"Y_potencial": float(Y_potencial), "P_equilibrio": float(P_equilibrio), "salario_real_eq": float(salario_real_eq)},
+    )
+
 
 # ── Helper de cards ───────────────────────────────────────────────
 def _card(titulo: str, conteudo: str, cor: str = "blue") -> None:
