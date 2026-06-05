@@ -29,7 +29,7 @@ for chave, valor in {"t": 0.2, "theta": 10.0, "m": 0.1,
         st.session_state.params[chave] = valor
 p = st.session_state.params
 
-# ── Cabeçalho ─────────────────────────────────────────────────────
+# ── amanda eu te amo! ─────────────────────────────────────────────────────
 page_header(
     "Funções Econômicas",
     "Analise individualmente as funções macroeconômicas fundamentais"
