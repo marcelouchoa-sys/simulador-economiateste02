@@ -142,7 +142,8 @@ def login(email: str, senha: str) -> tuple[bool, str]:
                 "email": resp.user.email,
                 "nome":  nome or resp.user.email.split("@")[0],
             }
-            st.session_state.auth_token = resp.session.access_token if resp.session else None
+            st.session_state["auth_token"] = resp.session.access_token
+            st.session_state["auth_refresh"] = resp.session.refresh_token
             return True, "Login realizado com sucesso!"
 
         return False, "Email ou senha incorretos."
@@ -163,8 +164,62 @@ def logout() -> None:
         client.auth.sign_out()
     except Exception:
         pass
-    st.session_state.user       = None
-    st.session_state.auth_token = None
+    st.session_state.user              = None
+    st.session_state.auth_token        = None
+    st.session_state["auth_refresh"]   = None
+
+
+def restore_session() -> None:
+    """Tenta restaurar a sessão salva ao recarregar a página."""
+    if is_logged_in():
+        return
+    token = st.session_state.get("auth_token")
+    refresh = st.session_state.get("auth_refresh")
+    if not token or not refresh:
+        return
+    try:
+        client = _get_client()
+        resp = client.auth.set_session(token, refresh)
+        if resp.user:
+            try:
+                perfil = client.table("profiles").select("nome").eq(
+                    "id", resp.user.id
+                ).single().execute()
+                nome = perfil.data.get("nome", "") if perfil.data else ""
+            except Exception:
+                nome = ""
+            st.session_state.user = {
+                "id":    resp.user.id,
+                "email": resp.user.email,
+                "nome":  nome or resp.user.email.split("@")[0],
+            }
+    except Exception:
+        pass
+
+
+def require_login(modulo: str = "") -> bool:
+    """
+    Verifica se o usuário está logado.
+    Se não estiver, mostra mensagem e botão de login.
+    Retorna True se logado, False se não.
+    """
+    restore_session()
+    if is_logged_in():
+        return True
+    st.markdown("""
+<div style="text-align:center; padding: 80px 0;">
+    <div style="font-size:1.3rem; font-weight:700; color:#1D1D1F; margin-bottom:8px;">
+        Acesso restrito
+    </div>
+    <div style="font-size:0.9rem; color:#6E6E73; margin-bottom:24px;">
+        Faca login para acessar este modulo e salvar suas simulacoes.
+    </div>
+</div>
+""", unsafe_allow_html=True)
+    _, col2, _ = st.columns([2, 1, 2])
+    with col2:
+        st.page_link("pages/5_Login.py", label="Fazer login", use_container_width=True)
+    return False
 
 
 # ══════════════════════════════════════════════════════════════════

@@ -33,6 +33,10 @@ if "settings" not in st.session_state:
         "color_final": "#1D7A4F",
     }
 
+init_auth_state()
+from core.auth import restore_session
+restore_session()
+
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');

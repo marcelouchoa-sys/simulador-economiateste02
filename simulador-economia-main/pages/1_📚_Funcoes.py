@@ -18,6 +18,10 @@ LOGO_PATH = str(BASE_DIR / "assets" / "logo.webp")
 
 st.set_page_config(layout="wide", page_title="Funções Econômicas — LBEX", page_icon=LOGO_PATH)
 aplicar_design()
+from core.auth import require_login, restore_session
+restore_session()
+if not require_login():
+    st.stop()
 st.page_link("app.py", label="← Voltar ao início")
 
 # ── Estado global ─────────────────────────────────────────────────
