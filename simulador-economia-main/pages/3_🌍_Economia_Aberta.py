@@ -10,12 +10,8 @@ LOGO_PATH = str(BASE_DIR / "assets" / "logo.webp")
 
 st.set_page_config(page_title="Economia Aberta — LBEX", page_icon=LOGO_PATH, layout="wide")
 aplicar_design()
-from core.auth import require_login, restore_session
-restore_session()
 if st.query_params.get("logged") == "1":
     st.query_params.clear()
-if not require_login():
-    st.stop()
 st.page_link("app.py", label="← Voltar ao início")
 
 from core.parameters import DEFAULT_PARAMS
