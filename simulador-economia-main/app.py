@@ -402,6 +402,17 @@ st.markdown(f"""
 <div class="header-spacer"></div>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<div style="position:fixed; top:12px; right:60px; z-index:9999;">
+    <a href="https://oikoslab-platform.vercel.app" target="_blank"
+       style="background:#0066CC; color:white; padding:8px 18px;
+              border-radius:10px; font-size:0.85rem; font-weight:600;
+              text-decoration:none; font-family:'DM Sans',sans-serif;">
+        Acessar Plataforma
+    </a>
+</div>
+""", unsafe_allow_html=True)
+
 # ══════════════════════════════════════════════════════════════════
 # HERO
 # ══════════════════════════════════════════════════════════════════
