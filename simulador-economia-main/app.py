@@ -1,8 +1,6 @@
-# app.py — OikosLab Landing Page
+# app.py — OikosLab Laboratório Didático
 from pathlib import Path
 import streamlit as st
-from core.parameters import DEFAULT_PARAMS
-from core.auth import init_auth_state
 import base64
 
 BASE_DIR  = Path(__file__).parent
@@ -16,566 +14,315 @@ def _logo_base64() -> str:
         return ""
 
 st.set_page_config(
-    page_title="OikosLab — Laboratório de Economia",
+    page_title="OikosLab — Laboratório Didático",
     page_icon=str(LOGO_PATH),
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-if "params" not in st.session_state:
-    st.session_state.params = DEFAULT_PARAMS.copy()
-if "settings" not in st.session_state:
-    st.session_state.settings = {
-        "nivel": "Medio",
-        "mobilidade_capital": "Alta",
-        "color_base":  "#0066CC",
-        "color_shock": "#C0392B",
-        "color_final": "#1D7A4F",
-    }
-
-init_auth_state()
-from core.auth import restore_session
-restore_session()
-
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
 
-* { font-family: 'DM Sans', -apple-system, sans-serif !important; }
+* { font-family: 'Montserrat', -apple-system, sans-serif !important; }
 
-/* ── Reset e fundo ── */
-.stApp { background: #FFFFFF; }
+.stApp { background: #0b0f19 !important; }
 #MainMenu, footer, header { visibility: hidden; }
-section[data-testid="stSidebar"]  { display: none !important; }
-[data-testid="collapsedControl"]   { display: none !important; }
+section[data-testid="stSidebar"] { display: none !important; }
+[data-testid="collapsedControl"] { display: none !important; }
+.block-container { padding: 0 !important; max-width: 100% !important; }
 
-/* ── Header fixo ── */
+/* HEADER */
 .oikos-header {
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 9999;
-    background: rgba(255,255,255,0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid #E5E5EA;
+    background: rgba(11,15,25,0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
     padding: 0 48px;
-    height: 60px;
+    height: 56px;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
-.oikos-header-logo {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #1D1D1F;
-    letter-spacing: -0.02em;
-    text-decoration: none;
+.oikos-logo {
     display: flex;
     align-items: center;
     gap: 10px;
+    text-decoration: none;
 }
-.oikos-header-logo img {
-    height: 32px;
-    width: auto;
+.oikos-logo img { height: 28px; width: auto; object-fit: contain; }
+.oikos-logo span {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.02em;
 }
-.oikos-nav {
+.header-right {
     display: flex;
     align-items: center;
-    gap: 32px;
+    gap: 12px;
 }
-.oikos-nav a {
-    font-size: 0.88rem;
-    font-weight: 500;
-    color: #1D1D1F;
-    text-decoration: none;
-    transition: color 0.2s;
-}
-.oikos-nav a:hover { color: #0066CC; }
-.oikos-nav-btn {
-    background: #0066CC;
-    color: #FFFFFF !important;
-    padding: 8px 20px;
+.btn-plataforma {
+    background: #2563eb;
+    color: #ffffff !important;
+    padding: 8px 18px;
     border-radius: 10px;
-    font-size: 0.85rem !important;
-    font-weight: 600 !important;
-    transition: background 0.2s !important;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
 }
-.oikos-nav-btn:hover { background: #0055AA !important; }
-
-/* ── Espaço abaixo do header fixo ── */
+.btn-plataforma:hover { background: #1d4ed8 !important; }
 .header-spacer { height: 80px; }
 
-/* ── Hero ── */
-.hero {
-    padding: 100px 48px 80px 48px;
+/* HERO MINIMO */
+.hero-min {
+    padding: 60px 48px 40px;
     text-align: center;
-    background: linear-gradient(180deg, #F5F5F7 0%, #FFFFFF 100%);
 }
-.hero-tag {
-    display: inline-block;
-    background: #E3F0FF;
-    color: #0055AA;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 4px 14px;
-    border-radius: 20px;
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    padding: 6px 16px;
     margin-bottom: 24px;
 }
+.badge-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+}
+.badge-text {
+    font-size: 0.78rem;
+    color: #9ca3af;
+    font-weight: 500;
+}
 .hero-titulo {
-    font-size: 3.2rem;
-    font-weight: 700;
-    color: #1D1D1F;
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: #ffffff;
     letter-spacing: -0.04em;
-    line-height: 1.1;
-    margin-bottom: 20px;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
+    line-height: 1.15;
+    margin-bottom: 16px;
 }
 .hero-titulo span {
-    background: linear-gradient(90deg, #0066CC, #6E3B9E);
+    background: linear-gradient(90deg, #60a5fa, #a78bfa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 .hero-sub {
-    font-size: 1.1rem;
-    color: #6E6E73;
-    max-width: 520px;
-    margin: 0 auto 36px auto;
-    line-height: 1.6;
-    font-weight: 400;
-}
-.hero-btns {
-    display: flex;
-    gap: 14px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-.btn-primary {
-    background: #0066CC;
-    color: #FFFFFF;
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: background 0.2s, transform 0.2s;
-    display: inline-block;
-}
-.btn-primary:hover {
-    background: #0055AA;
-    transform: translateY(-1px);
-    color: #FFFFFF;
-}
-.btn-secondary {
-    background: #F5F5F7;
-    color: #1D1D1F;
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    text-decoration: none;
-    border: 1px solid #D2D2D7;
-    transition: background 0.2s, transform 0.2s;
-    display: inline-block;
-}
-.btn-secondary:hover {
-    background: #E8E8ED;
-    transform: translateY(-1px);
-    color: #1D1D1F;
-}
-
-/* ── Seções ── */
-.section {
-    padding: 80px 48px;
-}
-.section-alt { background: #F5F5F7; }
-.section-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #6E6E73;
-    margin-bottom: 10px;
-}
-.section-titulo {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #1D1D1F;
-    letter-spacing: -0.03em;
-    margin-bottom: 12px;
-}
-.section-sub {
     font-size: 1rem;
-    color: #6E6E73;
-    max-width: 560px;
-    line-height: 1.6;
-    margin-bottom: 48px;
+    color: #6b7280;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.65;
 }
 
-/* ── Cards dos módulos ── */
-.modulos-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin-top: 40px;
+/* GRID DE SIMULADORES */
+.simuladores-section {
+    padding: 20px 48px 80px;
 }
-.modulo-card {
-    background: #FFFFFF;
-    border: 1px solid #D2D2D7;
-    border-radius: 18px;
-    padding: 28px 24px 22px 24px;
-    position: relative;
-    overflow: hidden;
-    transition: box-shadow 0.25s, transform 0.25s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-.modulo-card:hover {
-    box-shadow: 0 8px 28px rgba(0,0,0,0.10);
-    transform: translateY(-2px);
-}
-.modulo-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 4px;
-    border-radius: 18px 18px 0 0;
-}
-.mc-blue::before   { background: #0066CC; }
-.mc-purple::before { background: #6E3B9E; }
-.mc-green::before  { background: #1D7A4F; }
-.mc-slate::before  { background: #3A4D6B; }
-.mc-muted::before  { background: #B0B0B8; }
-.mc-muted          { opacity: 0.6; }
-
-.modulo-titulo { font-size: 1rem; font-weight: 600; color: #1D1D1F; margin-bottom: 8px; letter-spacing: -0.01em; }
-.modulo-desc   { font-size: 0.83rem; color: #6E6E73; line-height: 1.55; margin-bottom: 16px; }
-.modulo-tag    { display: inline-flex; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 500; }
-
-.tag-blue   { background: #E3F0FF; color: #0055AA; }
-.tag-purple { background: #F0E8FA; color: #5A2D8A; }
-.tag-green  { background: #E3F5EC; color: #145E3A; }
-.tag-slate  { background: #E8ECF2; color: #2C3E5A; }
-.tag-muted  { background: #EBEBED; color: #6E6E73; }
-
-.modulo-btn {
-    display: block;
-    margin-top: 16px;
-    text-align: center;
-    padding: 9px 16px;
-    background: #F5F5F7;
-    border: 1px solid #D2D2D7;
-    border-radius: 10px;
-    font-size: 0.83rem;
-    font-weight: 500;
-    color: #1D1D1F;
-    text-decoration: none;
-    transition: background 0.2s, border-color 0.2s;
-}
-.modulo-btn:hover {
-    background: #E8E8ED;
-    border-color: #0066CC;
-    color: #0066CC;
-}
-
-/* ── Sobre ── */
-.sobre-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
-    align-items: center;
-}
-.sobre-texto p {
-    font-size: 0.95rem;
-    color: #3A3A3C;
-    line-height: 1.75;
-    margin-bottom: 16px;
-}
-.sobre-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-.stat-card {
-    background: #FFFFFF;
-    border: 1px solid #E5E5EA;
-    border-radius: 14px;
-    padding: 24px;
+.section-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4b5563;
+    margin-bottom: 24px;
     text-align: center;
 }
-.stat-num  { font-size: 2rem; font-weight: 700; color: #0066CC; letter-spacing: -0.03em; }
-.stat-desc { font-size: 0.8rem; color: #6E6E73; margin-top: 4px; }
-
-/* ── Sobre mim ── */
-.sobreMim-card {
-    background: #FFFFFF;
-    border: 1px solid #D2D2D7;
-    border-radius: 20px;
-    padding: 40px;
-    max-width: 700px;
-    margin: 40px auto 0 auto;
-    text-align: center;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-}
-.sobreMim-avatar {
-    width: 80px; height: 80px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #0066CC, #6E3B9E);
-    margin: 0 auto 20px auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    color: white;
-    font-weight: 700;
-}
-.sobreMim-nome { font-size: 1.3rem; font-weight: 700; color: #1D1D1F; margin-bottom: 6px; }
-.sobreMim-cargo { font-size: 0.88rem; color: #6E6E73; margin-bottom: 20px; }
-.sobreMim-bio { font-size: 0.92rem; color: #3A3A3C; line-height: 1.7; }
-
-/* ── Contato ── */
-.contato-grid {
+.simuladores-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
-    max-width: 700px;
-    margin: 40px auto 0 auto;
+    max-width: 960px;
+    margin: 0 auto;
 }
-.contato-card {
-    background: #FFFFFF;
-    border: 1px solid #E5E5EA;
-    border-radius: 14px;
-    padding: 28px 20px;
-    text-align: center;
-    transition: box-shadow 0.2s, transform 0.2s;
+.sim-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-top: 2px solid transparent;
+    border-radius: 20px;
+    padding: 28px;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
 }
-.contato-card:hover {
-    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    transform: translateY(-2px);
+.sim-card:hover {
+    background: rgba(255,255,255,0.08);
+    transform: translateY(-3px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
 }
-.contato-tipo  { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #6E6E73; margin-bottom: 8px; }
-.contato-valor { font-size: 0.9rem; font-weight: 500; color: #0066CC; }
+.sim-card.blue  { border-top-color: #3b82f6; }
+.sim-card.purple { border-top-color: #8b5cf6; }
+.sim-card.green  { border-top-color: #10b981; }
+.sim-card.cyan   { border-top-color: #06b6d4; }
+.sim-card.orange { border-top-color: #f59e0b; }
+.sim-card.muted  { border-top-color: #374151; opacity: 0.6; }
 
-/* ── Footer ── */
+.sim-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 16px;
+}
+.icon-blue   { background: rgba(59,130,246,0.15); }
+.icon-purple { background: rgba(139,92,246,0.15); }
+.icon-green  { background: rgba(16,185,129,0.15); }
+.icon-cyan   { background: rgba(6,182,212,0.15); }
+.icon-orange { background: rgba(245,158,11,0.15); }
+.icon-muted  { background: rgba(55,65,81,0.3); }
+
+.sim-tag {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-bottom: 12px;
+}
+.tag-blue   { background: rgba(59,130,246,0.15);  color: #93c5fd; }
+.tag-purple { background: rgba(139,92,246,0.15); color: #c4b5fd; }
+.tag-green  { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+.tag-cyan   { background: rgba(6,182,212,0.15);  color: #67e8f9; }
+.tag-orange { background: rgba(245,158,11,0.15); color: #fcd34d; }
+.tag-muted  { background: rgba(55,65,81,0.3);    color: #6b7280; }
+
+.sim-titulo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f9fafb;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+}
+.sim-desc {
+    font-size: 0.82rem;
+    color: #6b7280;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+.sim-btn {
+    display: block;
+    text-align: center;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #e5e7eb;
+}
+.sim-btn:hover {
+    background: rgba(255,255,255,0.12);
+    color: #ffffff;
+}
+.sim-btn-disabled {
+    display: block;
+    text-align: center;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    color: #374151;
+    cursor: not-allowed;
+}
+
+/* FOOTER */
 .oikos-footer {
-    background: #F5F5F7;
-    border-top: 1px solid #E5E5EA;
-    padding: 32px 48px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 28px 48px;
     text-align: center;
 }
-.footer-logo { font-size: 1.1rem; font-weight: 700; color: #1D1D1F; margin-bottom: 8px; }
-.footer-sub  { font-size: 0.78rem; color: #AEAEB2; }
-
-/* ── Divisor ── */
-.divider { border: none; border-top: 1px solid #E5E5EA; margin: 0; }
-
-/* ── Próximas bancadas ── */
-.futuras-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-top: 32px;
+.footer-text {
+    font-size: 0.78rem;
+    color: #374151;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════
-# HEADER FIXO
-# ══════════════════════════════════════════════════════════════════
+logo_b64 = _logo_base64()
+logo_html = f'<img src="data:image/webp;base64,{logo_b64}" alt="OikosLab"/>' if logo_b64 else ''
+
 st.markdown(f"""
 <div class="oikos-header">
-    <a class="oikos-header-logo" href="#inicio">
-        <img src="data:image/webp;base64,{_logo_base64()}" alt="OikosLab"/>
-        OikosLab
+    <a class="oikos-logo" href="#">
+        {logo_html}
+        <span>OikosLab</span>
     </a>
-    <nav class="oikos-nav">
-        <a href="#modulos">Simuladores</a>
-        <a href="#sobre">Sobre o OikosLab</a>
-        <a href="#sobreMim">Sobre mim</a>
-        <a href="#contato">Contato</a>
-        <a href="/Login" class="oikos-nav-btn">Entrar</a>
-    </nav>
+    <div class="header-right">
+        <a href="https://oikoslab-platform.vercel.app" target="_blank" class="btn-plataforma">
+            Acessar Plataforma
+        </a>
+    </div>
 </div>
 <div class="header-spacer"></div>
 """, unsafe_allow_html=True)
 
 st.markdown("""
-<div style="position:fixed; top:12px; right:60px; z-index:9999;">
-    <a href="https://oikoslab-platform.vercel.app" target="_blank"
-       style="background:#0066CC; color:white; padding:8px 18px;
-              border-radius:10px; font-size:0.85rem; font-weight:600;
-              text-decoration:none; font-family:'DM Sans',sans-serif;">
-        Acessar Plataforma
-    </a>
-</div>
-""", unsafe_allow_html=True)
-
-# ══════════════════════════════════════════════════════════════════
-# HERO
-# ══════════════════════════════════════════════════════════════════
-st.markdown("""
-<div id="inicio" class="hero">
-    <div class="hero-tag">Laboratório de Economia Experimental</div>
+<div class="hero-min">
+    <div class="hero-badge">
+        <div class="badge-dot"></div>
+        <span class="badge-text">Laboratório Didático — UFRRJ</span>
+    </div>
     <div class="hero-titulo">
-        Explore, simule e analise<br>
-        <span>economias completas</span>
+        Escolha um<br>
+        <span>simulador</span>
     </div>
     <div class="hero-sub">
-        OikosLab é uma plataforma de simulação macroeconômica desenvolvida na UFRRJ.
-        Do modelo IS-LM-BP às escolas do pensamento econômico — tudo em um lugar.
-    </div>
-    <div class="hero-btns">
-        <a href="#modulos" class="btn-primary">Explorar simuladores</a>
-        <a href="#sobre" class="btn-secondary">Saiba mais</a>
+        Explore os modelos econômicos disponíveis. Sem cadastro, sem login.
     </div>
 </div>
-<hr class="divider">
 """, unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════
-# MÓDULOS
-# ══════════════════════════════════════════════════════════════════
 st.markdown("""
-<div id="modulos" class="section">
-    <div class="section-label">Módulos disponíveis</div>
-    <div class="section-titulo">Escolha uma área para explorar</div>
-    <div class="section-sub">
-        Cada módulo é uma bancada independente do laboratório.
-        Analise funções, compare escolas ou simule economias abertas.
-    </div>
-    <div class="modulos-grid">
-        <div class="modulo-card mc-blue">
-            <div class="modulo-titulo">Funções Econômicas</div>
-            <div class="modulo-desc">Analise individualmente as funções macroeconômicas fundamentais. Consumo, investimento, oferta agregada e mais.</div>
-            <span class="modulo-tag tag-blue">Disponível</span>
-            <a href="/Funcoes" class="modulo-btn">Acessar módulo</a>
+<div class="simuladores-section">
+    <div class="section-label">Simuladores disponíveis</div>
+    <div class="simuladores-grid">
+
+        <div class="sim-card blue">
+            <div class="sim-icon icon-blue">📈</div>
+            <span class="sim-tag tag-blue">Disponível</span>
+            <div class="sim-titulo">Funções Econômicas</div>
+            <div class="sim-desc">Analise individualmente as funções macroeconômicas: consumo, investimento, oferta agregada, demanda por moeda e mais.</div>
+            <a href="/Funcoes" class="sim-btn">Acessar →</a>
         </div>
-        <div class="modulo-card mc-purple">
-            <div class="modulo-titulo">Escolas Econômicas</div>
-            <div class="modulo-desc">Compare as grandes correntes do pensamento econômico. Clássica, Keynesiana, Monetarista e Pós-Keynesiana.</div>
-            <span class="modulo-tag tag-purple">Disponível</span>
-            <a href="/Escolas_Economicas" class="modulo-btn">Acessar módulo</a>
+
+        <div class="sim-card purple">
+            <div class="sim-icon icon-purple">🏫</div>
+            <span class="sim-tag tag-purple">Disponível</span>
+            <div class="sim-titulo">Escolas Econômicas</div>
+            <div class="sim-desc">Compare as grandes correntes do pensamento econômico: Clássica, Keynesiana, Monetarista e Pós-Keynesiana.</div>
+            <a href="/Escolas_Economicas" class="sim-btn">Acessar →</a>
         </div>
-        <div class="modulo-card mc-green">
-            <div class="modulo-titulo">Economia Aberta</div>
-            <div class="modulo-desc">Modelo IS-LM-BP (Mundell-Fleming). Câmbio fixo e flexível, graus de mobilidade de capital.</div>
-            <span class="modulo-tag tag-green">Disponível</span>
-            <a href="/Economia_Aberta" class="modulo-btn">Acessar módulo</a>
+
+        <div class="sim-card green">
+            <div class="sim-icon icon-green">🌐</div>
+            <span class="sim-tag tag-green">Disponível</span>
+            <div class="sim-titulo">Economia Aberta</div>
+            <div class="sim-desc">Modelo IS-LM-BP (Mundell-Fleming). Câmbio fixo e flexível, mobilidade de capital e choques de política.</div>
+            <a href="/Economia_Aberta" class="sim-btn">Acessar →</a>
         </div>
-        <div class="modulo-card mc-slate">
-            <div class="modulo-titulo">Laboratório</div>
-            <div class="modulo-desc">Construa e analise economias completas. Monte modelos, aplique políticas e visualize resultados.</div>
-            <span class="modulo-tag tag-slate">Em construção</span>
-            <a href="/Laboratorio" class="modulo-btn">Acessar módulo</a>
-        </div>
+
     </div>
 </div>
-<hr class="divider">
 """, unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════
-# SOBRE O OIKOSLAB
-# ══════════════════════════════════════════════════════════════════
-st.markdown("""
-<div id="sobre" class="section section-alt">
-    <div class="section-label">Sobre o OikosLab</div>
-    <div class="section-titulo">Um laboratório construído para crescer</div>
-    <div class="sobre-grid">
-        <div class="sobre-texto">
-            <p>
-                OikosLab é um projeto de graduação desenvolvido na Universidade Federal
-                Rural do Rio de Janeiro (UFRRJ), com o objetivo de criar uma plataforma
-                completa de simulação e análise econômica.
-            </p>
-            <p>
-                O nome vem do grego <em>οἶκος</em> (oikos), que significa "casa" ou
-                "gestão da casa" — raiz etimológica da palavra "economia".
-            </p>
-            <p>
-                O projeto será desenvolvido ao longo de toda a graduação, crescendo
-                junto com o conhecimento econômico do autor. Cada semestre novos
-                modelos, ferramentas e análises são adicionados.
-            </p>
-        </div>
-        <div class="sobre-stats">
-            <div class="stat-card">
-                <div class="stat-num">4</div>
-                <div class="stat-desc">Módulos disponíveis</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-num">9</div>
-                <div class="stat-desc">Funções econômicas</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-num">4</div>
-                <div class="stat-desc">Escolas de pensamento</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-num">∞</div>
-                <div class="stat-desc">Em construção contínua</div>
-            </div>
-        </div>
-    </div>
-</div>
-<hr class="divider">
-""", unsafe_allow_html=True)
-
-# ══════════════════════════════════════════════════════════════════
-# SOBRE MIM
-# ══════════════════════════════════════════════════════════════════
-st.markdown("""
-<div id="sobreMim" class="section">
-    <div class="section-label">Sobre mim</div>
-    <div class="section-titulo">Quem está por trás do OikosLab</div>
-    <div class="sobreMim-card">
-        <div class="sobreMim-avatar">M</div>
-        <div class="sobreMim-nome">Marcelo de Salles Cunha Uchôa</div>
-        <div class="sobreMim-cargo">Estudante de Economia — UFRRJ</div>
-        <div class="sobreMim-bio">
-            Em breve — texto sobre trajetória, interesses e motivações para criar o OikosLab.
-        </div>
-    </div>
-</div>
-<hr class="divider">
-""", unsafe_allow_html=True)
-
-# ══════════════════════════════════════════════════════════════════
-# CONTATO
-# ══════════════════════════════════════════════════════════════════
-st.markdown("""
-<div id="contato" class="section section-alt">
-    <div class="section-label">Contato</div>
-    <div class="section-titulo">Fale comigo</div>
-    <div class="contato-grid">
-        <div class="contato-card">
-            <div class="contato-tipo">Email</div>
-            <div class="contato-valor">Em breve</div>
-        </div>
-        <div class="contato-card">
-            <div class="contato-tipo">LinkedIn</div>
-            <div class="contato-valor">Em breve</div>
-        </div>
-        <div class="contato-card">
-            <div class="contato-tipo">GitHub</div>
-            <div class="contato-valor">Em breve</div>
-        </div>
-    </div>
-</div>
-<hr class="divider">
-""", unsafe_allow_html=True)
-
-# ══════════════════════════════════════════════════════════════════
-# FOOTER
-# ══════════════════════════════════════════════════════════════════
 st.markdown("""
 <div class="oikos-footer">
-    <div class="footer-logo">OikosLab</div>
-    <div class="footer-sub">
-        Marcelo de Salles Cunha Uchôa &nbsp;·&nbsp; UFRRJ &nbsp;·&nbsp;
-        Projeto de graduação em desenvolvimento contínuo
-    </div>
+    <div class="footer-text">OikosLab · Marcelo de Salles Cunha Uchôa · UFRRJ · 2026</div>
 </div>
 """, unsafe_allow_html=True)
